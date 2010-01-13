@@ -15,16 +15,29 @@ namespace Rhino.Mocks
       return CreateMockInReplay(repo => (T)repo.Stub(typeof(T), argumentsForConstructor));
     }
 
+
+
+    /// <summary>Generates a stub without needing a <see cref="MockRepository"/></summary>
+    /// <param name="type">The <see cref="Type"/> of stub.</param>
+    /// <param name="argumentsForConstructor">Arguments for the <paramref name="type"/>'s constructor.</param>
+    /// <param name="extraTypes">extra interfaces</param>
+    /// <returns>The stub</returns>
+    /// <seealso cref="Stub(Type, Type[], object[])"/>
+    public static object GenerateStub(Type type, Type[] extraTypes, params object[] argumentsForConstructor)
+    {
+        return CreateMockInReplay(repo => repo.Stub(type, extraTypes, argumentsForConstructor));
+    }
+
     /// <summary>Generates a stub without needing a <see cref="MockRepository"/></summary>
     /// <param name="type">The <see cref="Type"/> of stub.</param>
     /// <param name="argumentsForConstructor">Arguments for the <paramref name="type"/>'s constructor.</param>
     /// <returns>The stub</returns>
-    /// <seealso cref="Stub"/>
+    /// <seealso cref="Stub(Type, object[])"/>
     public static object GenerateStub(Type type, params object[] argumentsForConstructor)
     {
       return CreateMockInReplay(repo => repo.Stub(type, argumentsForConstructor));
     }
-
+    
     /// <summary>Generate a mock object without needing a <see cref="MockRepository"/></summary>
     /// <typeparam name="T">type <see cref="Type"/> of mock object to create.</typeparam>
     /// <param name="argumentsForConstructor">Arguments for <typeparamref name="T"/>'s constructor</param>

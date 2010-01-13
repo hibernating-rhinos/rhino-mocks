@@ -1232,10 +1232,25 @@ namespace Rhino.Mocks
         /// <returns>The stub</returns>
         public object Stub(Type type, params object[] argumentsForConstructor)
         {
+            return Stub(type, new Type[0], argumentsForConstructor);
+        }
+
+        /// <summary>
+        /// Create a stub object implements multiple interfaces.
+        /// </summary>
+        /// <param name="type">The type</param>
+        /// <param name="types">The interfaces</param>
+        /// <param name="argumentsForConstructor">The arguments for constructor.</param>
+        /// <returns></returns>
+        public object Stub(Type type, Type[] types, params object[] argumentsForConstructor)
+        {
             CreateMockState createStub = mockedObject => new StubRecordMockState(mockedObject, this);
             if (ShouldUseRemotingProxy(type, argumentsForConstructor))
                 return RemotingMock(type, createStub);
-            return CreateMockObject(type, createStub, new Type[0], argumentsForConstructor);
+            
+            if(types==null) types = new Type[0];
+            
+            return CreateMockObject(type, createStub, types, argumentsForConstructor);
         }
 
         /// <summary>

@@ -169,6 +169,7 @@
     <Compile Include="FieldsProblem\FieldProblem_Bill.cs" />
     <Compile Include="FieldsProblem\FieldProblem_JPBoodhoo.cs" />
     <Compile Include="MethodProblems\MethodProblem_JPBoodhoo.cs" />
+    <Compile Include="MultiStubWithAAA.cs" />
     <Compile Include="PartialMockTestsAAA.cs" />
     <Compile Include="MultiMocksWithAAA.cs" />
     <Compile Include="Coverage.cs" />
