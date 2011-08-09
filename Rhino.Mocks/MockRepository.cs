@@ -1066,6 +1066,27 @@ namespace Rhino.Mocks
             return CreateMockInReplay(repo => (T)repo.Stub(typeof(T), argumentsForConstructor));
         }
 
+        /// <summary>Generate a multi-stub object without needing a <see cref="MockRepository"/></summary>
+        /// <typeparam name="T">The <c>typeof</c> object to generate a stub for.</typeparam>
+        /// <typeparam name="TMultiMockInterface1">A second interface to generate a multi-stub for.</typeparam>
+        /// <param name="argumentsForConstructor">Arguments for <typeparamref name="T"/>'s constructor</param>
+        /// <returns>the multi-stub object</returns>
+        public static T GenerateStub<T, TMultiMockInterface1>(params object[] argumentsForConstructor)
+        {
+          return (T)GenerateStub(typeof(T), new[] { typeof(TMultiMockInterface1) }, argumentsForConstructor);
+        }
+
+        /// <summary>Generate a multi-stub object without without needing a <see cref="MockRepository"/></summary>
+        /// <typeparam name="T">The <c>typeof</c> object to generate a stub for.</typeparam>
+        /// <typeparam name="TMultiMockInterface1">An interface to generate a multi-stub for.</typeparam>
+        /// <typeparam name="TMultiMockInterface2">A second interface to generate a multi-stub for.</typeparam>
+        /// <param name="argumentsForConstructor">Arguments for <typeparamref name="T"/>'s constructor</param>
+        /// <returns>the multi-stub object</returns>
+        public static T GenerateStub<T, TMultiMockInterface1, TMultiMockInterface2>(params object[] argumentsForConstructor)
+        {
+          return (T)GenerateStub(typeof(T), new[] { typeof(TMultiMockInterface1), typeof(TMultiMockInterface2) }, argumentsForConstructor);
+        }
+
         /// <summary>Generates a stub without needing a <see cref="MockRepository"/></summary>
         /// <param name="type">The <see cref="Type"/> of stub.</param>
         /// <param name="argumentsForConstructor">Arguments for the <paramref name="type"/>'s constructor.</param>

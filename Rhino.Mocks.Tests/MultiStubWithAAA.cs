@@ -12,9 +12,9 @@ namespace Rhino.Mocks.Tests
         [Fact]
         public void MultiStubShouldGenerateStubWithMultiInterfaces()
         {
-            MockRepository mockRepository = new MockRepository();
-            var animal = (IAnimal)mockRepository.Stub(typeof(IAnimal), new Type[] { typeof(ICat) });
-            var cat = (ICat) animal;
+            var mockRepository = new MockRepository();
+            var animal = (IAnimal)mockRepository.Stub(typeof(IAnimal), new[] { typeof(ICat) });
+            var cat = (ICat)animal;
 
             Assert.NotNull(cat);
             Assert.NotNull(animal);
@@ -23,7 +23,7 @@ namespace Rhino.Mocks.Tests
         [Fact]
         public void MultiStubShouldGenerateStubWithOnlyBaseClass()
         {
-            MockRepository mockRepository = new MockRepository();
+            var mockRepository = new MockRepository();
             var animal = (IAnimal)mockRepository.Stub(typeof(IAnimal), null, null);
 
             Assert.NotNull(animal);
@@ -31,13 +31,23 @@ namespace Rhino.Mocks.Tests
         }
 
         [Fact]
-        public void StatciMultiStubMethodCanGenerateStubWithMultiInterfaces()
+        public void StaticMultiStubMethodCanGenerateStubWithMultiInterfaces()
         {
-            var animal = (IAnimal)MockRepository.GenerateStub(typeof(IAnimal), new Type[] { typeof(ICat) });
-            var cat = (ICat) animal;
+            var animal = (IAnimal)MockRepository.GenerateStub(typeof(IAnimal), new[] { typeof(ICat) });
+            var cat = (ICat)animal;
 
             Assert.NotNull(animal);
             Assert.NotNull(cat);
+        }
+
+        [Fact]
+        public void StaticGenericMultiStubMethodCanGenerateStubWithMultiInterfaces()
+        {
+          var animal = MockRepository.GenerateStub<IAnimal, ICat>();
+          var cat = (ICat)animal;
+
+          Assert.NotNull(animal);
+          Assert.NotNull(cat);
         }
     }
 }
