@@ -28,7 +28,9 @@
 
 
 using System;
+using System.Globalization;
 using System.Reflection;
+using System.Threading;
 using Xunit;
 using Rhino.Mocks.Constraints;
 using Rhino.Mocks.Expectations;
@@ -64,68 +66,87 @@ namespace Rhino.Mocks.Tests.Expectations
 		[Fact]
 		public void PassingNullConstraintsThrows()
 		{
-			Assert.Throws<InvalidOperationException>(
-				"The constraint at index 1 is null! Use Is.Null() to represent null parameters.",
-				() =>
-				expectation = new ConstraintsExpectation(new FakeInvocation(this.method), new AbstractConstraint[]
-				{
-					Is.Anything(),
-					null,
-					Is.Equal(3.14f),
-				}, new Range(1, 1)));
+			var ex = Assert.Throws<InvalidOperationException>(() =>
+			                                                  this.expectation = new ConstraintsExpectation(new FakeInvocation(this.method), new AbstractConstraint[]
+			                                                                                                                            	{
+			                                                                                                                            		Is.Anything(),
+			                                                                                                                            		null,
+			                                                                                                                            		Is.Equal(3.14f),
+			                                                                                                                            	}, new Range(1, 1)));
+			Assert.Equal("The constraint at index 1 is null! Use Is.Null() to represent null parameters.", ex.Message);
 		}
 
 		[Fact]
 		public void NullConstraints()
 		{
-			Assert.Throws<ArgumentNullException>("Value cannot be null.\r\nParameter name: constraints",
-			                                     () =>
-			                                     new ConstraintsExpectation(new FakeInvocation(this.method), null,
-			                                                                new Range(1, 1)));
+			var culture = Thread.CurrentThread.CurrentUICulture;
+			try
+			{
+				Thread.CurrentThread.CurrentUICulture = CultureInfo.InvariantCulture;
+				var ex = Assert.Throws<ArgumentNullException>(() => new ConstraintsExpectation(new FakeInvocation(this.method), null, new Range(1, 1)));
+				Assert.Equal("Value cannot be null.\r\nParameter name: constraints", ex.Message);
+			}
+			finally
+			{
+				Thread.CurrentThread.CurrentUICulture = culture;
+			}
 		}
 
 		[Fact]
 		public void NullConstraintsFromPrevExpectation()
 		{
-			Assert.Throws<ArgumentNullException>(
-				"Value cannot be null.\r\nParameter name: constraints",
-				() => new ConstraintsExpectation(expectation, null));
+			var culture = Thread.CurrentThread.CurrentUICulture;
+			try
+			{
+				Thread.CurrentThread.CurrentUICulture = CultureInfo.InvariantCulture;
+				var ex = Assert.Throws<ArgumentNullException>(() => new ConstraintsExpectation(this.expectation, null));
+				Assert.Equal("Value cannot be null.\r\nParameter name: constraints", ex.Message);
+			}
+			finally
+			{
+				Thread.CurrentThread.CurrentUICulture = culture;
+			}
 		}
-
 
 		[Fact]
 		public void NullEvaluation()
 		{
-			Assert.Throws<ArgumentNullException>("Value cannot be null.\r\nParameter name: args",
-			                                     () => expectation.IsExpected(null));
+			var culture = Thread.CurrentThread.CurrentUICulture;
+			try
+			{
+				Thread.CurrentThread.CurrentUICulture = CultureInfo.InvariantCulture;
+				var ex = Assert.Throws<ArgumentNullException>(() => this.expectation.IsExpected(null));
+				Assert.Equal("Value cannot be null.\r\nParameter name: args", ex.Message);
+			}
+			finally
+			{
+				Thread.CurrentThread.CurrentUICulture = culture;
+			}
 		}
 
 		[Fact]
 		public void TooFewConstraints()
 		{
-			Assert.Throws<InvalidOperationException>(
-				"The number of constraints is not the same as the number of the method's parameters!",
-				() => new ConstraintsExpectation(new FakeInvocation(this.method), new AbstractConstraint[]
-				{
-					Is.Anything(),
-					Is.Null()
-				}, new Range(1, 1)));
+			var ex = Assert.Throws<InvalidOperationException>(() => new ConstraintsExpectation(new FakeInvocation(this.method), new AbstractConstraint[]
+			                                                                                                                    	{
+			                                                                                                                    		Is.Anything(),
+			                                                                                                                    		Is.Null()
+			                                                                                                                    	}, new Range(1, 1)));
+			Assert.Equal("The number of constraints is not the same as the number of the method's parameters!", ex.Message);
 		}
 
 		[Fact]
 		public void TooManyConstraints()
 		{
-			Assert.Throws<InvalidOperationException>(
-				"The number of constraints is not the same as the number of the method's parameters!",
-				() =>
-				new ConstraintsExpectation(new FakeInvocation(this.method), new AbstractConstraint[]
-				{
-					Is.Anything(),
-					Is.Null(),
-					Is.NotNull(),
-					Text.Like("Song")
-				}, new Range(1, 1)));
-
+			var ex = Assert.Throws<InvalidOperationException>(() =>
+			                                                  new ConstraintsExpectation(new FakeInvocation(this.method), new AbstractConstraint[]
+			                                                                                                              	{
+			                                                                                                              		Is.Anything(),
+			                                                                                                              		Is.Null(),
+			                                                                                                              		Is.NotNull(),
+			                                                                                                              		Text.Like("Song")
+			                                                                                                              	}, new Range(1, 1)));
+			Assert.Equal("The number of constraints is not the same as the number of the method's parameters!", ex.Message);
 		}
 
 		[Fact]
@@ -158,9 +179,8 @@ namespace Rhino.Mocks.Tests.Expectations
 		[Fact]
 		public void TooFewArgs()
 		{
-			Assert.Throws<InvalidOperationException>(
-				"Number of argument doesn't match the number of parameters!",
-				() => this.expectation.IsExpected(new object[] {32, "Ayende"}));
+			var ex = Assert.Throws<InvalidOperationException>(() => this.expectation.IsExpected(new object[] {32, "Ayende"}));
+			Assert.Equal("Number of argument doesn't match the number of parameters!", ex.Message);
 		}
 	}
 }

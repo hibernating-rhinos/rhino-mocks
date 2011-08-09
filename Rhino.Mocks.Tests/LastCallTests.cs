@@ -48,8 +48,8 @@ namespace Rhino.Mocks.Tests
 		{
 			try
 			{
-				Assert.Throws<InvalidOperationException>("The object 'System.Object' is not a mocked object.",
-				                                         () => LastCall.On(new object()));
+				var ex = Assert.Throws<InvalidOperationException>(() => LastCall.On(new object()));
+				Assert.Equal("The object 'System.Object' is not a mocked object.", ex.Message);
 			}
 			finally
 			{
@@ -116,8 +116,8 @@ namespace Rhino.Mocks.Tests
             comf2.TheMethod();
             Assert.Equal(true, comf2.OriginalMethodCalled);
 
-			Assert.Throws<ExpectationViolationException>("CallOriginalMethodFodder.TheMethod(); Expected #2, Actual #1.",
-			                                             () => mockRepository.VerifyAll());
+			var ex = Assert.Throws<ExpectationViolationException>(() => mockRepository.VerifyAll());
+			Assert.Equal("CallOriginalMethodFodder.TheMethod(); Expected #2, Actual #1.", ex.Message);
 		}
 
         public class CallOriginalMethodFodder
@@ -179,9 +179,8 @@ namespace Rhino.Mocks.Tests
 		{
 			try
 			{
-				Assert.Throws<InvalidOperationException>(
-					"Invalid call, the last call has been used or no call has been made (make sure that you are calling a virtual (C#) / Overridable (VB) method).",
-					() => LastCall.Return(null));
+				var ex = Assert.Throws<InvalidOperationException>(() => LastCall.Return(null));
+				Assert.Equal("Invalid call, the last call has been used or no call has been made (make sure that you are calling a virtual (C#) / Overridable (VB) method).", ex.Message);
 			}
 			finally
 			{
@@ -196,7 +195,8 @@ namespace Rhino.Mocks.Tests
 			demo.VoidNoArgs();
 			LastCall.Throw(new Exception("Bla!"));
 			mocks.ReplayAll();
-			Assert.Throws<Exception>("Bla!", demo.VoidNoArgs);
+			var ex = Assert.Throws<Exception>(() => this.demo.VoidNoArgs());
+			Assert.Equal("Bla!", ex.Message);
 		}
 
 		[Fact]

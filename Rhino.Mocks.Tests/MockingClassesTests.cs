@@ -69,10 +69,8 @@ namespace Rhino.Mocks.Tests
 		public void CantMockNonVirtualCall()
 		{
 			demoClass.One();
-			Assert.Throws<InvalidOperationException>(
-				"There is no matching last call on this object. Are you sure that the last call was a virtual or interface method call?",
-				() => LastCall.On(demoClass).Return(3));
-
+			var ex = Assert.Throws<InvalidOperationException>(() => LastCall.On(this.demoClass).Return(3));
+			Assert.Equal("There is no matching last call on this object. Are you sure that the last call was a virtual or interface method call?", ex.Message);
 		}
 
 		[Fact]
@@ -121,18 +119,16 @@ namespace Rhino.Mocks.Tests
 		public void MockSealedClass()
 		{
 			MockRepository mocks = new MockRepository();
-			Assert.Throws<NotSupportedException>("Can't create mocks of sealed classes",
-			                                     () => mocks.StrictMock(typeof (File)));
+			var ex = Assert.Throws<NotSupportedException>(() => mocks.StrictMock(typeof (File)));
+			Assert.Equal("Can't create mocks of sealed classes", ex.Message);
 		}
 
         [Fact]
         public void CallNonVirtualMethodThatImplementsAnInterface()
         {
             ((IDisposable)demoClass).Dispose();
-        	Assert.Throws<InvalidOperationException>(
-        		"Invalid call, the last call has been used or no call has been made (make sure that you are calling a virtual (C#) / Overridable (VB) method).",
-        		() => LastCall.Repeat.Never());
-           
+        	var ex = Assert.Throws<InvalidOperationException>(() => LastCall.Repeat.Never());
+        	Assert.Equal("Invalid call, the last call has been used or no call has been made (make sure that you are calling a virtual (C#) / Overridable (VB) method).", ex.Message);
         }
     
 

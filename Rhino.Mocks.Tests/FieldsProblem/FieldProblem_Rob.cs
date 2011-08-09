@@ -22,7 +22,8 @@ namespace Rhino.Mocks.Tests.FieldsProblem
 
 			mocks.ReplayAll();
 
-			Assert.Throws<ExpectationViolationException>("IDemo.VoidNoArgs(); Expected #0, Actual #1.", demo.VoidNoArgs);
+			var ex = Assert.Throws<ExpectationViolationException>(() => demo.VoidNoArgs());
+			Assert.Equal("IDemo.VoidNoArgs(); Expected #0, Actual #1.", ex.Message);
 		}
 
 		[Fact]
@@ -37,20 +38,16 @@ namespace Rhino.Mocks.Tests.FieldsProblem
 					.Return(new List<ExpectedBar>());
 			}
 
-			Assert.Throws<ExpectationViolationException>(
-				@"ISomeSystem.GetFooFor<Rhino.Mocks.Tests.FieldsProblem.UnexpectedBar>(""foo""); Expected #1, Actual #1.
-ISomeSystem.GetFooFor<Rhino.Mocks.Tests.FieldsProblem.ExpectedBar>(""foo""); Expected #1, Actual #0.",
-				() =>
-				{
-					using (mocks.Playback())
-					{
-						ExpectedBarPerformer cut = new ExpectedBarPerformer(mockSomeSystem);
-						cut.DoStuffWithExpectedBar("foo");
-					}
-				}
-				);
-
-			
+			var ex = Assert.Throws<ExpectationViolationException>(() =>
+			                                                      	{
+			                                                      		using (mocks.Playback())
+			                                                      		{
+			                                                      			ExpectedBarPerformer cut = new ExpectedBarPerformer(mockSomeSystem);
+			                                                      			cut.DoStuffWithExpectedBar("foo");
+			                                                      		}
+			                                                      	});
+			Assert.Equal(@"ISomeSystem.GetFooFor<Rhino.Mocks.Tests.FieldsProblem.UnexpectedBar>(""foo""); Expected #1, Actual #1.
+ISomeSystem.GetFooFor<Rhino.Mocks.Tests.FieldsProblem.ExpectedBar>(""foo""); Expected #1, Actual #0.", ex.Message);
 		}
 	}
 

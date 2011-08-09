@@ -90,9 +90,8 @@ namespace Rhino.Mocks.Tests.FieldsProblem
 		{
 			ILookupMapper<int> mapper = m_mockery.StrictMock<ILookupMapper<int>>();
 			Foo<string> retval = new Foo<string>();
-			Assert.Throws<InvalidOperationException>(
-				"Type 'Rhino.Mocks.Tests.FieldsProblem.Foo`1[[System.String, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089]]' doesn't match the return type 'Rhino.Mocks.Tests.FieldsProblem.Foo`1[System.Int32]' for method 'ILookupMapper`1.FindOneFoo();'",
-				() => Expect.Call<object>(mapper.FindOneFoo()).Return(retval));
+			var ex = Assert.Throws<InvalidOperationException>(() => Expect.Call<object>(mapper.FindOneFoo()).Return(retval));
+			Assert.Equal("Type 'Rhino.Mocks.Tests.FieldsProblem.Foo`1[[System.String, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089]]' doesn't match the return type 'Rhino.Mocks.Tests.FieldsProblem.Foo`1[System.Int32]' for method 'ILookupMapper`1.FindOneFoo();'", ex.Message);
 		}
 	}
 

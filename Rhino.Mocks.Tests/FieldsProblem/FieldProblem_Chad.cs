@@ -18,7 +18,8 @@ namespace Rhino.Mocks.Tests.FieldsProblem
 Instead of writing code such as this: mockObject.Stub(x => x.SomeProperty).Return(42);
 You can use the property directly to achieve the same result: mockObject.SomeProperty = 42;";
 
-			Assert.Throws<InvalidOperationException>(expected, () => SetupResult.For(test.ReadWrite).PropertyBehavior());
+			var ex = Assert.Throws<InvalidOperationException>(() => SetupResult.For(test.ReadWrite).PropertyBehavior());
+			Assert.Equal(expected, ex.Message);
 		}
 		public class TestClass
 		{

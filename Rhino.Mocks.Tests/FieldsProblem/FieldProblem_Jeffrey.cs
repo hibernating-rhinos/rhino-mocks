@@ -63,13 +63,13 @@ namespace Rhino.Mocks.Tests.FieldsProblem
 			IEMailFormatter<string> formatterMock = mocks.StrictMock<IEMailFormatter<string>>();
 			SmtpEMailSenderBase<string> senderMock = (SmtpEMailSenderBase<string>)mocks.StrictMock(typeof(SmtpEMailSenderBase<string>));
 			senderMock.SetFormatter(formatterMock);
-			Assert.Throws<InvalidOperationException>("Callback arguments didn't match the method arguments",
-			                                         () =>
-			                                         LastCall.Do(
-			                                         	(Action<IEMailFormatter<int>>) delegate(IEMailFormatter<int> formatter)
-			                                         	{
-			                                         		Assert.NotNull(formatter);
-			                                         	}));
+			var ex = Assert.Throws<InvalidOperationException>(() =>
+			                                                  LastCall.Do(
+			                                                  	(Action<IEMailFormatter<int>>) delegate(IEMailFormatter<int> formatter)
+			                                                  	                               	{
+			                                                  	                               		Assert.NotNull(formatter);
+			                                                  	                               	}));
+			Assert.Equal("Callback arguments didn't match the method arguments", ex.Message);
 		}
 	}
 	public interface IEMailFormatter<T>

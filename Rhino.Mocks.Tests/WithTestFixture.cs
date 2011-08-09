@@ -63,71 +63,70 @@ namespace Rhino.Mocks.Tests
     	[Fact]
 		public void CannotUseMockerOutsideOfWithMocks()
     	{
-    		Assert.Throws<InvalidOperationException>(
-    			"You cannot use Mocker.Current outside of a With.Mocks block",
-    			() => GC.KeepAlive(Mocker.Current));
-			
+    		var ex = Assert.Throws<InvalidOperationException>(() => GC.KeepAlive(Mocker.Current));
+    		Assert.Equal("You cannot use Mocker.Current outside of a With.Mocks block", ex.Message);
     	}
 
     	[Fact]
         public void UsingTheWithMocksConstruct_ThrowsIfExpectationIsMissed()
-        {
-    		Assert.Throws<ExpectationViolationException>("IDemo.ReturnIntNoArgs(); Expected #1, Actual #0.",
-    		                                             () =>
+    	{
+    		var ex = Assert.Throws<ExpectationViolationException>(() =>
 
-    		                                             With.Mocks(delegate
-    		                                             {
-    		                                             	IDemo demo = Mocker.Current.StrictMock<IDemo>();
-    		                                             	Expect.Call(demo.ReturnIntNoArgs()).Return(5);
-    		                                             	Mocker.Current.ReplayAll();
-    		                                             }));
-        }
+    		                                                      With.Mocks(delegate
+    		                                                                 	{
+    		                                                                 		IDemo demo = Mocker.Current.StrictMock<IDemo>();
+    		                                                                 		Expect.Call(demo.ReturnIntNoArgs()).Return(5);
+    		                                                                 		Mocker.Current.ReplayAll();
+    		                                                                 	}));
+    		Assert.Equal("IDemo.ReturnIntNoArgs(); Expected #1, Actual #0.", ex.Message);
+    	}
 
-        [Fact]
+    	[Fact]
         public void UsingTheWithMocksConstruct_ThrowsIfReplayAllNotCalled()
-        {
-        	Assert.Throws<InvalidOperationException>(
-        		"This action is invalid when the mock object {Rhino.Mocks.Tests.IDemo} is in record state.",
-        		() =>
-        		{
-        			With.Mocks(delegate
-        			{
-        				IDemo demo = Mocker.Current.StrictMock<IDemo>();
-        				Expect.Call(demo.ReturnIntNoArgs()).Return(5);
-        			});
-        		});
-        }
+    	{
+    		var ex = Assert.Throws<InvalidOperationException>(() =>
+    		                                                  	{
+    		                                                  		With.Mocks(delegate
+    		                                                  		           	{
+    		                                                  		           		IDemo demo = Mocker.Current.StrictMock<IDemo>();
+    		                                                  		           		Expect.Call(demo.ReturnIntNoArgs()).Return(5);
+    		                                                  		           	});
+    		                                                  	});
+    		Assert.Equal("This action is invalid when the mock object {Rhino.Mocks.Tests.IDemo} is in record state.", ex.Message);
+    	}
 
 
-        [Fact]
+    	[Fact]
         public void UsingTheWithMocksConstruct_GiveCorrectExceptionWhenMocking()
-        {
-        	Assert.Throws<IndexOutOfRangeException>("foo", () =>
-        	{
-        		With.Mocks(delegate
-        		{
-        			IDemo demo = Mocker.Current.StrictMock<IDemo>();
-        			Expect.Call(demo.ReturnIntNoArgs()).Return(5);
-        			Mocker.Current.ReplayAll();
-        			throw new IndexOutOfRangeException("foo");
-        		});
-        	});
-        }
+    	{
+    		var ex = Assert.Throws<IndexOutOfRangeException>(() =>
+    		                                                 	{
+    		                                                 		With.Mocks(delegate
+    		                                                 		           	{
+    		                                                 		           		IDemo demo = Mocker.Current.StrictMock<IDemo>();
+    		                                                 		           		Expect.Call(demo.ReturnIntNoArgs()).Return(5);
+    		                                                 		           		Mocker.Current.ReplayAll();
+    		                                                 		           		throw new IndexOutOfRangeException("foo");
+    		                                                 		           	});
+    		                                                 	});
+    		Assert.Equal("foo", ex.Message);
+    	}
 
 
-        [Fact]
+    	[Fact]
         public void UsingTheWithMocksConstruct_GiveCorrectExceptionWhenMockingEvenIfReplayAllNotCalled()
-        {
-        	Assert.Throws<IndexOutOfRangeException>("foo", () =>
-        	                                               With.Mocks(delegate
-        	                                               {
-        	                                               	IDemo demo = Mocker.Current.StrictMock<IDemo>();
-        	                                               	Expect.Call(demo.ReturnIntNoArgs()).Return(5);
-        	                                               	throw new IndexOutOfRangeException("foo");
-        	                                               }));
-        }
+    	{
+    		var ex = Assert.Throws<IndexOutOfRangeException>(() =>
+    		                                                 With.Mocks(delegate
+    		                                                            	{
+    		                                                            		IDemo demo = Mocker.Current.StrictMock<IDemo>();
+    		                                                            		Expect.Call(demo.ReturnIntNoArgs()).Return(5);
+    		                                                            		throw new IndexOutOfRangeException("foo");
+    		                                                            	}));
+    		Assert.Equal("foo", ex.Message);
+    	}
 
-        [Fact]
+    	[Fact]
         public void UsingTheWithMocksExceptingVerifyConstruct()
         {
             MockRepository mocks = new MockRepository();
@@ -150,16 +149,16 @@ namespace Rhino.Mocks.Tests
             MockRepository mocks = new MockRepository();
             IDemo demo = mocks.StrictMock<IDemo>();
 
-        	Assert.Throws<ExpectationViolationException>("IDemo.ReturnIntNoArgs(); Expected #1, Actual #0.",
-        	                                             () =>
-        	                                             With.Mocks(mocks)
-        	                                             	.Expecting(delegate
-        	                                             	{
-        	                                             		Expect.Call(demo.ReturnIntNoArgs()).Return(5);
-        	                                             	})
-        	                                             	.Verify(delegate
-        	                                             	{
-        	                                             	}));
+        	var ex = Assert.Throws<ExpectationViolationException>(() =>
+        	                                                      With.Mocks(mocks)
+        	                                                      	.Expecting(delegate
+        	                                                      	           	{
+        	                                                      	           		Expect.Call(demo.ReturnIntNoArgs()).Return(5);
+        	                                                      	           	})
+        	                                                      	.Verify(delegate
+        	                                                      	        	{
+        	                                                      	        	}));
+        	Assert.Equal("IDemo.ReturnIntNoArgs(); Expected #1, Actual #0.", ex.Message);
         }
 
         [Fact]
@@ -168,16 +167,17 @@ namespace Rhino.Mocks.Tests
             MockRepository mocks = new MockRepository();
             IDemo demo = mocks.StrictMock<IDemo>();
 
-        	Assert.Throws<IndexOutOfRangeException>("foo", () =>
-        	                                               With.Mocks(mocks)
-        	                                               	.Expecting(delegate
-        	                                               	{
-        	                                               		Expect.Call(demo.ReturnIntNoArgs()).Return(5);
-        	                                               	})
-        	                                               	.Verify(delegate
-        	                                               	{
-        	                                               		throw new IndexOutOfRangeException("foo");
-        	                                               	}));
+        	var ex = Assert.Throws<IndexOutOfRangeException>(() =>
+        	                                                 With.Mocks(mocks)
+        	                                                 	.Expecting(delegate
+        	                                                 	           	{
+        	                                                 	           		Expect.Call(demo.ReturnIntNoArgs()).Return(5);
+        	                                                 	           	})
+        	                                                 	.Verify(delegate
+        	                                                 	        	{
+        	                                                 	        		throw new IndexOutOfRangeException("foo");
+        	                                                 	        	}));
+        	Assert.Equal("foo", ex.Message);
         }
 
         [Fact]

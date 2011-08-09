@@ -45,9 +45,8 @@ namespace Rhino.Mocks.Tests.FieldsProblem
 			service.Stub(x => x.GetString()).Return("Test");
 			var presenter = new Presenter(view, service);
 			presenter.OnViewLoaded();
-			Assert.Throws<InvalidOperationException>(
-				"Cannot assert on an object that is not in replay mode. Did you forget to call ReplayAll() ?",
-				() => view.AssertWasCalled(x => x.Message = "Test"));
+			var ex = Assert.Throws<InvalidOperationException>(() => view.AssertWasCalled(x => x.Message = "Test"));
+			Assert.Equal("Cannot assert on an object that is not in replay mode. Did you forget to call ReplayAll() ?", ex.Message);
 		}
 
 		[Fact]

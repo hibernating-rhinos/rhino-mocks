@@ -68,9 +68,8 @@ namespace Rhino.Mocks.Tests.Impl
 		public void ExpectedMethodCallOnReplay()
 		{
 			ReplayMockState replay = new ReplayMockState(record);
-			Assert.Throws<ExpectationViolationException>(
-				"String.StartsWith(\"2\"); Expected #1, Actual #0.",
-				() => replay.Verify());
+			var ex = Assert.Throws<ExpectationViolationException>(() => replay.Verify());
+			Assert.Equal("String.StartsWith(\"2\"); Expected #1, Actual #0.", ex.Message);
 		}
 
 		[Fact]
@@ -78,9 +77,8 @@ namespace Rhino.Mocks.Tests.Impl
 		{
 			MethodInfo endsWith = MethodCallTests.GetMethodInfo("EndsWith", "2");
 
-			Assert.Throws<ExpectationViolationException>(
-				"String.EndsWith(\"2\"); Expected #0, Actual #1.",
-				() => replay.MethodCall(new FakeInvocation(endsWith), endsWith, "2"));
+			var ex = Assert.Throws<ExpectationViolationException>(() => this.replay.MethodCall(new FakeInvocation(endsWith), endsWith, "2"));
+			Assert.Equal("String.EndsWith(\"2\"); Expected #0, Actual #1.", ex.Message);
 		}
 
 		[Fact]
@@ -96,18 +94,16 @@ namespace Rhino.Mocks.Tests.Impl
 		public void VerifyWhenNotAllExpectedCallsWereCalled()
 		{
 			ReplayMockState replay = new ReplayMockState(record);
-			Assert.Throws<ExpectationViolationException>(
-				"String.StartsWith(\"2\"); Expected #1, Actual #0.",
-				() => replay.Verify());
+			var ex = Assert.Throws<ExpectationViolationException>(() => replay.Verify());
+			Assert.Equal("String.StartsWith(\"2\"); Expected #1, Actual #0.", ex.Message);
 		}
 
 		[Fact]
 		public void VerifyWhenMismatchArgsContainsNull()
 		{
 			MethodInfo endsWith = MethodCallTests.GetMethodInfo("EndsWith", "2");
-			Assert.Throws<ExpectationViolationException>(
-				"String.EndsWith(null); Expected #0, Actual #1.",
-				() => replay.MethodCall(new FakeInvocation(endsWith), endsWith, new object[1] {null}));
+			var ex = Assert.Throws<ExpectationViolationException>(() => this.replay.MethodCall(new FakeInvocation(endsWith), endsWith, new object[1] {null}));
+			Assert.Equal("String.EndsWith(null); Expected #0, Actual #1.", ex.Message);
 		}
 
 		[Fact]

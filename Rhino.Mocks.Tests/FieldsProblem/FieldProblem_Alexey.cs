@@ -49,9 +49,8 @@ namespace Rhino.Mocks.Tests.FieldsProblem
 			LastCall.Return(mockObj);
 			mockery.ReplayAll();
 
-			Assert.Throws<ExpectationViolationException>(
-				"ITestInterface.AddService<System.IDisposable, System.Data.SqlClient.SqlConnection>(); Expected #1, Actual #0.",
-				() => mockery.VerifyAll());
+			var ex = Assert.Throws<ExpectationViolationException>(() => mockery.VerifyAll());
+			Assert.Equal("ITestInterface.AddService<System.IDisposable, System.Data.SqlClient.SqlConnection>(); Expected #1, Actual #0.", ex.Message);
 		}
 
 		[Fact]
@@ -64,9 +63,8 @@ namespace Rhino.Mocks.Tests.FieldsProblem
 			LastCall.Return(mockObj);
 			mockery.ReplayAll();
 
-			Assert.Throws<ExpectationViolationException>(
-				"ITestInterface.AddService<System.IDisposable, System.Data.SqlClient.SqlConnection>(); Expected #1, Actual #0.",
-				() => mockery.VerifyAll());
+			var ex = Assert.Throws<ExpectationViolationException>(() => mockery.VerifyAll());
+			Assert.Equal("ITestInterface.AddService<System.IDisposable, System.Data.SqlClient.SqlConnection>(); Expected #1, Actual #0.", ex.Message);
 		}
 
 		[Fact]

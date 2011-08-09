@@ -61,8 +61,8 @@ namespace Rhino.Mocks.Tests
 		{
 			try
 			{
-				Assert.Throws<InvalidOperationException>("The object 'System.Object' is not a mocked object.",
-														 () => Expect.On(new object()));
+				var ex = Assert.Throws<InvalidOperationException>(() => Expect.On(new object()));
+				Assert.Equal("The object 'System.Object' is not a mocked object.", ex.Message);
 			}
 			finally
 			{
@@ -76,7 +76,7 @@ namespace Rhino.Mocks.Tests
 		{
 			Expect.Call(delegate { demo.VoidNoArgs(); }).Throw(new ArgumentNullException());
 			mocks.ReplayAll();
-			Assert.Throws<ArgumentNullException>(demo.VoidNoArgs);
+			Assert.Throws<ArgumentNullException>(() => demo.VoidNoArgs());
 		}
 
 		[Fact]
@@ -84,7 +84,7 @@ namespace Rhino.Mocks.Tests
 		{
 			Expect.Call(demo.VoidNoArgs).Throw(new ArgumentNullException());
 			mocks.ReplayAll();
-			Assert.Throws<ArgumentNullException>(demo.VoidNoArgs);
+			Assert.Throws<ArgumentNullException>(() => demo.VoidNoArgs());
 		}
 
 		[Fact]
@@ -98,9 +98,8 @@ namespace Rhino.Mocks.Tests
 		[Fact]
 		public void ExpectWhenNoCallMade()
 		{
-			Assert.Throws<InvalidOperationException>(
-				"The object is not a mock object that belong to this repository.",
-				() => Expect.Call<object>(null));
+			var ex = Assert.Throws<InvalidOperationException>(() => Expect.Call<object>(null));
+			Assert.Equal("Invalid call, the last call has been used or no call has been made (make sure that you are calling a virtual (C#) / Overridable (VB) method).", ex.Message);
 			mocks.Replay(demo); //for the tear down
 		}
 
@@ -110,9 +109,8 @@ namespace Rhino.Mocks.Tests
 			Expect.Call(demo.Prop).Return("ayende");
 			mocks.ReplayAll();
 			Assert.Equal("ayende", demo.Prop);
-			Assert.Throws<InvalidOperationException>(
-				"Invalid call, the last call has been used or no call has been made (make sure that you are calling a virtual (C#) / Overridable (VB) method).",
-				() => Expect.Call<object>(null));
+			var ex = Assert.Throws<InvalidOperationException>(() => Expect.Call<object>(null));
+			Assert.Equal("Invalid call, the last call has been used or no call has been made (make sure that you are calling a virtual (C#) / Overridable (VB) method).", ex.Message);
 		}
 	}
 }

@@ -146,12 +146,12 @@ namespace Rhino.Mocks.Tests
 			//missing expectations here. 
 
 			//cause a stack overflow error
-			
-			Assert.Throws<ExpectationViolationException>("IApplicationSession.get_IMetricBroker(); Expected #0, Actual #1.",
-			                                             () =>
-			                                             {
-															 IMetric objMetric = m_objIMetric.Numerator;
-			                                             });
+
+			var ex = Assert.Throws<ExpectationViolationException>(() =>
+			                                                      	{
+			                                                      		IMetric objMetric = this.m_objIMetric.Numerator;
+			                                                      	});
+			Assert.Equal("IApplicationSession.get_IMetricBroker(); Expected #0, Actual #1.", ex.Message);
 		}
 
 	}

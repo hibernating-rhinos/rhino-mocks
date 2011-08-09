@@ -118,29 +118,26 @@ namespace Rhino.Mocks.Tests
         [Fact]
         public void InvalidReturnValueThrows()
         {
-        	Assert.Throws<InvalidOperationException>(
-        		"The delegate return value should be assignable from System.Int32",
-        		() => Expect.Call(demo.ReturnIntNoArgs()).Do(new GetDay(GetSunday)));
-            
+        	var ex = Assert.Throws<InvalidOperationException>(() => Expect.Call(this.demo.ReturnIntNoArgs()).Do(new GetDay(this.GetSunday)));
+        	Assert.Equal("The delegate return value should be assignable from System.Int32", ex.Message);
         }
 
-        [Fact]
+    	[Fact]
         public void InvalidDelegateThrows()
-        {
-        	Assert.Throws<InvalidOperationException>("Callback arguments didn't match the method arguments",
-        	                                         () =>
-        	                                         Expect.Call(demo.ReturnIntNoArgs()).Do(new IntDelegate(IntMethod)));
-        }
+    	{
+    		var ex = Assert.Throws<InvalidOperationException>(() =>
+    		                                                  Expect.Call(this.demo.ReturnIntNoArgs()).Do(new IntDelegate(this.IntMethod)));
+    		Assert.Equal("Callback arguments didn't match the method arguments", ex.Message);
+    	}
 
-        [Fact]
+    	[Fact]
         public void CanOnlySpecifyOnce()
-        {
-        	Assert.Throws<InvalidOperationException>(
-        		"Can set only a single return value or exception to throw or delegate to execute on the same method call.",
-        		() => Expect.Call(demo.EnumNoArgs()).Do(new GetDay(ThrowDay)).Return(DayOfWeek.Saturday));
-        }
+    	{
+    		var ex = Assert.Throws<InvalidOperationException>(() => Expect.Call(this.demo.EnumNoArgs()).Do(new GetDay(this.ThrowDay)).Return(DayOfWeek.Saturday));
+    		Assert.Equal("Can set only a single return value or exception to throw or delegate to execute on the same method call.", ex.Message);
+    	}
 
-        public delegate DayOfWeek GetDay();
+    	public delegate DayOfWeek GetDay();
 
         private DayOfWeek GetSunday()
         {

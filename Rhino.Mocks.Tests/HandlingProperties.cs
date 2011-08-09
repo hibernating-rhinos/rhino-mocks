@@ -61,25 +61,25 @@ namespace Rhino.Mocks.Tests
         [Fact]
         public void ExceptionIfLastMethodCallIsNotProperty()
         {
-        	Assert.Throws<InvalidOperationException>("Last method call was not made on a setter or a getter",
-        	                                         () => Expect.Call(demo.EnumNoArgs()).PropertyBehavior());
+        	var ex = Assert.Throws<InvalidOperationException>(() => Expect.Call(this.demo.EnumNoArgs()).PropertyBehavior());
+        	Assert.Equal("Last method call was not made on a setter or a getter", ex.Message);
         }
 
-        [Fact]
+    	[Fact]
         public void ExceptionIfPropHasOnlyGetter()
-        {
-        	Assert.Throws<InvalidOperationException>("Property must be read/write",
-        	                                         () => Expect.Call(demo.ReadOnly).PropertyBehavior());
-        }
+    	{
+    		var ex = Assert.Throws<InvalidOperationException>(() => Expect.Call(this.demo.ReadOnly).PropertyBehavior());
+    		Assert.Equal("Property must be read/write", ex.Message);
+    	}
 
-        [Fact]
+    	[Fact]
         public void ExceptionIfPropHasOnlySetter()
-        {
-        	Assert.Throws<InvalidOperationException>("Property must be read/write",
-        	                                         () => Expect.Call(demo.WriteOnly).PropertyBehavior());
-        }
+    	{
+    		var ex = Assert.Throws<InvalidOperationException>(() => Expect.Call(this.demo.WriteOnly).PropertyBehavior());
+    		Assert.Equal("Property must be read/write", ex.Message);
+    	}
 
-        [Fact]
+    	[Fact]
         public void IndexedPropertiesSupported()
         {
             IWithIndexers x = (IWithIndexers)mocks.StrictMock(typeof(IWithIndexers));
@@ -106,9 +106,8 @@ namespace Rhino.Mocks.Tests
             IWithIndexers x = (IWithIndexers)mocks.StrictMock(typeof(IWithIndexers));
             Expect.Call(x[1]).PropertyBehavior();
             mocks.ReplayAll();
-        	Assert.Throws<InvalidOperationException>(
-        		"Can't return a value for property Item because no value was set and the Property return a value type.",
-        		() => GC.KeepAlive(x[1]));
+        	var ex = Assert.Throws<InvalidOperationException>(() => GC.KeepAlive(x[1]));
+        	Assert.Equal("Can't return a value for property Item because no value was set and the Property return a value type.", ex.Message);
         }
 
         [Fact]

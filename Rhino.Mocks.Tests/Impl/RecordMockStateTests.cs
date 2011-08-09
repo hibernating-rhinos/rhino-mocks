@@ -28,12 +28,14 @@
 
 
 using System;
+using System.Globalization;
 using System.Reflection;
-using Xunit;
+using System.Threading;
 using Rhino.Mocks.Expectations;
 using Rhino.Mocks.Impl;
 using Rhino.Mocks.Interfaces;
 using Rhino.Mocks.Tests.Expectations;
+using Xunit;
 
 namespace Rhino.Mocks.Tests.Impl
 {
@@ -75,27 +77,24 @@ namespace Rhino.Mocks.Tests.Impl
 		{
 			MockRepository mocks = new MockRepository();
 			RecordMockState recordState = new RecordMockState(new ProxyInstance(mocks), mocks);
-			Assert.Throws<InvalidOperationException>(
-				"This action is invalid when the mock object is in record state.",
-				() => recordState.Verify());
+			var ex = Assert.Throws<InvalidOperationException>(() => recordState.Verify());
+			Assert.Equal("This action is invalid when the mock object is in record state.", ex.Message);
 		}
 
         [Fact]
         public void VerifyOnRecordThrowsOneMockType() {
             MockRepository mocks = new MockRepository();
             RecordMockState recordState = new RecordMockState(new ProxyInstance(mocks, typeof(IAnimal)), mocks);
-        	Assert.Throws<InvalidOperationException>(
-        		"This action is invalid when the mock object {Rhino.Mocks.Tests.IAnimal} is in record state.",
-        		() => recordState.Verify());
+        	var ex = Assert.Throws<InvalidOperationException>(() => recordState.Verify());
+        	Assert.Equal("This action is invalid when the mock object {Rhino.Mocks.Tests.IAnimal} is in record state.", ex.Message);
         }
 
         [Fact]
         public void VerifyOnRecordThrowsTwoMockTypes() {
             MockRepository mocks = new MockRepository();
             RecordMockState recordState = new RecordMockState(new ProxyInstance(mocks, typeof(IAnimal), typeof(IDemo)), mocks);
-        	Assert.Throws<InvalidOperationException>(
-        		"This action is invalid when the mock object {Rhino.Mocks.Tests.IAnimal, Rhino.Mocks.Tests.IDemo} is in record state.",
-        		() => recordState.Verify());
+        	var ex = Assert.Throws<InvalidOperationException>(() => recordState.Verify());
+        	Assert.Equal("This action is invalid when the mock object {Rhino.Mocks.Tests.IAnimal, Rhino.Mocks.Tests.IDemo} is in record state.", ex.Message);
         }
 
         [Fact]
@@ -121,17 +120,33 @@ namespace Rhino.Mocks.Tests.Impl
 		[Fact]
 		public void PassingNullProxyCauseException()
 		{
-			Assert.Throws<ArgumentNullException>(
-				"Value cannot be null.\r\nParameter name: proxy",
-				() => new RecordMockState(null, null));
+			var culture = Thread.CurrentThread.CurrentUICulture;
+			try
+			{
+				Thread.CurrentThread.CurrentUICulture = CultureInfo.InvariantCulture;
+				var ex = Assert.Throws<ArgumentNullException>(() => new RecordMockState(null, null));
+				Assert.Equal("Value cannot be null.\r\nParameter name: proxy", ex.Message);
+			}
+			finally
+			{
+				Thread.CurrentThread.CurrentUICulture = culture;
+			}
 		}
 
 		[Fact]
 		public void PassingNullmocksCauseException()
 		{
-			Assert.Throws<ArgumentNullException>(
-				"Value cannot be null.\r\nParameter name: repository",
-				() => new RecordMockState(new ProxyInstance(null), null));
+			var culture = Thread.CurrentThread.CurrentUICulture;
+			try
+			{
+				Thread.CurrentThread.CurrentUICulture = CultureInfo.InvariantCulture;
+				var ex = Assert.Throws<ArgumentNullException>(() => new RecordMockState(new ProxyInstance(null), null));
+				Assert.Equal("Value cannot be null.\r\nParameter name: repository", ex.Message);
+			}
+			finally
+			{
+				Thread.CurrentThread.CurrentUICulture = culture;
+			}
 		}
 
 		[Fact]
@@ -141,9 +156,8 @@ namespace Rhino.Mocks.Tests.Impl
 			ProxyInstance proxy = new ProxyInstance(mocks);
 			RecordMockState recordState = new RecordMockState(proxy, mocks);
             recordState.MethodCall(new FakeInvocation(method), method, "");
-			Assert.Throws<InvalidOperationException>(
-				"Previous method 'String.StartsWith(\"\");' requires a return value or an exception to throw.",
-				() => recordState.Replay());
+			var ex = Assert.Throws<InvalidOperationException>(() => recordState.Replay());
+			Assert.Equal("Previous method 'String.StartsWith(\"\");' requires a return value or an exception to throw.", ex.Message);
 		}
 
         [Fact]

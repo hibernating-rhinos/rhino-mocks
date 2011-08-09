@@ -28,7 +28,9 @@
 
 
 using System;
+using System.Globalization;
 using System.Reflection;
+using System.Threading;
 using Xunit;
 using Rhino.Mocks.Impl;
 using Rhino.Mocks.MethodRecorders;
@@ -103,16 +105,35 @@ namespace Rhino.Mocks.Tests.MethodRecorders
 		[Fact]
 		public void ProxyNullThrows()
 		{
-			Assert.Throws<ArgumentNullException>("Value cannot be null.\r\nParameter name: proxy", () => new ProxyMethodPair(null, endsWith));
+			var culture = Thread.CurrentThread.CurrentUICulture;
+			try
+			{
+				Thread.CurrentThread.CurrentUICulture = CultureInfo.InvariantCulture;
+				var ex = Assert.Throws<ArgumentNullException>(() => new ProxyMethodPair(null, this.endsWith));
+				Assert.Equal("Value cannot be null.\r\nParameter name: proxy", ex.Message);
+			}
+			finally
+			{
+				Thread.CurrentThread.CurrentUICulture = culture;
+			}
 		}
 
 		[Fact]
 		public void MethodNullThrows()
 		{
-			ProxyInstance mockProxy = new ProxyInstance(null);
+			var culture = Thread.CurrentThread.CurrentUICulture;
+			try
+			{
+				Thread.CurrentThread.CurrentUICulture = CultureInfo.InvariantCulture;
+				ProxyInstance mockProxy = new ProxyInstance(null);
 
-			Assert.Throws<ArgumentNullException>("Value cannot be null.\r\nParameter name: method",
-			                                     () => new ProxyMethodPair(mockProxy, null));
+				var ex = Assert.Throws<ArgumentNullException>(() => new ProxyMethodPair(mockProxy, null));
+				Assert.Equal("Value cannot be null.\r\nParameter name: method", ex.Message);
+			}
+			finally
+			{
+				Thread.CurrentThread.CurrentUICulture = culture;
+			}
 		}
 	}
 }

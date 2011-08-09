@@ -28,7 +28,9 @@
 
 
 using System;
+using System.Globalization;
 using System.Reflection;
+using System.Threading;
 using Xunit;
 using Rhino.Mocks.Expectations;
 using Rhino.Mocks.Impl;
@@ -130,68 +132,132 @@ namespace Rhino.Mocks.Tests.MethodRecorders
 		[Fact]
 		public void RecordProxyNullThrows()
 		{
-			Assert.Throws<ArgumentNullException>(
-				"Value cannot be null.\r\nParameter name: proxy",
-				() => this.recorder.Record(null, voidNoArgs, expectationOne));
+			var culture = Thread.CurrentThread.CurrentUICulture;
+			try
+			{
+				Thread.CurrentThread.CurrentUICulture = CultureInfo.InvariantCulture;
+				var ex = Assert.Throws<ArgumentNullException>(() => this.recorder.Record(null, this.voidNoArgs, this.expectationOne));
+				Assert.Equal("Value cannot be null.\r\nParameter name: proxy", ex.Message);
+			}
+			finally
+			{
+				Thread.CurrentThread.CurrentUICulture = culture;
+			}
 		}
 
 		[Fact]
 		public void RecordMethodNullThrows()
 		{
-			Assert.Throws<ArgumentNullException>("Value cannot be null.\r\nParameter name: method",
-			                                     () => recorder.Record(demo, null, expectationOne));
+			var culture = Thread.CurrentThread.CurrentUICulture;
+			try
+			{
+				Thread.CurrentThread.CurrentUICulture = CultureInfo.InvariantCulture;
+				var ex = Assert.Throws<ArgumentNullException>(() => this.recorder.Record(this.demo, null, this.expectationOne));
+				Assert.Equal("Value cannot be null.\r\nParameter name: method", ex.Message);
+			}
+			finally
+			{
+				Thread.CurrentThread.CurrentUICulture = culture;
+			}
 		}
 
 		[Fact]
 		public void RecordArgsNullThrows()
 		{
-			Assert.Throws<ArgumentNullException>(
-				"Value cannot be null.\r\nParameter name: expectation",
-				() => recorder.Record(demo, voidNoArgs, null));
+			var culture = Thread.CurrentThread.CurrentUICulture;
+			try
+			{
+				Thread.CurrentThread.CurrentUICulture = CultureInfo.InvariantCulture;
+				var ex = Assert.Throws<ArgumentNullException>(() => this.recorder.Record(this.demo, this.voidNoArgs, null));
+				Assert.Equal("Value cannot be null.\r\nParameter name: expectation", ex.Message);
+			}
+			finally
+			{
+				Thread.CurrentThread.CurrentUICulture = culture;
+			}
 		}
 
 		[Fact]
 		public void WasRecordedProxyNullThrows()
 		{
-			recorder.Record(demo, voidNoArgs, expectationOne);
-			Assert.Throws<ArgumentNullException>(
-				"Value cannot be null.\r\nParameter name: proxy",
-				() => recorder.GetRecordedExpectation(new FakeInvocation(voidNoArgs), null, voidNoArgs, new object[0]));
+			var culture = Thread.CurrentThread.CurrentUICulture;
+			try
+			{
+				Thread.CurrentThread.CurrentUICulture = CultureInfo.InvariantCulture;
+				recorder.Record(demo, voidNoArgs, expectationOne);
+				var ex = Assert.Throws<ArgumentNullException>(() => this.recorder.GetRecordedExpectation(new FakeInvocation(this.voidNoArgs), null, this.voidNoArgs, new object[0]));
+				Assert.Equal("Value cannot be null.\r\nParameter name: proxy", ex.Message);
+			}
+			finally
+			{
+				Thread.CurrentThread.CurrentUICulture = culture;
+			}
 		}
 
 		[Fact]
 		public void WasRecordedMethodNullThrows()
 		{
-			recorder.Record(demo, voidNoArgs, expectationOne);
-			Assert.Throws<ArgumentNullException>(
-				"Value cannot be null.\r\nParameter name: method",
-				() => recorder.GetRecordedExpectation(new FakeInvocation(null), demo, null, new object[0]));
+			var culture = Thread.CurrentThread.CurrentUICulture;
+			try
+			{
+				Thread.CurrentThread.CurrentUICulture = CultureInfo.InvariantCulture;
+				recorder.Record(demo, voidNoArgs, expectationOne);
+				var ex = Assert.Throws<ArgumentNullException>(() => this.recorder.GetRecordedExpectation(new FakeInvocation(null), this.demo, null, new object[0]));
+				Assert.Equal("Value cannot be null.\r\nParameter name: method", ex.Message);
+			}
+			finally
+			{
+				Thread.CurrentThread.CurrentUICulture = culture;
+			}
 		}
 
 		[Fact]
 		public void WasRecordedArgsNullThrows()
 		{
-			recorder.Record(demo, voidNoArgs, expectationOne);
-			Assert.Throws<ArgumentNullException>(
-				"Value cannot be null.\r\nParameter name: args",
-				() => recorder.GetRecordedExpectation(new FakeInvocation(voidNoArgs), demo, voidNoArgs, null));
+			var culture = Thread.CurrentThread.CurrentUICulture;
+			try
+			{
+				Thread.CurrentThread.CurrentUICulture = CultureInfo.InvariantCulture;
+				recorder.Record(demo, voidNoArgs, expectationOne);
+				var ex = Assert.Throws<ArgumentNullException>(() => this.recorder.GetRecordedExpectation(new FakeInvocation(this.voidNoArgs), this.demo, this.voidNoArgs, null));
+				Assert.Equal("Value cannot be null.\r\nParameter name: args", ex.Message);
+			}
+			finally
+			{
+				Thread.CurrentThread.CurrentUICulture = culture;
+			}
 		}
 
 		[Fact]
 		public void GetAllExpectationsMethodNullThrows()
 		{
-			Assert.Throws<ArgumentNullException>(
-				"Value cannot be null.\r\nParameter name: method",
-				() => recorder.GetAllExpectationsForProxyAndMethod(demo, null));
+			var culture = Thread.CurrentThread.CurrentUICulture;
+			try
+			{
+				Thread.CurrentThread.CurrentUICulture = CultureInfo.InvariantCulture;
+				var ex = Assert.Throws<ArgumentNullException>(() => this.recorder.GetAllExpectationsForProxyAndMethod(this.demo, null));
+				Assert.Equal("Value cannot be null.\r\nParameter name: method", ex.Message);
+			}
+			finally
+			{
+				Thread.CurrentThread.CurrentUICulture = culture;
+			}
 		}
 
 		[Fact]
 		public void GetAllExpectationsProxyNullThrows()
 		{
-			Assert.Throws<ArgumentNullException>(
-				"Value cannot be null.\r\nParameter name: proxy",
-				() => recorder.GetAllExpectationsForProxyAndMethod(null, voidNoArgs));
-
+			var culture = Thread.CurrentThread.CurrentUICulture;
+			try
+			{
+				Thread.CurrentThread.CurrentUICulture = CultureInfo.InvariantCulture;
+				var ex = Assert.Throws<ArgumentNullException>(() => this.recorder.GetAllExpectationsForProxyAndMethod(null, this.voidNoArgs));
+				Assert.Equal("Value cannot be null.\r\nParameter name: proxy", ex.Message);
+			}
+			finally
+			{
+				Thread.CurrentThread.CurrentUICulture = culture;
+			}
 		}
 
 		protected abstract IMethodRecorder CreateRecorder();

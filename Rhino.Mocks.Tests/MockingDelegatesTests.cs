@@ -209,11 +209,11 @@ namespace Rhino.Mocks.Tests
         [Fact]
         public void DelegateBaseTypeCannotBeMocked()
         {
-        	Assert.Throws<InvalidOperationException>("Cannot mock the Delegate base type.",
-        	                                         () => mocks.StrictMock(typeof (Delegate)));
+        	var ex = Assert.Throws<InvalidOperationException>(() => this.mocks.StrictMock(typeof (Delegate)));
+        	Assert.Equal("Cannot mock the Delegate base type.", ex.Message);
         }
 
-        private int Return1_Plus2_A(ref int a, out string b)
+    	private int Return1_Plus2_A(ref int a, out string b)
         {
             a += 2;
             b = "A";

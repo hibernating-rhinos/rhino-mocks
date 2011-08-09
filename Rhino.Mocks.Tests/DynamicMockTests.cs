@@ -76,9 +76,8 @@ namespace Rhino.Mocks.Tests
 			mocks.ReplayAll();
 			Assert.Null(demo.ReturnStringNoArgs());
 			doNotVerifyOnTearDown = true;
-			Assert.Throws<ExpectationViolationException>(
-				"IDemo.ReturnIntNoArgs(); Expected #1, Actual #0.",
-				() => mocks.Verify(demo));	
+			var ex = Assert.Throws<ExpectationViolationException>(() => this.mocks.Verify(this.demo));
+			Assert.Equal("IDemo.ReturnIntNoArgs(); Expected #1, Actual #0.", ex.Message);
 		}
 
 		[Fact]
@@ -105,9 +104,8 @@ namespace Rhino.Mocks.Tests
 		{
 			Expect.Call(demo.ReturnIntNoArgs()).Repeat.Never();
 			mocks.ReplayAll();
-			Assert.Throws<ExpectationViolationException>(
-				"IDemo.ReturnIntNoArgs(); Expected #0, Actual #1.",
-				() => demo.ReturnIntNoArgs());
+			var ex = Assert.Throws<ExpectationViolationException>(() => this.demo.ReturnIntNoArgs());
+			Assert.Equal("IDemo.ReturnIntNoArgs(); Expected #0, Actual #1.", ex.Message);
 		}
 	}
 }

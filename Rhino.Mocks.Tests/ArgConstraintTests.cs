@@ -104,8 +104,8 @@ namespace Rhino.Mocks.Tests
 		{
 			this.demoMock.VoidStringArg(Arg.Text.Contains("World"));
 			this.mocks.Replay(this.demoMock);
-			Assert.Throws<ExpectationViolationException>("IDemo.VoidStringArg(contains \"World\"); Expected #1, Actual #0.",
-			                                             () => this.mocks.Verify(this.demoMock));
+			var ex = Assert.Throws<ExpectationViolationException>(() => this.mocks.Verify(this.demoMock));
+			Assert.Equal("IDemo.VoidStringArg(contains \"World\"); Expected #1, Actual #0.", ex.Message);
 		}
 
 		[Fact]
@@ -149,34 +149,31 @@ namespace Rhino.Mocks.Tests
 			mocks.ReplayAll();
 
 			testMock.VoidList(new List<string>(new string[] { "1", "2", "4", "5" }));
-			
-			Assert.Throws<ExpectationViolationException>(
-				"ITestInterface.VoidList(System.Collections.Generic.List`1[System.String]); Expected #0, Actual #1.",
-				() => testMock.VoidList(new List<string>(new string[] { "1", "3" })));
+
+			var ex = Assert.Throws<ExpectationViolationException>(() => testMock.VoidList(new List<string>(new string[] { "1", "3" })));
+			Assert.Equal("ITestInterface.VoidList(System.Collections.Generic.List`1[System.String]); Expected #0, Actual #1.", ex.Message);
 		}
 		
 		[Fact]
 		public void ConstraintWithTooFewArguments_ThrowsException()
 		{
-			Assert.Throws<InvalidOperationException>(
-				"When using Arg<T>, all arguments must be defined using Arg<T>.Is, Arg<T>.Text, Arg<T>.List, Arg<T>.Ref or Arg<T>.Out. 3 arguments expected, 2 have been defined.",
-				() => demoMock.VoidThreeArgs(
-				      	Arg<int>.Is.Equal(4),
-				      	Arg.Text.Contains("World"),
-				      	3.14f));
+			var ex = Assert.Throws<InvalidOperationException>(() => this.demoMock.VoidThreeArgs(
+				Arg<int>.Is.Equal(4),
+				Arg.Text.Contains("World"),
+				3.14f));
+			Assert.Equal("When using Arg<T>, all arguments must be defined using Arg<T>.Is, Arg<T>.Text, Arg<T>.List, Arg<T>.Ref or Arg<T>.Out. 3 arguments expected, 2 have been defined.", ex.Message);
 		}
 
 		[Fact]
 		public void ConstraintToManyArgs_ThrowsException()
 		{
 			Arg<int>.Is.Equal(4);
-			Assert.Throws<InvalidOperationException>(
-				"Use Arg<T> ONLY within a mock method call while recording. 3 arguments expected, 4 have been defined.",
-				() =>
-				demoMock.VoidThreeArgs(
-					Arg<int>.Is.Equal(4),
-					Arg.Text.Contains("World"),
-					Arg<float>.Is.Equal(3.14f)));
+			var ex = Assert.Throws<InvalidOperationException>(() =>
+			                                                  this.demoMock.VoidThreeArgs(
+			                                                  	Arg<int>.Is.Equal(4),
+			                                                  	Arg.Text.Contains("World"),
+			                                                  	Arg<float>.Is.Equal(3.14f)));
+			Assert.Equal("Use Arg<T> ONLY within a mock method call while recording. 3 arguments expected, 4 have been defined.", ex.Message);
 		}
 
 		[Fact]
@@ -200,77 +197,70 @@ namespace Rhino.Mocks.Tests
 		public void TooFewOutArgs()
 		{
 			int iout = 2;
-			Assert.Throws<InvalidOperationException>(
-				"When using Arg<T>, all arguments must be defined using Arg<T>.Is, Arg<T>.Text, Arg<T>.List, Arg<T>.Ref or Arg<T>.Out. 5 arguments expected, 4 have been defined.",
-				() => testMock.RefOut(
-				      	Arg<string>.Is.Anything,
-				      	out iout,
-				      	Arg.Text.Contains("Steinegger"),
-				      	ref Arg<int>.Ref(Is.Equal(2), 7).Dummy,
-				      	Arg<string>.Is.NotNull
-				      	));
+			var ex = Assert.Throws<InvalidOperationException>(() => this.testMock.RefOut(
+				Arg<string>.Is.Anything,
+				out iout,
+				Arg.Text.Contains("Steinegger"),
+				ref Arg<int>.Ref(Is.Equal(2), 7).Dummy,
+				Arg<string>.Is.NotNull
+			                                                        	));
+			Assert.Equal("When using Arg<T>, all arguments must be defined using Arg<T>.Is, Arg<T>.Text, Arg<T>.List, Arg<T>.Ref or Arg<T>.Out. 5 arguments expected, 4 have been defined.", ex.Message);
 		}
 
 		[Fact]
 		public void RefInsteadOfOutArg()
 		{
-			Assert.Throws<InvalidOperationException>(
-				"Argument 1 must be defined as: out Arg<T>.Out(returnvalue).Dummy",
-				() => testMock.RefOut(
-				      	Arg<string>.Is.Anything,
-				      	out Arg<int>.Ref(Is.Equal(2), 7).Dummy,
-				      	Arg.Text.Contains("Steinegger"),
-				      	ref Arg<int>.Ref(Is.Equal(2), 7).Dummy,
-				      	Arg<string>.Is.NotNull
-				      	));
+			var ex = Assert.Throws<InvalidOperationException>(() => this.testMock.RefOut(
+				Arg<string>.Is.Anything,
+				out Arg<int>.Ref(Is.Equal(2), 7).Dummy,
+				Arg.Text.Contains("Steinegger"),
+				ref Arg<int>.Ref(Is.Equal(2), 7).Dummy,
+				Arg<string>.Is.NotNull
+			                                                        	));
+			Assert.Equal("Argument 1 must be defined as: out Arg<T>.Out(returnvalue).Dummy", ex.Message);
 		}
 
 		[Fact]
 		public void OutInsteadOfRefArg()
 		{
-			Assert.Throws<InvalidOperationException>(
-				"Argument 3 must be defined as: ref Arg<T>.Ref(constraint, returnvalue).Dummy",
-				() => testMock.RefOut(
-				      	Arg<string>.Is.Anything,
-				      	out Arg<int>.Out(7).Dummy,
-				      	Arg.Text.Contains("Steinegger"),
-				      	ref Arg<int>.Out(7).Dummy,
-				      	Arg<string>.Is.NotNull
-				      	));
+			var ex = Assert.Throws<InvalidOperationException>(() => this.testMock.RefOut(
+				Arg<string>.Is.Anything,
+				out Arg<int>.Out(7).Dummy,
+				Arg.Text.Contains("Steinegger"),
+				ref Arg<int>.Out(7).Dummy,
+				Arg<string>.Is.NotNull
+			                                                        	));
+			Assert.Equal("Argument 3 must be defined as: ref Arg<T>.Ref(constraint, returnvalue).Dummy", ex.Message);
 		}
 
 		[Fact]
 		public void OutInsteadOfInArg()
 		{
-			Assert.Throws<InvalidOperationException>(
-				"Argument 0 must be defined using: Arg<T>.Is, Arg<T>.Text or Arg<T>.List",
-				() => testMock.VoidObject(Arg<object>.Out(null)));
+			var ex = Assert.Throws<InvalidOperationException>(() => this.testMock.VoidObject(Arg<object>.Out(null)));
+			Assert.Equal("Argument 0 must be defined using: Arg<T>.Is, Arg<T>.Text or Arg<T>.List", ex.Message);
 		}
-		
+
 		[Fact]
 		public void Is_EqualsThrowsException()
 		{
-			Assert.Throws<InvalidOperationException>(
-				"Don't use Equals() to define constraints, use Equal() instead",
-				() => Arg<object>.Is.Equals(null));
+			var ex = Assert.Throws<InvalidOperationException>(() => Arg<object>.Is.Equals(null));
+			Assert.Equal("Don't use Equals() to define constraints, use Equal() instead", ex.Message);
 		}
 
 		[Fact]
 		public void List_EqualsThrowsException()
 		{
-			Assert.Throws<InvalidOperationException>(
-				"Don't use Equals() to define constraints, use Equal() instead",
-				() => Arg<object>.List.Equals(null));
+			var ex = Assert.Throws<InvalidOperationException>(() => Arg<object>.List.Equals(null));
+			Assert.Equal("Don't use Equals() to define constraints, use Equal() instead", ex.Message);
 		}
 
 		[Fact]
 		public void Text_EqualsThrowsException()
 		{
-			Assert.Throws<InvalidOperationException>(
-				"Don't use Equals() to define constraints, use Equal() instead",
-				() => Arg.Text.Equals(null));
+			var ex = Assert.Throws<InvalidOperationException>(() => Arg.Text.Equals(null));
+			Assert.Equal("Don't use Equals() to define constraints, use Equal() instead", ex.Message);
 		}
-		
+
 		/// <summary>
 		/// Adapted from MockingDelegatesTests.MockStringDelegateWithParams
 		/// </summary>

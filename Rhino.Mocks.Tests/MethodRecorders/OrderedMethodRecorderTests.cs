@@ -106,10 +106,9 @@ namespace Rhino.Mocks.Tests.MethodRecorders
 			recorder.Record(this.demo, this.voidThreeArgs, expectationOne);
 
 			Assert.NotNull(recorder.GetRecordedExpectation(new FakeInvocation(this.voidNoArgs), this.demo, this.voidNoArgs, new object[0]));
-			Assert.Throws<ExpectationViolationException>(
-				"Unordered method call! The expected call is: 'Ordered: { IDemo.VoidNoArgs(); }' but was: 'IDemo.VoidNoArgs();'",
-				() =>
-				recorder.GetRecordedExpectation(new FakeInvocation(this.voidNoArgs), this.demo, this.voidNoArgs, new object[0]));
+			var ex = Assert.Throws<ExpectationViolationException>(() =>
+			                                                      recorder.GetRecordedExpectation(new FakeInvocation(this.voidNoArgs), this.demo, this.voidNoArgs, new object[0]));
+			Assert.Equal("Unordered method call! The expected call is: 'Ordered: { IDemo.VoidNoArgs(); }' but was: 'IDemo.VoidNoArgs();'", ex.Message);
 		}
 
 		
@@ -122,20 +121,18 @@ namespace Rhino.Mocks.Tests.MethodRecorders
 			recorder.Record(this.demo, this.voidThreeArgs, expectationOne);
 
 			Assert.NotNull(recorder.GetRecordedExpectation(new FakeInvocation(this.voidNoArgs), this.demo, this.voidNoArgs, new object[0]));
-			Assert.Throws<ExpectationViolationException>(
-				"Unordered method call! The expected call is: 'Ordered: { Message: Test Message\nIDemo.VoidNoArgs(); }' but was: 'IDemo.VoidNoArgs();'",
-				() =>
-				recorder.GetRecordedExpectation(new FakeInvocation(this.voidNoArgs), this.demo, this.voidNoArgs, new object[0]));
+			var ex = Assert.Throws<ExpectationViolationException>(() =>
+			                                                      recorder.GetRecordedExpectation(new FakeInvocation(this.voidNoArgs), this.demo, this.voidNoArgs, new object[0]));
+			Assert.Equal("Unordered method call! The expected call is: 'Ordered: { Message: Test Message\nIDemo.VoidNoArgs(); }' but was: 'IDemo.VoidNoArgs();'", ex.Message);
 		}
 
 		[Fact]
 		public void ReplayWhenNoMethodIsExpected()
 		{
 			OrderedMethodRecorder recorder = new OrderedMethodRecorder(new ProxyMethodExpectationsDictionary());
-			Assert.Throws<ExpectationViolationException>(
-				"Unordered method call! The expected call is: 'Ordered: { No method call is expected }' but was: 'IDemo.VoidNoArgs();'",
-				() =>
-				recorder.GetRecordedExpectation(new FakeInvocation(this.voidNoArgs), this.demo, this.voidNoArgs, new object[0]));
+			var ex = Assert.Throws<ExpectationViolationException>(() =>
+			                                                      recorder.GetRecordedExpectation(new FakeInvocation(this.voidNoArgs), this.demo, this.voidNoArgs, new object[0]));
+			Assert.Equal("Unordered method call! The expected call is: 'Ordered: { No method call is expected }' but was: 'IDemo.VoidNoArgs();'", ex.Message);
 		}
 
 		[Fact]
@@ -143,10 +140,9 @@ namespace Rhino.Mocks.Tests.MethodRecorders
 		{
 			OrderedMethodRecorder recorder = new OrderedMethodRecorder(new ProxyMethodExpectationsDictionary());
 			recorder.AddRecorder(new UnorderedMethodRecorder(new ProxyMethodExpectationsDictionary()));
-			Assert.Throws<ExpectationViolationException>(
-				"IDemo.VoidNoArgs(); Expected #0, Actual #1.",
-				() =>
-				recorder.GetRecordedExpectation(new FakeInvocation(this.voidNoArgs), this.demo, this.voidNoArgs, new object[0]));
+			var ex = Assert.Throws<ExpectationViolationException>(() =>
+			                                                      recorder.GetRecordedExpectation(new FakeInvocation(this.voidNoArgs), this.demo, this.voidNoArgs, new object[0]));
+			Assert.Equal("IDemo.VoidNoArgs(); Expected #0, Actual #1.", ex.Message);
 		}
 
 		protected override IMethodRecorder CreateRecorder()

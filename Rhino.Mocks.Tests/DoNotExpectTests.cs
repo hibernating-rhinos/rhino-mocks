@@ -50,9 +50,8 @@ namespace Rhino.Mocks.Tests
         {
             DoNotExpect.Call(demo.StringArgString("Ayende"));
             mocks.ReplayAll();
-            Assert.Throws<ExpectationViolationException>(
-        		"IDemo.StringArgString(\"Ayende\"); Expected #0, Actual #1.",
-				() => demo.StringArgString("Ayende"));
+        	var ex = Assert.Throws<ExpectationViolationException>(() => this.demo.StringArgString("Ayende"));
+        	Assert.Equal("IDemo.StringArgString(\"Ayende\"); Expected #0, Actual #1.", ex.Message);
         }
 
         [Fact]
@@ -60,9 +59,8 @@ namespace Rhino.Mocks.Tests
         {
             DoNotExpect.Call(delegate { demo.VoidNoArgs(); });
             mocks.ReplayAll();
-            Assert.Throws<ExpectationViolationException>(
-        		"IDemo.VoidNoArgs(); Expected #0, Actual #1.",
-				() => demo.VoidNoArgs());
+        	var ex = Assert.Throws<ExpectationViolationException>(() => this.demo.VoidNoArgs());
+        	Assert.Equal("IDemo.VoidNoArgs(); Expected #0, Actual #1.", ex.Message);
         }
 
         [Fact]
@@ -70,9 +68,8 @@ namespace Rhino.Mocks.Tests
         {
             DoNotExpect.Call(delegate { demo.VoidStringArg("Ayende"); });
             mocks.ReplayAll();
-            Assert.Throws<ExpectationViolationException>(
-        		"IDemo.VoidStringArg(\"Ayende\"); Expected #0, Actual #1.",
-				() => demo.VoidStringArg("Ayende"));
+        	var ex = Assert.Throws<ExpectationViolationException>(() => this.demo.VoidStringArg("Ayende"));
+        	Assert.Equal("IDemo.VoidStringArg(\"Ayende\"); Expected #0, Actual #1.", ex.Message);
         }
 
         [Fact]
@@ -80,9 +77,8 @@ namespace Rhino.Mocks.Tests
         {
             DoNotExpect.Call(demo.VoidNoArgs);
             mocks.ReplayAll();
-            Assert.Throws<ExpectationViolationException>(
-        		"IDemo.VoidNoArgs(); Expected #0, Actual #1.",
-				() => demo.VoidNoArgs());
+        	var ex = Assert.Throws<ExpectationViolationException>(() => this.demo.VoidNoArgs());
+        	Assert.Equal("IDemo.VoidNoArgs(); Expected #0, Actual #1.", ex.Message);
         }
 
         [Fact]
@@ -90,9 +86,8 @@ namespace Rhino.Mocks.Tests
         {
             DoNotExpect.Call(demo.StringArgString("Ayende"));
             mocks.ReplayAll();
-            Assert.Throws<ExpectationViolationException>(
-        		"IDemo.StringArgString(\"Ayende\"); Expected #0, Actual #1.",
-				() => demo.StringArgString("Ayende"));
+        	var ex = Assert.Throws<ExpectationViolationException>(() => this.demo.StringArgString("Ayende"));
+        	Assert.Equal("IDemo.StringArgString(\"Ayende\"); Expected #0, Actual #1.", ex.Message);
         }
 
         [Fact]
@@ -101,8 +96,8 @@ namespace Rhino.Mocks.Tests
             DoNotExpect.Call(demo.StringArgString("Ayende"));
             mocks.ReplayAll();
             demo.StringArgString("Sneal");
-            Assert.Throws<ExpectationViolationException>("IDemo.StringArgString(\"Ayende\"); Expected #0, Actual #1.",
-														 () => demo.StringArgString("Ayende"));
+        	var ex = Assert.Throws<ExpectationViolationException>(() => this.demo.StringArgString("Ayende"));
+        	Assert.Equal("IDemo.StringArgString(\"Ayende\"); Expected #0, Actual #1.", ex.Message);
         }
 
         [Fact]
@@ -116,10 +111,9 @@ namespace Rhino.Mocks.Tests
         {
             DoNotExpect.Call(delegate { demo.Prop = "Ayende"; });
             mocks.ReplayAll();
-            
-        	Assert.Throws<ExpectationViolationException>(
-        		"IDemo.set_Prop(\"Ayende\"); Expected #0, Actual #1.",
-				() => demo.Prop = "Ayende");
+
+        	var ex = Assert.Throws<ExpectationViolationException>(() => this.demo.Prop = "Ayende");
+        	Assert.Equal("IDemo.set_Prop(\"Ayende\"); Expected #0, Actual #1.", ex.Message);
         }
 
         [Fact]
@@ -127,11 +121,11 @@ namespace Rhino.Mocks.Tests
         {
             DoNotExpect.Call(demo.Prop);
             mocks.ReplayAll();
-            Assert.Throws<ExpectationViolationException>("IDemo.get_Prop(); Expected #0, Actual #1.",
-        	                                             () =>
-        	                                             {
-        	                                             	string soItCompiles = demo.Prop;
-        	                                             });
+        	var ex = Assert.Throws<ExpectationViolationException>(() =>
+        	                                                      	{
+        	                                                      		string soItCompiles = this.demo.Prop;
+        	                                                      	});
+        	Assert.Equal("IDemo.get_Prop(); Expected #0, Actual #1.", ex.Message);
         }
     }
 }

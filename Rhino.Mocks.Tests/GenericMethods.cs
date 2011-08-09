@@ -62,10 +62,9 @@ namespace Rhino.Mocks.Tests
 			IFactory factory = mocks.StrictMock<IFactory>();
 			Expect.Call(factory.Create<string>()).Return("working?");
 			mocks.ReplayAll();
-			Assert.Throws<ExpectationViolationException>(
-				@"IFactory.Create<System.Int32>(); Expected #1, Actual #1.
-IFactory.Create<System.String>(); Expected #1, Actual #0.",
-				() => factory.Create<int>());
+			var ex = Assert.Throws<ExpectationViolationException>(() => factory.Create<int>());
+			Assert.Equal(@"IFactory.Create<System.Int32>(); Expected #1, Actual #1.
+IFactory.Create<System.String>(); Expected #1, Actual #0.", ex.Message);
 		}
 
 //		Won't compile anymore
@@ -85,10 +84,8 @@ IFactory.Create<System.String>(); Expected #1, Actual #0.",
 			IFactory factory = mocks.StrictMock<IFactory>();
 			Expect.Call(factory.Create<string>()).Return("working?");
 			mocks.ReplayAll();
-			Assert.Throws<ExpectationViolationException>(
-				"IFactory.Create<System.String>(); Expected #1, Actual #0.",
-				() => mocks.VerifyAll());
-
+			var ex = Assert.Throws<ExpectationViolationException>(() => mocks.VerifyAll());
+			Assert.Equal("IFactory.Create<System.String>(); Expected #1, Actual #0.", ex.Message);
 		}
 
 	}
