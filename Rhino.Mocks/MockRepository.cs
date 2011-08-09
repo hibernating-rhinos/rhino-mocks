@@ -1070,10 +1070,21 @@ namespace Rhino.Mocks
         /// <param name="type">The <see cref="Type"/> of stub.</param>
         /// <param name="argumentsForConstructor">Arguments for the <paramref name="type"/>'s constructor.</param>
         /// <returns>The stub</returns>
-        /// <seealso cref="Stub"/>
+        /// <seealso cref="Stub(Type, object[])"/>
         public static object GenerateStub(Type type, params object[] argumentsForConstructor)
         {
             return CreateMockInReplay(repo => repo.Stub(type, argumentsForConstructor));
+        }
+
+        /// <summary>Generates a stub without needing a <see cref="MockRepository"/></summary>
+        /// <param name="type">The <see cref="Type"/> of stub.</param>
+        /// <param name="argumentsForConstructor">Arguments for the <paramref name="type"/>'s constructor.</param>
+        /// <param name="extraTypes">extra interfaces</param>
+        /// <returns>The stub</returns>
+        /// <seealso cref="Stub(Type, Type[], object[])"/>
+        public static object GenerateStub(Type type, Type[] extraTypes, params object[] argumentsForConstructor)
+        {
+          return CreateMockInReplay(repo => repo.Stub(type, extraTypes, argumentsForConstructor));
         }
 
         /// <summary>Generate a mock object without needing a <see cref="MockRepository"/></summary>
@@ -1437,10 +1448,25 @@ namespace Rhino.Mocks
         /// <returns>The stub</returns>
         public object Stub(Type type, params object[] argumentsForConstructor)
         {
+            return Stub(type, new Type[0], argumentsForConstructor);
+        }
+
+        /// <summary>
+        /// Create a stub object implements multiple interfaces.
+        /// </summary>
+        /// <param name="type">The type</param>
+        /// <param name="types">The interfaces</param>
+        /// <param name="argumentsForConstructor">The arguments for constructor.</param>
+        /// <returns></returns>
+        public object Stub(Type type, Type[] types, params object[] argumentsForConstructor)
+        {
             CreateMockState createStub = mockedObject => new StubRecordMockState(mockedObject, this);
             if (ShouldUseRemotingProxy(type, argumentsForConstructor))
                 return RemotingMock(type, createStub);
-            return CreateMockObject(type, createStub, new Type[0], argumentsForConstructor);
+            
+            if(types==null) types = new Type[0];
+            
+            return CreateMockObject(type, createStub, types, argumentsForConstructor);
         }
 
         /// <summary>
