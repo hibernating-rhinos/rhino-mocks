@@ -33,8 +33,8 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Reflection;
+using System.Reflection.Emit;
 using System.Text;
-using Castle.Core.Interceptor;
 using Castle.DynamicProxy;
 using Rhino.Mocks.Exceptions;
 using Rhino.Mocks.Generated;
@@ -211,9 +211,9 @@ namespace Rhino.Mocks
         {
             proxyGenerationOptions = new ProxyGenerationOptions
             {
-                AttributesToAddToGeneratedTypes = 
+                AdditionalAttributes = 
                     {
-                        new __ProtectAttribute()
+                        CreateProtectAttributeBuilder()
                     }
             };
             recorders = new Stack();
@@ -695,6 +695,16 @@ namespace Rhino.Mocks
             return invocationProxy;
         }
 
+		private CustomAttributeBuilder CreateProtectAttributeBuilder()
+		{
+			var ctorInfo = typeof (__ProtectAttribute).GetConstructor(Type.EmptyTypes);
+			if (ctorInfo == null)
+			{
+				throw new Exception("Unable to find a parameterless constructor for __ProtectAttribute");
+			}
+			return new CustomAttributeBuilder(ctorInfo, new object[0]);
+		}
+
         private IMockState CreateRecordState(IMockedObject mockedObject)
         {
             return new RecordMockState(mockedObject, this);
@@ -794,7 +804,7 @@ namespace Rhino.Mocks
                 delegateTargetInterface,
                 types, proxyGenerationOptions, interceptor);
 
-            proxy = Delegate.CreateDelegate(type, target, delegateTargetInterface.Name+ ".Invoke");
+            proxy = Delegate.CreateDelegate(type, target, "Invoke");
             delegateProxies.Add(target, proxy);
 
             IMockState value = mockStateFactory(GetMockedObject(proxy));
