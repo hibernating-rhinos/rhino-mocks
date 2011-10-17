@@ -27,12 +27,9 @@
 #endregion
 
 
-using System;
 using System.Reflection;
-using Castle.Core.Interceptor;
-using Rhino.Mocks.Interfaces;
-using Rhino.Mocks.Utilities;
 using Castle.DynamicProxy;
+using Rhino.Mocks.Interfaces;
 
 namespace Rhino.Mocks.Impl
 {
