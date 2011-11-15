@@ -327,7 +327,8 @@ namespace Rhino.Mocks.Impl
 
 		private static string GenerateKey(MethodInfo method, object[] args)
 		{
-            var baseName = method.DeclaringType.FullName + method.Name.Substring(4); 
+            var propertyType = method.Name.StartsWith("get_") ? method.ReturnType : method.GetParameters()[args.Length - 1].ParameterType;
+            var baseName = propertyType.FullName + method.Name.Substring(4);
             if ((method.Name.StartsWith("get_") && args.Length == 0) ||
 			    (method.Name.StartsWith("set_") && args.Length == 1))
 				return baseName;

@@ -161,11 +161,24 @@ namespace Rhino.Mocks.Tests
             Assert.Equal(5, aquarium.DetermineAge(new SpecificFish()));
         }
 
+        [Fact]
+        public void StubDoesNotDistinguishInheritedPropertiesWithSameName()
+        {
+            IDog dog = MockRepository.GenerateStub<IDog>();
+            dog.Name = "Bello";
+
+            Assert.Equal("Bello", ((IAnimal)dog).Name);
+        }
 	}
 
 	public interface ICat : IAnimal
 	{
 		bool IsDeclawed { get; set; }
+	}
+
+	public interface IDog : IAnimal
+	{
+		new string Name { get; set; }
 	}
 
 	public class Feline
