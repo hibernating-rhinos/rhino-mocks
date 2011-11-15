@@ -37,10 +37,6 @@ using Rhino.Mocks.Impl.Invocation.Actions;
 using Rhino.Mocks.Impl.Invocation.Specifications;
 using Rhino.Mocks.Interfaces;
 
-namespace Rhino.Mocks.Impl.InvocationSpecifications
-{
-}
-
 namespace Rhino.Mocks.Impl
 {
     /// <summary>

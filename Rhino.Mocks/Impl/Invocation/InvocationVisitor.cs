@@ -1,5 +1,5 @@
 using Castle.DynamicProxy;
-using Rhino.Mocks.Impl.InvocationSpecifications;
+using Rhino.Mocks.Impl.Invocation.Specifications;
 using Rhino.Mocks.Interfaces;
 
 namespace Rhino.Mocks.Impl.Invocation
