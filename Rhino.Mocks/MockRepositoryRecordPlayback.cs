@@ -95,7 +95,7 @@ namespace Rhino.Mocks
     /// N.B. mockRepository.ReplayAll() and mockRepository.VerifyAll()
     ///      calls are taken care of by Record/Playback
     ///</summary>
-    public interface IModeChanger : IDisposable
+    internal interface IModeChanger : IDisposable
     {
         
     }
