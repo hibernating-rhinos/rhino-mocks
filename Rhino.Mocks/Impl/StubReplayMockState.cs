@@ -41,11 +41,18 @@ namespace Rhino.Mocks.Impl
 	internal class StubReplayMockState : ReplayMockState
 	{
 		/// <summary>
+		/// A flag indicating whether this is a partial stub (and behaves like a partial mock).
+		/// </summary>
+		private readonly bool isPartial;
+
+		/// <summary>
 		/// Initializes a new instance of the <see cref="StubReplayMockState"/> class.
 		/// </summary>
 		/// <param name="previousState">The previous state for this method</param>
-		public StubReplayMockState(RecordMockState previousState) : base(previousState)
+		/// <param name="isPartial">A flag indicating whether we should behave like a partial stub.</param>
+		public StubReplayMockState(RecordMockState previousState, bool isPartial) : base(previousState)
 		{
+			this.isPartial = isPartial;
 		}
 
 		/// <summary>
@@ -62,12 +69,16 @@ namespace Rhino.Mocks.Impl
 				RhinoMocks.Logger.LogReplayedExpectation(invocation, expectation);
 				return expectation.ReturnOrThrow(invocation, args);
 			}
-			else
+
+			if (this.isPartial && method.IsAbstract == false)
 			{
-				RhinoMocks.Logger.LogUnexpectedMethodCall(invocation, "Stub Mock: Unexpected method call ignored");
-				return ReturnValueUtil.DefaultValue(method.ReturnType, invocation);
+				RhinoMocks.Logger.LogUnexpectedMethodCall(invocation, "Partial stub: calling original method");
+				invocation.Proceed();
+				return invocation.ReturnValue;
 			}
-		
+
+			RhinoMocks.Logger.LogUnexpectedMethodCall(invocation, "Stub Mock: Unexpected method call ignored");
+			return ReturnValueUtil.DefaultValue(method.ReturnType, invocation);
 		}
 
         /// <summary>
@@ -75,7 +86,7 @@ namespace Rhino.Mocks.Impl
         /// </summary>
         public override IMockState BackToRecord()
         {
-            return new StubRecordMockState(proxy, repository);
+            return new StubRecordMockState(proxy, repository, this.isPartial);
         }
 
         public override void Verify()

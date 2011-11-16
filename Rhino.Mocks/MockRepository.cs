@@ -522,6 +522,36 @@ namespace Rhino.Mocks
             return CreateMockObject(type, CreatePartialRecordState, extraTypesWithMarker.ToArray(), argumentsForConstructor);
         }
 
+        /// <summary>Creates a stub object that defaults to calling the class methods if no expectation is set on the method.</summary>
+        /// <param name="type">Type.</param>
+        /// <param name="argumentsForConstructor">Arguments for the class' constructor.</param>
+        public object PartialStub(Type type, params object[] argumentsForConstructor)
+        {
+            return PartialMultiStub(type, new Type[0], argumentsForConstructor);
+        }
+
+        /// <summary>Creates a stub object that defaults to calling the class methods.</summary>
+        /// <param name="type">Type.</param>
+        /// <param name="extraTypes">Extra interface types to mock.</param>
+        public object PartialMultiStub(Type type, params Type[] extraTypes)
+        {
+            return PartialMultiStub(type, extraTypes, new object[0]);
+        }
+
+        /// <summary>Creates a stub object that defaults to calling the class methods.</summary>
+        /// <param name="type">Type.</param>
+        /// <param name="extraTypes">Extra interface types to mock.</param>
+        /// <param name="argumentsForConstructor">Arguments for the class' constructor.</param>
+        public object PartialMultiStub(Type type, Type[] extraTypes, params object[] argumentsForConstructor)
+        {
+            if (type.IsInterface)
+                throw new InvalidOperationException("Can't create a partial stub from an interface");
+            List<Type> extraTypesWithMarker = new List<Type>(extraTypes);
+            extraTypesWithMarker.Add(typeof(IPartialMockMarker));
+            CreateMockState createStub = mockedObject => new StubRecordMockState(mockedObject, this, true);
+            return CreateMockObject(type, createStub, extraTypesWithMarker.ToArray(), argumentsForConstructor);
+        }
+
         /// <summary>Creates a mock object using remoting proxies</summary>
         /// <param name="type">Type to mock - must be MarshalByRefObject</param>
         /// <returns>Mock object</returns>
@@ -1253,6 +1283,50 @@ namespace Rhino.Mocks
             return CreateMockInReplay(r => r.PartialMultiMock(type, extraTypes, argumentsForConstructor));
         }
 
+        ///<summary>
+        ///</summary>
+        ///<param name="argumentsForConstructor"></param>
+        ///<typeparam name="T"></typeparam>
+        ///<returns></returns>
+        public static T GeneratePartialStub<T>(params object[] argumentsForConstructor)
+        {
+            return (T)GeneratePartialStub(typeof(T), new Type[0], argumentsForConstructor);
+        }
+
+        ///<summary>
+        ///</summary>
+        ///<param name="argumentsForConstructor"></param>
+        ///<typeparam name="T"></typeparam>
+        ///<typeparam name="TMultiMockInterface1"></typeparam>
+        ///<returns></returns>
+        public static T GeneratePartialStub<T, TMultiMockInterface1>(params object[] argumentsForConstructor)
+        {
+            return (T)GeneratePartialStub(typeof(T), new Type[] { typeof(TMultiMockInterface1) }, argumentsForConstructor);
+        }
+
+        ///<summary>
+        ///</summary>
+        ///<param name="argumentsForConstructor"></param>
+        ///<typeparam name="T"></typeparam>
+        ///<typeparam name="TMultiMockInterface1"></typeparam>
+        ///<typeparam name="TMultiMockInterface2"></typeparam>
+        ///<returns></returns>
+        public static T GeneratePartialStub<T, TMultiMockInterface1, TMultiMockInterface2>(params object[] argumentsForConstructor)
+        {
+            return (T)GeneratePartialStub(typeof(T), new Type[] { typeof(TMultiMockInterface1), typeof(TMultiMockInterface2) }, argumentsForConstructor);
+        }
+
+        ///<summary>
+        ///</summary>
+        ///<param name="type"></param>
+        ///<param name="extraTypes"></param>
+        ///<param name="argumentsForConstructor"></param>
+        ///<returns></returns>
+        public static object GeneratePartialStub(Type type, Type[] extraTypes, params object[] argumentsForConstructor)
+        {
+            return CreateMockInReplay(r => r.PartialMultiStub(type, extraTypes, argumentsForConstructor));
+        }
+
         /// <summary>
         /// Generate a mock object with dynamic replay semantics and remoting without needing the mock repository
         /// </summary>
@@ -1442,6 +1516,16 @@ namespace Rhino.Mocks
             return (T)PartialMultiMock(typeof(T), extraTypes, argumentsForConstructor);
         }
 
+        /// <summary>
+        /// Create a stub object from several types with partial semantics.
+        /// </summary>
+        /// <param name="extraTypes">Extra interface types to mock.</param>
+        /// <param name="argumentsForConstructor">Arguments for the class' constructor, if mocking a concrete class</param>
+        public T PartialMultiStub<T>(Type[] extraTypes, params object[] argumentsForConstructor)
+        {
+            return (T)PartialMultiStub(typeof(T), extraTypes, argumentsForConstructor);
+        }
+
         /*
          * Method: PartialMock
          * Create a mock object with from a class that defaults to calling the class methods
@@ -1456,6 +1540,15 @@ namespace Rhino.Mocks
         public T PartialMock<T>(params object[] argumentsForConstructor) where T : class
         {
             return (T)PartialMock(typeof(T), argumentsForConstructor);
+        }
+
+        /// <summary>
+        /// Create a stub object with from a class that defaults to calling the class methods
+        /// </summary>
+        /// <param name="argumentsForConstructor">Arguments for the class' constructor, if mocking a concrete class</param>
+        public T PartialStub<T>(params object[] argumentsForConstructor) where T : class
+        {
+            return (T)PartialStub(typeof(T), argumentsForConstructor);
         }
 
         /// <summary>
@@ -1491,7 +1584,7 @@ namespace Rhino.Mocks
         /// <returns></returns>
         public object Stub(Type type, Type[] types, params object[] argumentsForConstructor)
         {
-            CreateMockState createStub = mockedObject => new StubRecordMockState(mockedObject, this);
+            CreateMockState createStub = mockedObject => new StubRecordMockState(mockedObject, this, false);
             if (ShouldUseRemotingProxy(type, argumentsForConstructor))
                 return RemotingMock(type, createStub);
             

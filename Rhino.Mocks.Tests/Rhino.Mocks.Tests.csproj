@@ -167,6 +167,8 @@
     <Compile Include="Constraints\StringConstraintsTests.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="PartialStubTestsAAA.cs" />
+    <Compile Include="PartialStubTests.cs" />
     <Compile Include="FieldsProblem\FieldProblem_Alex.cs" />
     <Compile Include="FieldsProblem\FieldProblem_Bill.cs" />
     <Compile Include="FieldsProblem\FieldProblem_JPBoodhoo.cs" />

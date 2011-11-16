@@ -41,13 +41,20 @@ namespace Rhino.Mocks.Impl
 	public class StubRecordMockState : RecordMockState
 	{
 		/// <summary>
+		/// A flag indicating whether this is a partial stub (and behaves like a partial mock).
+		/// </summary>
+		private readonly bool isPartial;
+
+		/// <summary>
 		/// Initializes a new instance of the <see cref="StubRecordMockState"/> class.
 		/// </summary>
 		/// <param name="mockedObject">The proxy that generates the method calls</param>
 		/// <param name="repository">Repository.</param>
-		public StubRecordMockState(IMockedObject mockedObject, MockRepository repository)
+		/// <param name="isPartial">A flag indicating whether we should behave like a partial stub.</param>
+		public StubRecordMockState(IMockedObject mockedObject, MockRepository repository, bool isPartial)
 			: base(mockedObject, repository)
 		{
+			this.isPartial = isPartial;
 			Type[] types = mockedObject.ImplementedTypes;
 			SetPropertyBehavior(mockedObject, types);
 		}
@@ -111,7 +118,7 @@ namespace Rhino.Mocks.Impl
 		public override IMockState Replay()
 		{
 			AssertPreviousMethodIsClose();
-			return new StubReplayMockState(this);
+			return new StubReplayMockState(this, this.isPartial);
 		}
 
         /// <summary>
