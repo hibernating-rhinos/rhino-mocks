@@ -121,6 +121,14 @@ namespace Rhino.Mocks.Tests
 			Assert.Equal("Happy", animal.GetMood());
 			mocks.VerifyAll();
 		}
+
+		[Fact]
+		public void StubReplacesVirtualMethod()
+		{
+			var stub = MockRepository.GenerateStub<AbstractClass>();
+
+			Assert.Equal(0, stub.Increment());
+		}
 	}
 
 	public interface IAnimal
