@@ -169,6 +169,15 @@ namespace Rhino.Mocks.Tests
 
             Assert.Equal("Bello", ((IAnimal)dog).Name);
         }
+
+        [Fact]
+        public void StubDoesNotDistinguishInheritedReadOnlyPropertiesWithSameName()
+        {
+          IDog dog = MockRepository.GenerateStub<IDog>();
+          dog.FullName = "Bello";
+
+          Assert.Equal("Bello", ((IAnimal)dog).FullName);
+        }
 	}
 
 	public interface ICat : IAnimal
@@ -179,6 +188,7 @@ namespace Rhino.Mocks.Tests
 	public interface IDog : IAnimal
 	{
 		new string Name { get; set; }
+		new string FullName { get; set; }
 	}
 
 	public class Feline

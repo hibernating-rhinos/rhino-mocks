@@ -150,12 +150,29 @@ namespace Rhino.Mocks.Impl
 		{
 			if (left.Equals(right))
 				return true;
-			// GetHashCode calls to RuntimeMethodHandle.StripMethodInstantiation()
-			// which is needed to fix issues with method equality from generic types.
-			if (left.GetHashCode() != right.GetHashCode())
-				return false;
-			if (left.DeclaringType != right.DeclaringType)
-				return false;
+
+			if (left.Name.StartsWith("get_"))
+			{
+				if (!left.Name.Equals(right.Name))
+				{
+					return false;
+				}
+			}
+			else
+			{
+				// GetHashCode calls to RuntimeMethodHandle.StripMethodInstantiation()
+				// which is needed to fix issues with method equality from generic types.
+				if (left.GetHashCode() != right.GetHashCode())
+				{
+					return false;
+				}
+
+				if (left.DeclaringType != right.DeclaringType)
+				{
+					return false;
+				}
+			}
+
 			ParameterInfo[] leftParams = left.GetParameters();
 			ParameterInfo[] rightParams = right.GetParameters();
 			if (leftParams.Length != rightParams.Length)
