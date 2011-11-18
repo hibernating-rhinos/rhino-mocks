@@ -96,5 +96,22 @@ namespace Rhino.Mocks.Tests
       Assert.Equal(4, withParameters.Int);
       withParameters.VerifyAllExpectations();
     }
+
+    [Fact]
+    public void CanMockWithAbstractCtorCalls()
+    {
+      var sut = MockRepository.GeneratePartialMock<AbstractMethodCall>();
+      Assert.NotNull(sut);
+    }
+  }
+
+  public abstract class AbstractMethodCall
+  {
+    public AbstractMethodCall()
+    {
+      this.MyProperty = this.MyProperty + 1;
+    }
+
+    public abstract int MyProperty { get; set; }
   }
 }

@@ -517,9 +517,8 @@ namespace Rhino.Mocks
         {
             if (type.IsInterface)
                 throw new InvalidOperationException("Can't create a partial mock from an interface");
-            List<Type> extraTypesWithMarker = new List<Type>(extraTypes);
-            extraTypesWithMarker.Add(typeof(IPartialMockMarker));
-            return CreateMockObject(type, CreatePartialRecordState, extraTypesWithMarker.ToArray(), argumentsForConstructor);
+
+            return CreateMockObject(type, CreatePartialRecordState, extraTypes, argumentsForConstructor);
         }
 
         /// <summary>Creates a stub object that defaults to calling the class methods if no expectation is set on the method.</summary>
@@ -546,10 +545,9 @@ namespace Rhino.Mocks
         {
             if (type.IsInterface)
                 throw new InvalidOperationException("Can't create a partial stub from an interface");
-            List<Type> extraTypesWithMarker = new List<Type>(extraTypes);
-            extraTypesWithMarker.Add(typeof(IPartialMockMarker));
+
             CreateMockState createStub = mockedObject => new StubRecordMockState(mockedObject, this, true);
-            return CreateMockObject(type, createStub, extraTypesWithMarker.ToArray(), argumentsForConstructor);
+            return CreateMockObject(type, createStub, extraTypes, argumentsForConstructor);
         }
 
         /// <summary>Creates a mock object using remoting proxies</summary>
@@ -700,14 +698,18 @@ namespace Rhino.Mocks
             if (proxies.ContainsKey(proxy) == false)
             {
                 //We allow calls to virtual methods from the ctor only for partial mocks.
-                if (proxy is IPartialMockMarker)
-                {
-                    invocation.Proceed();
-                    return invocation.ReturnValue;
-                }
-                return null;
+              try
+              {
+                invocation.Proceed();
+                return invocation.ReturnValue;
+              }
+              catch (NotImplementedException)
+              {
+                return Utilities.ReturnValueUtil.DefaultValue(method.ReturnType, invocation);
+              }
             }
-            IMockState state = proxies[proxy];
+
+          IMockState state = proxies[proxy];
             GetMockedObject(proxy).MethodCall(method, args);
             return state.MethodCall(invocation, method, args);
         }

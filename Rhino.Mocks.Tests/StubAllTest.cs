@@ -178,6 +178,13 @@ namespace Rhino.Mocks.Tests
 
           Assert.Equal("Bello", ((IAnimal)dog).FullName);
         }
+
+        [Fact]
+        public void CanStubWithAbstractCtorCalls()
+        {
+            var sut = MockRepository.GenerateStub<AbstractMethodCall>();
+            Assert.NotNull(sut);
+        }
 	}
 
 	public interface ICat : IAnimal

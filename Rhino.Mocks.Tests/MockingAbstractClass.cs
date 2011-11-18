@@ -88,6 +88,13 @@ namespace Rhino.Mocks.Tests
 	
 		}
 
+		[Fact]
+		public void CanMockWithAbstractCtorCalls()
+		{
+			var sut = MockRepository.GenerateMock<AbstractMethodCall>();
+			Assert.NotNull(sut);
+		}
+
 		public abstract class AbsCls
 		{
 			public abstract string AbPropGet { get; }

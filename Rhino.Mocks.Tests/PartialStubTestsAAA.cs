@@ -90,5 +90,12 @@ namespace Rhino.Mocks.Tests
             withParameters.Int = 4;
             Assert.Equal(4, withParameters.Int);
         }
+
+        [Fact]
+        public void CanStubWithAbstractCtorCalls()
+        {
+            var sut = MockRepository.GeneratePartialStub<AbstractMethodCall>();
+            Assert.NotNull(sut);
+        }
     }
 }
