@@ -167,6 +167,7 @@
     <Compile Include="Constraints\StringConstraintsTests.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="FieldsProblem\FieldProblem_Andreas2.cs" />
     <Compile Include="PartialStubTestsAAA.cs" />
     <Compile Include="PartialStubTests.cs" />
     <Compile Include="FieldsProblem\FieldProblem_Alex.cs" />
@@ -467,8 +468,6 @@
       <Link>ayende-open-source.snk</Link>
     </None>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Properties\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>

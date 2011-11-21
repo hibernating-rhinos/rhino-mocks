@@ -70,7 +70,7 @@ namespace Rhino.Mocks.Impl
 
 				SetPropertyBehavior(mockedObject, implementedType.GetInterfaces());
 
-				foreach (PropertyInfo property in implementedType.GetProperties())
+				foreach (PropertyInfo property in implementedType.GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance))
 				{
 					if (property.CanRead && CanWriteToPropertyThroughPublicSignature(property))
 					{
@@ -93,7 +93,7 @@ namespace Rhino.Mocks.Impl
 
 		private static bool CanWriteToPropertyThroughPublicSignature(PropertyInfo property)
 	    {
-            return property.CanWrite && property.GetSetMethod(false) != null;
+            return property.CanWrite && (property.GetSetMethod(false) != null || (property.GetSetMethod(true) != null && property.GetSetMethod(true).IsFamilyOrAssembly));
 	    }
 
 	    /// <summary>
