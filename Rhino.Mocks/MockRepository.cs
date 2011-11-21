@@ -517,8 +517,9 @@ namespace Rhino.Mocks
         {
             if (type.IsInterface)
                 throw new InvalidOperationException("Can't create a partial mock from an interface");
-
-            return CreateMockObject(type, CreatePartialRecordState, extraTypes, argumentsForConstructor);
+            List<Type> extraTypesWithMarker = new List<Type>(extraTypes);
+            extraTypesWithMarker.Add(typeof(IPartialMockMarker));
+            return CreateMockObject(type, CreatePartialRecordState, extraTypesWithMarker.ToArray(), argumentsForConstructor);
         }
 
         /// <summary>Creates a stub object that defaults to calling the class methods if no expectation is set on the method.</summary>
@@ -545,9 +546,10 @@ namespace Rhino.Mocks
         {
             if (type.IsInterface)
                 throw new InvalidOperationException("Can't create a partial stub from an interface");
-
+            List<Type> extraTypesWithMarker = new List<Type>(extraTypes);
+            extraTypesWithMarker.Add(typeof(IPartialMockMarker));
             CreateMockState createStub = mockedObject => new StubRecordMockState(mockedObject, this, true);
-            return CreateMockObject(type, createStub, extraTypes, argumentsForConstructor);
+            return CreateMockObject(type, createStub, extraTypesWithMarker.ToArray(), argumentsForConstructor);
         }
 
         /// <summary>Creates a mock object using remoting proxies</summary>

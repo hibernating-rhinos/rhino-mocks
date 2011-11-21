@@ -1,4 +1,4 @@
-﻿#region license
+#region license
 // Copyright (c) 2005 - 2007 Ayende Rahien (ayende@ayende.com)
 // All rights reserved.
 // 
@@ -26,85 +26,13 @@
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endregion
 
-namespace Rhino.Mocks.Tests
+namespace Rhino.Mocks.Interfaces
 {
-	using System;
-	using Rhino.Mocks.Interfaces;
-	using Xunit;
-
-	
-	public class MockingAbstractClass : IDisposable
+	/// <summary>
+	/// Marker interface used to indicate that this is a partial mock.
+	/// </summary>
+	public interface IPartialMockMarker
 	{
-		private MockRepository mocks;
-
-		public MockingAbstractClass()
-		{
-			mocks = new MockRepository();
-		}
-
-		public void Dispose()
-		{
-			mocks.VerifyAll();
-		}
-
-		[Fact]
-		public void MockAbsPropertyGetter()
-		{
-			AbsCls ac = (AbsCls)mocks.StrictMock(typeof(AbsCls));
-			Expect.Call(ac.AbPropGet).Return("n");
-			mocks.ReplayAll();
-			Assert.Equal("n", ac.AbPropGet);
-		}
-
-		[Fact]
-		public void MockAbsPropertySetter()
-		{
-			AbsCls ac = (AbsCls)mocks.StrictMock(typeof(AbsCls));
-			Expect.Call(ac.AbPropSet = "n");
-			mocks.ReplayAll();
-			ac.AbPropSet = "n";
-		}
-
-
-		[Fact]
-		public void MockAbsProp()
-		{
-			AbsCls ac = (AbsCls)mocks.StrictMock(typeof(AbsCls));
-			Expect.Call(ac.AbProp = "n");
-			Expect.Call(ac.AbProp).Return("u");
-			mocks.ReplayAll();
-			ac.AbProp = "n";
-			Assert.Equal("u", ac.AbProp);
-		}
-
-		[Fact]
-		public void MockAbstractMethod()
-		{
-			AbsCls ac = (AbsCls)mocks.StrictMock(typeof(AbsCls));
-			Expect.Call(ac.Method()).Return(45);
-			mocks.ReplayAll();
-			Assert.Equal(45, ac.Method());
-	
-		}
-
-		[Fact]
-		public void CanMockWithAbstractCtorCalls()
-		{
-			var sut = MockRepository.GenerateMock<AbstractMethodCall>();
-			Assert.NotNull(sut);
-			Assert.False(sut is IPartialMockMarker);
-		}
-
-		public abstract class AbsCls
-		{
-			public abstract string AbPropGet { get; }
-
-			public abstract string AbPropSet { set; }
-
-			public abstract string AbProp { get; set; }
-
-			public abstract int Method();
-
-		}
+		
 	}
 }

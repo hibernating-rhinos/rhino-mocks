@@ -31,6 +31,7 @@
 using System;
 using Xunit;
 using Rhino.Mocks.Exceptions;
+using Rhino.Mocks.Interfaces;
 
 namespace Rhino.Mocks.Tests
 {
@@ -102,6 +103,7 @@ namespace Rhino.Mocks.Tests
     {
       var sut = MockRepository.GeneratePartialMock<AbstractMethodCall>();
       Assert.NotNull(sut);
+      Assert.True(sut is IPartialMockMarker);
     }
   }
 

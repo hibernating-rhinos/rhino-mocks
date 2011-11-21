@@ -184,6 +184,7 @@ namespace Rhino.Mocks.Tests
         {
             var sut = MockRepository.GenerateStub<AbstractMethodCall>();
             Assert.NotNull(sut);
+            Assert.False(sut is IPartialMockMarker);
         }
 	}
 
