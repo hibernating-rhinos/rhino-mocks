@@ -105,9 +105,11 @@ task Merge {
 }
 
 task Release -depends Test, Merge {
+	$commit = Get-Git-Commit
 	& $tools_dir\zip.exe -9 -A -j `
-		$release_dir\Rhino.Mocks-$humanReadableversion-Build-$env:ccnetnumericlabel.zip `
+		$release_dir\Rhino.Mocks-$humanReadableversion-Build-$commit.zip `
 		$build_dir\Rhino.Mocks.dll `
+		$build_dir\Rhino.Mocks.pdb `
 		$build_dir\Rhino.Mocks.xml `
 		license.txt `
 		acknowledgements.txt
