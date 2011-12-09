@@ -96,6 +96,7 @@ task Merge {
 		Castle.Core.dll `
 		/out:Rhino.Mocks.dll `
 		/t:library `
+		/targetplatform:v4 `
 		"/keyfile:$base_dir\ayende-open-source.snk" `
 		"/internalize:$base_dir\ilmerge.exclude"
 	if ($lastExitCode -ne 0) {

@@ -18,7 +18,7 @@
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>..\ayende-open-source.snk</AssemblyOriginatorKeyFile>
     <IsWebBootstrapper>false</IsWebBootstrapper>
-    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileUpgradeFlags>
     </FileUpgradeFlags>
     <OldToolsVersion>3.5</OldToolsVersion>
@@ -125,6 +125,7 @@
     <Reference Include="System.Web">
       <Name>System.Web</Name>
     </Reference>
+    <Reference Include="System.Web.ApplicationServices" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml">
       <Name>System.XML</Name>
@@ -427,10 +428,9 @@
       <Project>{3078B943-10A5-41FA-A68A-7C4FC98506A0}</Project>
       <Name>Rhino.Mocks.Tests.Model</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Rhino.Mocks\Rhino.Mocks 2.0.csproj">
-      <Name>Rhino.Mocks</Name>
+    <ProjectReference Include="..\Rhino.Mocks\Rhino.Mocks.csproj">
       <Project>{1E8FECC7-9E9B-4275-A938-D956F5E5D4F8}</Project>
-      <Package>{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</Package>
+      <Name>Rhino.Mocks</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

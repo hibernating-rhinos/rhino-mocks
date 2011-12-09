@@ -64,25 +64,9 @@ namespace Rhino.Mocks.Tests.FieldsProblem
 		[Fact]
 		public void DoubleGeneric()
 		{
-			string clrInstallationDir = Path.GetDirectoryName(typeof(object).Assembly.Location);
-			string mscorwksFilename = Path.Combine(clrInstallationDir, "mscorwks.dll");
-			FileVersionInfo clrVersion = FileVersionInfo.GetVersionInfo(mscorwksFilename);
-			if(clrVersion.ProductMajorPart == 2 && 
-				clrVersion.ProductMinorPart == 0 &&
-				clrVersion.ProductBuildPart == 50727)
-			{
-				// CLR 2.0, now need to check if we have the .NET 3.5 with SP1 installed,
-				// without the hotfix
-				if (clrVersion.ProductPrivatePart >= 3053 &&
-					clrVersion.ProductPrivatePart < 3068)
-				{
-					//"You are running on .NET 3.5 SP1, without the KB 957542 hotfix. This version of the CLR has a bug that cause this test to fail");
-					return;
-				}
-			}
 			MockRepository mocks = new MockRepository();
 			IDoubleGeneric<int> mock = mocks.StrictMock<IDoubleGeneric<int>>();
-			Expect.Call(mock.Method<string>(1, ""));
+			Expect.Call(mock.Method(1, ""));
 		}
 	}
 

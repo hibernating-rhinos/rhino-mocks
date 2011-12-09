@@ -34,8 +34,10 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Reflection;
 using System.Reflection.Emit;
+using System.Security.Permissions;
 using System.Text;
 using Castle.DynamicProxy;
+using Castle.DynamicProxy.Generators;
 using Rhino.Mocks.Exceptions;
 using Rhino.Mocks.Generated;
 using Rhino.Mocks.Impl;
@@ -203,6 +205,14 @@ namespace Rhino.Mocks
         /* function: MockRepository
          * Create a new instance of MockRepository
          */
+
+        /// <summary>
+        /// Initializes the <see cref="MockRepository"/> class.
+        /// </summary>
+        static MockRepository()
+        {
+          AttributesToAvoidReplicating.Add<UIPermissionAttribute>();
+        }
 
         /// <summary>
         /// Creates a new <see cref="MockRepository"/> instance.
