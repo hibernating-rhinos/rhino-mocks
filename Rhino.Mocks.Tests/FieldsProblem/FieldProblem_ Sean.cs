@@ -6,7 +6,7 @@ namespace Rhino.Mocks.Tests.FieldsProblem
 	
 	public class FieldProblem__Sean
 	{
-		[Fact(Skip = "Not sure what the problem is, and don't know enough about CAS to try to figure it out")]
+		[Fact]
 		public void CanMockMethodWithEnvironmentPermissions()
 		{
 			MockRepository mocks = new MockRepository();

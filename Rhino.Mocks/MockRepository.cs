@@ -212,6 +212,7 @@ namespace Rhino.Mocks
         static MockRepository()
         {
           AttributesToAvoidReplicating.Add<UIPermissionAttribute>();
+          AttributesToAvoidReplicating.Add<EnvironmentPermissionAttribute>();
         }
 
         /// <summary>
