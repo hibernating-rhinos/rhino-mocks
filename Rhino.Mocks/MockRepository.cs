@@ -127,7 +127,8 @@ namespace Rhino.Mocks
         /// <summary>
         /// This is a map of types to ProxyGenerators.
         /// </summary>
-        private static readonly IDictionary<Type, ProxyGenerator> generatorMap = new Dictionary<Type, ProxyGenerator>();
+	[ThreadStatic]
+        private static IDictionary<Type, ProxyGenerator> generatorMap;
 
         /*
          * Variable: lastRepository
@@ -139,6 +140,7 @@ namespace Rhino.Mocks
         /// <summary>
         /// This is used to record the last repository that has a method called on it.
         /// </summary>
+	[ThreadStatic]
         internal static MockRepository lastRepository;
 
         /*
@@ -200,6 +202,13 @@ namespace Rhino.Mocks
 
         #region c'tors
 
+	static MockRepository()
+	{
+		if (generatorMap == null)
+		generatorMap = new Dictionary<Type, ProxyGenerator>();
+		if (lastRepository == null)
+		lastRepository = new MockRepository();
+	}
         /* function: MockRepository
          * Create a new instance of MockRepository
          */
@@ -209,6 +218,7 @@ namespace Rhino.Mocks
         /// </summary>
         public MockRepository()
         {
+		
             proxyGenerationOptions = new ProxyGenerationOptions
             {
                 AttributesToAddToGeneratedTypes = 
@@ -1051,6 +1061,8 @@ namespace Rhino.Mocks
         /// </summary>
         protected virtual ProxyGenerator GetProxyGenerator(Type type)
         {
+		if (generatorMap == null)
+			generatorMap = new Dictionary<Type, ProxyGenerator>(); 
             if (!generatorMap.ContainsKey(type))
             {
                 generatorMap[type] = new ProxyGenerator();
