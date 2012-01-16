@@ -169,6 +169,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="FieldsProblem\FieldProblem_Andreas2.cs" />
+    <Compile Include="FieldsProblem\FieldProblem_Norbi.cs" />
     <Compile Include="PartialStubTestsAAA.cs" />
     <Compile Include="PartialStubTests.cs" />
     <Compile Include="FieldsProblem\FieldProblem_Alex.cs" />
