@@ -78,7 +78,7 @@ task Compile -depends Init {
 task Test -depends Compile {
   $old = pwd
   cd $build_dir
-  &.\Xunit.console.exe "$build_dir\Rhino.Mocks.Tests.dll"
+  &.\Xunit.console.clr4.exe "$build_dir\Rhino.Mocks.Tests.dll"
   if ($lastExitCode -ne 0) {
         throw "Error: Failed to execute tests"
   }
