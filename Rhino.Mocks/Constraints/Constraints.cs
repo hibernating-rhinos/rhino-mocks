@@ -29,9 +29,7 @@
 
 using System;
 using System.Collections;
-#if DOTNET35
 using System.Linq.Expressions;
-#endif
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -372,8 +370,6 @@ namespace Rhino.Mocks.Constraints
 		}
     }
 
-#if DOTNET35
-
     /// <summary>
 	/// A constraint based on lambda expression, we are using Expression{T} 
 	/// because we want to be able to get good error reporting on that.
@@ -425,8 +421,6 @@ namespace Rhino.Mocks.Constraints
             get { return expr.ToString(); }
         }
     }
-
-    #endif
 
     #endregion
 

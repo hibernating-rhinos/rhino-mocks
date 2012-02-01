@@ -26,7 +26,6 @@
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endregion
 
-#if DOTNET35
 using System;
 using System.Collections.Generic;
 using Xunit;
@@ -540,7 +539,6 @@ namespace Rhino.Mocks.Tests
             demo.AssertWasNotCalled(x => x.FooBar);
         }
 
-#if !FOR_NET_2_0 // we can't get the structure from a delegate, as happens on 2.0, so ignore this
 		[Fact]
 		public void CanAssertOnMethodCallUsingConstraints_WhenMethodNotFound()
 		{
@@ -552,9 +550,8 @@ namespace Rhino.Mocks.Tests
 			demo.Bar("yoho");
 
 			var ex = Assert.Throws<ExpectationViolationException>(() => demo.AssertWasCalled(x => x.Bar(Arg<string>.Matches((string a) => a.StartsWith("b") && a.Contains("ba")))));
-			Assert.Equal("IFoo54.Bar(a => (a.StartsWith(\"b\") && a.Contains(\"ba\"))); Expected #1, Actual #0.", ex.Message);
+			Assert.Equal("IFoo54.Bar(a => (a.StartsWith(\"b\") AndAlso a.Contains(\"ba\"))); Expected #1, Actual #0.", ex.Message);
 		}
-#endif
 
 		[Fact]
 		public void CannotUseRepeatAny()
@@ -683,4 +680,3 @@ namespace Rhino.Mocks.Tests
 		#endregion
 	}
 }
-#endif

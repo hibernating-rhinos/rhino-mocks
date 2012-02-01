@@ -1,12 +1,9 @@
-#if DOTNET35
 using Xunit;
 
 namespace Rhino.Mocks.Tests
 {
-	using System;
 	using Exceptions;
 
-	
 	public class DotNet35Tests
 	{
 		[Fact]
@@ -92,4 +89,3 @@ IDemo.VoidStringArg(""blah""); Expected #1, Actual #0.",delegate
 		}
 	}
 }
-#endif

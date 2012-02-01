@@ -3,10 +3,8 @@ namespace Rhino.Mocks.Tests.FieldsProblem
 	using System;
 	using Xunit;
 
-	
 	public class FieldProblem_Libardo
 	{
-#if DOTNET35
 		[Fact]
 		public void Can_mix_assert_was_call_with_verify_all()
 		{
@@ -22,7 +20,6 @@ namespace Rhino.Mocks.Tests.FieldsProblem
 			mocks.ReplayAll();
 			mocks.VerifyAll(); // Can I still keep this somehow?
 		}
-#endif
 	}
 
 	public interface IErrorHandler

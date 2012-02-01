@@ -26,15 +26,12 @@
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endregion
 
-#if DOTNET35
-
 using Xunit;
 using Rhino.Mocks.Exceptions;
 using Xunit.Extensions;
 
 namespace Rhino.Mocks.Tests.FieldsProblem
 {
-	
 	public class FieldProblem_Jodran
 	{
 		[Theory]
@@ -151,4 +148,3 @@ namespace Rhino.Mocks.Tests.FieldsProblem
         }
 	}
 }
-#endif

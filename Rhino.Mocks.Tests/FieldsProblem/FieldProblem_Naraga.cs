@@ -1,11 +1,8 @@
-#if DOTNET35
 namespace Rhino.Mocks.Tests.FieldsProblem
 {
-	using System;
 	using System.Threading;
 	using Xunit;
 
-	
 	public class FieldProblem_Naraga
 	{
 		public interface IService
@@ -45,4 +42,3 @@ namespace Rhino.Mocks.Tests.FieldsProblem
 		}
 	}
 }
-#endif
