@@ -356,7 +356,7 @@ namespace Rhino.Mocks.Impl
 				len--;
 			for (int i = 0; i < len; i++)
 			{
-				sb.Append(args[i].GetHashCode());
+				sb.Append(args[i] == null ? 0 : args[i].GetHashCode());
 			}
 			return sb.ToString();
 		}
