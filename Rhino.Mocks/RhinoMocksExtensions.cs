@@ -453,7 +453,7 @@ namespace Rhino.Mocks
 
         /// <summary>
         /// Assert that all calls specified by <paramref name="beforeCalls"/> 
-        /// happened before all calls specified by <paramref name="afterCalls"/>
+        /// occurred before all calls specified by <paramref name="afterCalls"/>
         /// </summary>
         /// <param name="beforeCalls">
         /// Calls that happens before <paramref name="afterCalls"/>
@@ -461,39 +461,93 @@ namespace Rhino.Mocks
         /// <param name="afterCalls">
         /// Calls that happens after <paramref name="beforeCalls"/>
         /// </param>
-        public static void Before(this IList<CallRecord> beforeCalls, IList<CallRecord> afterCalls)
+        public static IList<CallRecord> Before(this IList<CallRecord> beforeCalls, IList<CallRecord> afterCalls)
         {
-            long maxBefore = long.MinValue;
-            CallRecord latestBeforeCall = null;
-            foreach (var call in beforeCalls)
-            {
-                var sequence = call.Sequence;
-                if (sequence > maxBefore)
-                {
-                    maxBefore = sequence;
-                    latestBeforeCall = call;
-                }
-            }
-
-            long minAfter = long.MaxValue;
-            CallRecord earliestAfterCall = null;
-            foreach (var call in afterCalls)
-            {
-                var sequence = call.Sequence;
-                if (sequence < minAfter)
-                {
-                    minAfter = sequence;
-                    earliestAfterCall = call;
-                }
-            }
-            if (maxBefore>minAfter)
-            {
-                throw new ExpectationViolationException(
-                    "Expected that calls to " + latestBeforeCall.Method + 
-                    " occurs before " + earliestAfterCall.Method + 
-                    ", but the expectation is not satisfied.");
-            }
+            Ordered(Last(beforeCalls), First(afterCalls));
+            return afterCalls;
         }
+
+        /// <summary>
+        /// Assert that all calls specified by <paramref name="afterCalls"/> 
+        /// occurred after all calls specified by <paramref name="beforeCalls"/>
+        /// </summary>
+        /// <param name="afterCalls">
+        /// Calls that happens after <paramref name="beforeCalls"/>
+        /// </param>
+        /// <param name="beforeCalls">
+        /// Calls that happens before <paramref name="afterCalls"/>
+        /// </param>
+        public static IList<CallRecord> After(this IList<CallRecord> afterCalls, IList<CallRecord> beforeCalls)
+        {
+            Ordered(Last(beforeCalls), First(afterCalls));
+            return beforeCalls;
+        }
+
+        /// <summary>
+        /// Assert that the call specified by <paramref name="before"/> 
+        /// occurred before the call specified by <paramref name="after"/>
+        /// </summary>
+        /// <param name="before">
+        /// Call that occurred before <paramref name="after"/>
+        /// </param>
+        /// <param name="after">
+        /// Call that occurred after <paramref name="before"/>
+        /// </param>
+        public static CallRecord Before(this CallRecord before, CallRecord after)
+        {
+            Ordered(before, after);
+            return after;
+        }
+
+        /// <summary>
+        /// Assert that the call specified by <paramref name="after"/> 
+        /// occurred after the call specified by <paramref name="before"/>
+        /// </summary>
+        /// <param name="after">
+        /// Call that occurred after <paramref name="before"/>
+        /// </param>
+        /// <param name="before">
+        /// Call that occurred before <paramref name="after"/>
+        /// </param>
+        public static CallRecord After(this CallRecord after, CallRecord before)
+        {
+            Ordered(before, after);
+            return before;
+        }
+
+        /// <summary>
+        /// Returns the last executed call in the <paramref name="callRecords"/>.
+        /// </summary>
+        /// <param name="callRecords">
+        /// A list of call records ordered by the time they were executed.
+        /// </param>
+        /// <returns>The last call executed in <paramref name="callRecords"/></returns>
+        public static CallRecord Last(this IList<CallRecord> callRecords)
+        {
+            return callRecords[callRecords.Count - 1];
+        }
+
+        /// <summary>
+        /// Returns the first executed call in the <paramref name="callRecords"/>.
+        /// </summary>
+        /// <param name="callRecords">
+        /// A list of call records ordered by the time they were executed.
+        /// </param>
+        /// <returns>The first call executed in <paramref name="callRecords"/></returns>
+        public static CallRecord First(this IList<CallRecord> callRecords)
+        {
+            return callRecords[0];
+        }
+	    private static void Ordered(CallRecord before, CallRecord after)
+	    {
+	        if (before.Sequence > after.Sequence)
+	        {
+	            throw new ExpectationViolationException(
+	                "Expected that call " + before.Method +
+	                " occurs before call " + after.Method +
+	                ", but the expectation is not satisfied.");
+	        }
+	    }
 
     /// <summary>TODO: Make this better!  It currently breaks down when mocking classes or
     /// ABC's that call other virtual methods which are getting intercepted too.  I wish
