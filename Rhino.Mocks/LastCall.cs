@@ -305,16 +305,6 @@ namespace Rhino.Mocks
 		}
 
 		/// <summary>
-		/// Call the original method on the class, bypassing the mocking layers, for the last call.
-		/// </summary>
-		[Obsolete("Use CallOriginalMethod(OriginalCallOptions options) overload to explicitly specify the call options")]
-		public static void CallOriginalMethod()
-		{
-			GetOptions<object>().CallOriginalMethod();
-		}
-
-
-		/// <summary>
 		/// Call the original method on the class, optionally bypassing the mocking layers, for the last call.
 		/// </summary>
 		public static IMethodOptions<object> CallOriginalMethod(OriginalCallOptions options)

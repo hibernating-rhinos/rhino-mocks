@@ -277,17 +277,6 @@ namespace Rhino.Mocks.Impl
 		}
 
 		/// <summary>
-		/// Call the original method on the class, bypassing the mocking layers.
-		/// </summary>
-		/// <returns></returns>
-		[Obsolete("Use CallOriginalMethod(OriginalCallOptions options) overload to explicitly specify the call options")]
-		public void CallOriginalMethod()
-		{
-			CallOriginalMethod(OriginalCallOptions.NoExpectation);
-		}
-
-
-		/// <summary>
 		/// Call the original method on the class, optionally bypassing the mocking layers
 		/// </summary>
 		/// <returns></returns>

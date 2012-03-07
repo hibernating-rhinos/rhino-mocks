@@ -340,24 +340,6 @@ namespace Rhino.Mocks
             return new RecorderChanger(this, Recorder, new UnorderedMethodRecorder(Recorder, repeatableMethods));
         }
 
-        /*
-         * Method: CreateMock
-         * Create a mock object with strict semantics.
-         * Strict semantics means that any call that wasn't explicitly recorded is considered an
-         * error and would cause an exception to be thrown. 
-         */
-
-        /// <summary>
-        /// Creates a mock for the specified type.
-        /// </summary>
-        /// <param name="type">Type.</param>
-        /// <param name="argumentsForConstructor">Arguments for the class' constructor, if mocking a concrete class</param>
-        [Obsolete("Use StrictMock instead")]
-        public object CreateMock(Type type, params object[] argumentsForConstructor)
-        {
-            return StrictMock(type, argumentsForConstructor);
-        }
-
         /// <summary>
         /// Creates a strict mock for the specified type.
         /// </summary>
@@ -371,17 +353,6 @@ namespace Rhino.Mocks
         }
 
         /// <summary>
-        /// Creates a remoting mock for the specified type.
-        /// </summary>
-        /// <param name="type">Type.</param>
-        /// <param name="argumentsForConstructor">Arguments for the class' constructor, if mocking a concrete class</param>
-        [Obsolete("Use StrictMockWithRemoting instead")]
-        public object CreateMockWithRemoting(Type type, params object[] argumentsForConstructor)
-        {
-            return StrictMockWithRemoting(type, argumentsForConstructor);
-        }
-
-        /// <summary>
         /// Creates a strict remoting mock for the specified type.
         /// </summary>
         /// <param name="type">Type.</param>
@@ -389,18 +360,6 @@ namespace Rhino.Mocks
         public object StrictMockWithRemoting(Type type, params object[] argumentsForConstructor)
         {
             return RemotingMock(type, CreateRecordState);
-        }
-
-        /// <summary>
-        /// Creates a remoting mock for the specified type.
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="argumentsForConstructor">Arguments for the class' constructor, if mocking a concrete class</param>
-        /// <returns></returns>
-        [Obsolete("Use StrictMockWithRemoting instead")]
-        public T CreateMockWithRemoting<T>(params object[] argumentsForConstructor)
-        {
-            return StrictMockWithRemoting<T>(argumentsForConstructor);
         }
 
         /// <summary>
@@ -415,35 +374,12 @@ namespace Rhino.Mocks
         }
 
         /// <summary>
-        /// Creates a mock from several types, with strict semantics.
-        /// Only <paramref name="mainType"/> may be a class.
-        /// </summary>
-        [Obsolete("Use StrictMultiMock instead")]
-        public object CreateMultiMock(Type mainType, params Type[] extraTypes)
-        {
-            return StrictMultiMock(mainType, extraTypes);
-        }
-
-        /// <summary>
         /// Creates a strict mock from several types, with strict semantics.
         /// Only <paramref name="mainType"/> may be a class.
         /// </summary>
         public object StrictMultiMock(Type mainType, params Type[] extraTypes)
         {
             return StrictMultiMock(mainType, extraTypes, new object[0]);
-        }
-
-        /// <summary>
-        /// Creates a mock from several types, with strict semantics.
-        /// Only <paramref name="mainType"/> may be a class.
-        /// </summary>
-        /// <param name="mainType">The main type to mock.</param>
-        /// <param name="extraTypes">Extra interface types to mock.</param>
-        /// <param name="argumentsForConstructor">Arguments for the class' constructor, if mocking a concrete class.</param>
-        [Obsolete("Use StrictMultiMock instead")]
-        public object CreateMultiMock(Type mainType, Type[] extraTypes, params object[] argumentsForConstructor)
-        {
-            return StrictMultiMock(mainType, extraTypes, argumentsForConstructor);
         }
 
         /// <summary>
@@ -1430,17 +1366,6 @@ namespace Rhino.Mocks
         /// <para>Strict semantics means that any call that wasn't explicitly recorded is considered an error and would cause an exception to be thrown.</para>
         /// </summary>
         /// <param name="argumentsForConstructor">Arguments for the class' constructor, if mocking a concrete class</param>
-        [Obsolete("Use StrictMock instead")]
-        public T CreateMock<T>(params object[] argumentsForConstructor)
-        {
-            return StrictMock<T>(argumentsForConstructor);
-        }
-
-        /// <summary>
-        /// Creates a mock for the spesified type with strict mocking semantics.
-        /// <para>Strict semantics means that any call that wasn't explicitly recorded is considered an error and would cause an exception to be thrown.</para>
-        /// </summary>
-        /// <param name="argumentsForConstructor">Arguments for the class' constructor, if mocking a concrete class</param>
         public T StrictMock<T>(params object[] argumentsForConstructor)
         {
             if (ShouldUseRemotingProxy(typeof(T), argumentsForConstructor))
@@ -1474,15 +1399,6 @@ namespace Rhino.Mocks
         }
 
         /// <summary>
-        /// Creates a mock object from several types.
-        /// </summary>
-        [Obsolete("Use StrictMultiMock instead")]
-        public T CreateMultiMock<T>(params Type[] extraTypes)
-        {
-            return StrictMultiMock<T>(extraTypes);
-        }
-
-        /// <summary>
         /// Creates a strict mock object from several types.
         /// </summary>
         public T StrictMultiMock<T>(params Type[] extraTypes)
@@ -1505,18 +1421,6 @@ namespace Rhino.Mocks
         {
             return (T)PartialMultiMock(typeof(T), extraTypes);
         }
-
-        /// <summary>
-        /// Create a mock object from several types with strict semantics.
-        /// </summary>
-        /// <param name="extraTypes">Extra interface types to mock.</param>
-        /// <param name="argumentsForConstructor">Arguments for the class' constructor, if mocking a concrete class</param>
-        [Obsolete("Use StrictMultiMock instead")]
-        public T CreateMultiMock<T>(Type[] extraTypes, params object[] argumentsForConstructor)
-        {
-            return StrictMultiMock<T>(extraTypes, argumentsForConstructor);
-        }
-
 
         /// <summary>
         /// Create a strict mock object from several types with strict semantics.
