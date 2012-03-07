@@ -213,9 +213,9 @@ namespace Rhino.Mocks
 		/// <typeparam name="T"></typeparam>
 		/// <param name="mock">The mock.</param>
 		/// <param name="action">The action.</param>
-    public static void AssertWasCalled<T>(this T mock, Action<T> action)
+    public static IList<CallRecord> AssertWasCalled<T>(this T mock, Action<T> action)
 		{
-			AssertWasCalled(mock, action, DefaultConstraintSetup);
+			return AssertWasCalled(mock, action, DefaultConstraintSetup);
 		}
 
 		private static void DefaultConstraintSetup(IMethodOptions<object> options)
@@ -230,19 +230,21 @@ namespace Rhino.Mocks
 		/// <param name="mock">The mock.</param>
 		/// <param name="action">The action.</param>
 		/// <param name="setupConstraints">The setup constraints.</param>
-    public static void AssertWasCalled<T>(this T mock, Action<T> action, Action<IMethodOptions<object>> setupConstraints)
+    public static IList<CallRecord> AssertWasCalled<T>(this T mock, Action<T> action, Action<IMethodOptions<object>> setupConstraints)
 		{
 			ExpectationVerificationInformation verificationInformation = GetExpectationsToVerify(mock, action, setupConstraints);
 
-			foreach (var args in verificationInformation.ArgumentsForAllCalls)
+			List<CallRecord> records = new List<CallRecord>();
+			foreach (var record in verificationInformation.AllCallRecords)
 			{
-				if (verificationInformation.Expected.IsExpected(args))
+				if (verificationInformation.Expected.IsExpected(record.Arguments))
 				{
 					verificationInformation.Expected.AddActualCall();
+					records.Add(record);
 				}
 			}
 			if (verificationInformation.Expected.ExpectationSatisfied)
-				return;
+				return records;
 			throw new ExpectationViolationException(verificationInformation.Expected.BuildVerificationFailureMessage());
         }
 
@@ -253,10 +255,10 @@ namespace Rhino.Mocks
         /// <typeparam name="T"></typeparam>
         /// <param name="mock">The mock.</param>
         /// <param name="action">The action.</param>
-        public static void AssertWasCalled<T>(this T mock, Func<T, object> action)
+        public static IList<CallRecord> AssertWasCalled<T>(this T mock, Func<T, object> action)
         {
             var newAction = new Action<T>(t => action(t));
-            AssertWasCalled(mock, newAction, DefaultConstraintSetup);
+            return AssertWasCalled(mock, newAction, DefaultConstraintSetup);
         }
 
         /// <summary>
@@ -267,10 +269,10 @@ namespace Rhino.Mocks
         /// <param name="mock">The mock.</param>
         /// <param name="action">The action.</param>
         /// <param name="setupConstraints">The setup constraints.</param>
-        public static void AssertWasCalled<T>(this T mock, Func<T, object> action, Action<IMethodOptions<object>> setupConstraints)
+        public static IList<CallRecord> AssertWasCalled<T>(this T mock, Func<T, object> action, Action<IMethodOptions<object>> setupConstraints)
         {
             var newAction = new Action<T>(t => action(t));
-            AssertWasCalled(mock, newAction, setupConstraints);
+            return AssertWasCalled(mock, newAction, setupConstraints);
         }
 
 
@@ -361,10 +363,10 @@ namespace Rhino.Mocks
 				throw new InvalidOperationException(
 					"The expectation was removed from the waiting expectations list, did you call Repeat.Any() ? This is not supported in AssertWasCalled()");
 			IExpectation expected = expectationsToVerify[0];
-			ICollection<object[]> argumentsForAllCalls = mockedObject.GetCallArgumentsFor(expected.Method);
+			ICollection<CallRecord> argumentsForAllCalls = mockedObject.GetCallArgumentsFor(expected.Method);
 			return new ExpectationVerificationInformation
 					{
-						ArgumentsForAllCalls = new List<object[]>(argumentsForAllCalls),
+						AllCallRecords = new List<CallRecord>(argumentsForAllCalls),
 						Expected = expected
 					};
         }
@@ -448,6 +450,50 @@ namespace Rhino.Mocks
 			var eventRaiser = GetEventRaiser(mockObject, eventSubscription);
 			eventRaiser.Raise(args);
 		}
+
+        /// <summary>
+        /// Assert that all calls specified by <paramref name="beforeCalls"/> 
+        /// happened before all calls specified by <paramref name="afterCalls"/>
+        /// </summary>
+        /// <param name="beforeCalls">
+        /// Calls that happens before <paramref name="afterCalls"/>
+        /// </param>
+        /// <param name="afterCalls">
+        /// Calls that happens after <paramref name="beforeCalls"/>
+        /// </param>
+        public static void Before(this IList<CallRecord> beforeCalls, IList<CallRecord> afterCalls)
+        {
+            long maxBefore = long.MinValue;
+            CallRecord latestBeforeCall = null;
+            foreach (var call in beforeCalls)
+            {
+                var sequence = call.Sequence;
+                if (sequence > maxBefore)
+                {
+                    maxBefore = sequence;
+                    latestBeforeCall = call;
+                }
+            }
+
+            long minAfter = long.MaxValue;
+            CallRecord earliestAfterCall = null;
+            foreach (var call in afterCalls)
+            {
+                var sequence = call.Sequence;
+                if (sequence < minAfter)
+                {
+                    minAfter = sequence;
+                    earliestAfterCall = call;
+                }
+            }
+            if (maxBefore>minAfter)
+            {
+                throw new ExpectationViolationException(
+                    "Expected that calls to " + latestBeforeCall.Method + 
+                    " occurs before " + earliestAfterCall.Method + 
+                    ", but the expectation is not satisfied.");
+            }
+        }
 
     /// <summary>TODO: Make this better!  It currently breaks down when mocking classes or
     /// ABC's that call other virtual methods which are getting intercepted too.  I wish

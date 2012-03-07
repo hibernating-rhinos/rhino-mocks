@@ -51,7 +51,7 @@ namespace Rhino.Mocks.Impl
 		private IDictionary eventsSubscribers;
 		private readonly Type[] implemented;
 
-	    private readonly IDictionary<MethodInfo, ICollection<object[]>> methodToActualCalls = new Dictionary<MethodInfo, ICollection<object[]>>();
+	    private readonly IDictionary<MethodInfo, ICollection<CallRecord>> methodToActualCalls = new Dictionary<MethodInfo, ICollection<CallRecord>>();
 	    private object[] constructorArguments = new object[0];
 	    private IList<IMockedObject> dependentMocks = new List<IMockedObject>();
 
@@ -301,10 +301,10 @@ namespace Rhino.Mocks.Impl
 		/// <remarks>
 		/// Only method calls in replay mode are counted
 		/// </remarks>
-	    public ICollection<object[]> GetCallArgumentsFor(MethodInfo method)
+	    public ICollection<CallRecord> GetCallArgumentsFor(MethodInfo method)
 	    {
             if (methodToActualCalls.ContainsKey(method) == false)
-                return new List<object[]>();
+                return new List<CallRecord>();
 	        return methodToActualCalls[method];
 	    }
 
@@ -319,8 +319,11 @@ namespace Rhino.Mocks.Impl
 	        if(repository.IsInReplayMode(this)==false)
 	            return;
             if (methodToActualCalls.ContainsKey(method) == false)
-                methodToActualCalls[method] = new List<object[]>();
-	        methodToActualCalls[method].Add(args);
+                methodToActualCalls[method] = new List<CallRecord>();
+	        methodToActualCalls[method].Add(new CallRecord{
+                Arguments = args,
+                Method = method
+            });
         }
 
 	    /// <summary>

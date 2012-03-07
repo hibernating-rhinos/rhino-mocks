@@ -139,6 +139,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BackToRecord.cs" />
+    <Compile Include="BeforeExtensionMethodTest.cs" />
     <Compile Include="Callbacks\CallbackTests.cs">
       <SubType>Code</SubType>
     </Compile>

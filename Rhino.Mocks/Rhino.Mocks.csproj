@@ -91,6 +91,7 @@
     <Compile Include="Arg.cs" />
     <Compile Include="ArgManager.cs" />
     <Compile Include="BackToRecordOptions.cs" />
+    <Compile Include="CallRecord.cs" />
     <Compile Include="Constraints\AbstractConstraint.cs">
       <SubType>Code</SubType>
     </Compile>

@@ -10,6 +10,23 @@ namespace Rhino.Mocks
 		private IList<object[]> argumentsForAllCalls;
 		
 		public IExpectation Expected { get { return expected; } set { expected = value; } }
-		public IList<object[]> ArgumentsForAllCalls { get { return argumentsForAllCalls; } set { argumentsForAllCalls = value; }  }
+        public ICollection<CallRecord> AllCallRecords { get; set; }
+        public IList<object[]> ArgumentsForAllCalls
+	    {
+	        get
+	        {
+                if (argumentsForAllCalls==null)
+                {
+                    var allCalls = AllCallRecords;
+                    var a = new List<object[]>(allCalls.Count);
+                    foreach (var call in allCalls)
+                    {
+                        a.Add(call.Arguments);
+                    }
+                    argumentsForAllCalls = a;
+                }
+	            return argumentsForAllCalls;
+	        }
+	    }
 	}
 }
