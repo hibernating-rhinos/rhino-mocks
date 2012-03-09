@@ -128,7 +128,7 @@ namespace Rhino.Mocks.Interfaces
         /// <remarks>
         /// Only method calls in replay mode are counted
         /// </remarks>
-        ICollection<CallRecord> GetCallArgumentsFor(MethodInfo method);
+        CallRecordCollection GetCallArgumentsFor(MethodInfo method);
 
         /// <summary>
         /// Records the method call

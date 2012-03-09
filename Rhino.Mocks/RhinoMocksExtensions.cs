@@ -213,7 +213,7 @@ namespace Rhino.Mocks
 		/// <typeparam name="T"></typeparam>
 		/// <param name="mock">The mock.</param>
 		/// <param name="action">The action.</param>
-    public static IList<CallRecord> AssertWasCalled<T>(this T mock, Action<T> action)
+    public static CallRecordCollection AssertWasCalled<T>(this T mock, Action<T> action)
 		{
 			return AssertWasCalled(mock, action, DefaultConstraintSetup);
 		}
@@ -230,12 +230,12 @@ namespace Rhino.Mocks
 		/// <param name="mock">The mock.</param>
 		/// <param name="action">The action.</param>
 		/// <param name="setupConstraints">The setup constraints.</param>
-    public static IList<CallRecord> AssertWasCalled<T>(this T mock, Action<T> action, Action<IMethodOptions<object>> setupConstraints)
+    public static CallRecordCollection AssertWasCalled<T>(this T mock, Action<T> action, Action<IMethodOptions<object>> setupConstraints)
 		{
 			ExpectationVerificationInformation verificationInformation = GetExpectationsToVerify(mock, action, setupConstraints);
 
-			List<CallRecord> records = new List<CallRecord>();
-			foreach (var record in verificationInformation.AllCallRecords)
+			var records = new CallRecordCollection();
+			foreach (var record in verificationInformation.AllCallRecords.GetRecordEnumerable())
 			{
 				if (verificationInformation.Expected.IsExpected(record.Arguments))
 				{
@@ -255,7 +255,7 @@ namespace Rhino.Mocks
         /// <typeparam name="T"></typeparam>
         /// <param name="mock">The mock.</param>
         /// <param name="action">The action.</param>
-        public static IList<CallRecord> AssertWasCalled<T>(this T mock, Func<T, object> action)
+        public static CallRecordCollection AssertWasCalled<T>(this T mock, Func<T, object> action)
         {
             var newAction = new Action<T>(t => action(t));
             return AssertWasCalled(mock, newAction, DefaultConstraintSetup);
@@ -269,7 +269,7 @@ namespace Rhino.Mocks
         /// <param name="mock">The mock.</param>
         /// <param name="action">The action.</param>
         /// <param name="setupConstraints">The setup constraints.</param>
-        public static IList<CallRecord> AssertWasCalled<T>(this T mock, Func<T, object> action, Action<IMethodOptions<object>> setupConstraints)
+        public static CallRecordCollection AssertWasCalled<T>(this T mock, Func<T, object> action, Action<IMethodOptions<object>> setupConstraints)
         {
             var newAction = new Action<T>(t => action(t));
             return AssertWasCalled(mock, newAction, setupConstraints);
@@ -363,12 +363,8 @@ namespace Rhino.Mocks
 				throw new InvalidOperationException(
 					"The expectation was removed from the waiting expectations list, did you call Repeat.Any() ? This is not supported in AssertWasCalled()");
 			IExpectation expected = expectationsToVerify[0];
-			ICollection<CallRecord> argumentsForAllCalls = mockedObject.GetCallArgumentsFor(expected.Method);
-			return new ExpectationVerificationInformation
-					{
-						AllCallRecords = new List<CallRecord>(argumentsForAllCalls),
-						Expected = expected
-					};
+			var argumentsForAllCalls = new CallRecordCollection(mockedObject.GetCallArgumentsFor(expected.Method));
+			return new ExpectationVerificationInformation(argumentsForAllCalls, expected);
         }
 
 		/// <summary>
@@ -461,7 +457,7 @@ namespace Rhino.Mocks
         /// <param name="afterCalls">
         /// Calls that happens after <paramref name="beforeCalls"/>
         /// </param>
-        public static IList<CallRecord> Before(this IList<CallRecord> beforeCalls, IList<CallRecord> afterCalls)
+        public static CallRecordCollection Before(this CallRecordCollection beforeCalls, CallRecordCollection afterCalls)
         {
             Ordered(Last(beforeCalls), First(afterCalls));
             return afterCalls;
@@ -477,7 +473,7 @@ namespace Rhino.Mocks
         /// <param name="beforeCalls">
         /// Calls that happens before <paramref name="afterCalls"/>
         /// </param>
-        public static IList<CallRecord> After(this IList<CallRecord> afterCalls, IList<CallRecord> beforeCalls)
+        public static CallRecordCollection After(this CallRecordCollection afterCalls, CallRecordCollection beforeCalls)
         {
             Ordered(Last(beforeCalls), First(afterCalls));
             return beforeCalls;
@@ -522,7 +518,7 @@ namespace Rhino.Mocks
         /// A list of call records ordered by the time they were executed.
         /// </param>
         /// <returns>The last call executed in <paramref name="callRecords"/></returns>
-        public static CallRecord Last(this IList<CallRecord> callRecords)
+        public static CallRecord Last(this CallRecordCollection callRecords)
         {
             return callRecords[callRecords.Count - 1];
         }
@@ -534,7 +530,7 @@ namespace Rhino.Mocks
         /// A list of call records ordered by the time they were executed.
         /// </param>
         /// <returns>The first call executed in <paramref name="callRecords"/></returns>
-        public static CallRecord First(this IList<CallRecord> callRecords)
+        public static CallRecord First(this CallRecordCollection callRecords)
         {
             return callRecords[0];
         }
