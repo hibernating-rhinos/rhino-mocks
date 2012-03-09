@@ -1,6 +1,11 @@
 Rhino Mocks
 ======================================================================
 
+_Version: 3.6.2.0 (vNext - unreleased)_
+
+* Better encapsulation of the ordered AAA API.
+
+
 _Version: 3.6.1.0_
 
 * Added support for (generic) multi stubs.
