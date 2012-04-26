@@ -249,8 +249,11 @@ namespace Rhino.Mocks.MethodRecorders
 					if (triplet.Expectation == expectation)
 						recordedActions.RemoveAt(i);
 				}
-				//Action cannot be another recorder, since then the RemoveExpectation would've
-				//passed us to the top most recorder.
+				else //Action is another recorder
+				{
+					IMethodRecorder innerRecorder = (IMethodRecorder)recordedActions[i];
+					innerRecorder.RemoveExpectation(expectation);
+				}
 			}
 		}
 

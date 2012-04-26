@@ -4,6 +4,7 @@ Rhino Mocks
 _Version: 3.6.2.0 (vNext - unreleased)_
 
 * Better encapsulation of the ordered AAA API.
+* Fixed corner case bug when working with nested recorders ([reported by honggogg](https://groups.google.com/d/topic/rhinomocks/tMAbfs2qBec/discussion))
 
 
 _Version: 3.6.1.0_
