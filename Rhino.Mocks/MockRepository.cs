@@ -658,16 +658,13 @@ namespace Rhino.Mocks
             //proper state.
             if (proxies.ContainsKey(proxy) == false)
             {
-                //We allow calls to virtual methods from the ctor only for partial mocks.
-              try
+              if (!method.IsAbstract)
               {
                 invocation.Proceed();
                 return invocation.ReturnValue;
               }
-              catch (NotImplementedException)
-              {
-                return Utilities.ReturnValueUtil.DefaultValue(method.ReturnType, invocation);
-              }
+
+              return Utilities.ReturnValueUtil.DefaultValue(method.ReturnType, invocation);
             }
 
           IMockState state = proxies[proxy];

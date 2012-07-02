@@ -4,6 +4,7 @@ Rhino Mocks
 _Version: 3.6.2.0 (vNext - unreleased)_
 
 * Better encapsulation of the ordered AAA API.
+* Avoid unnecessary first chance NotImplementedExcption if abstract method is called in the constructor of a mocked object.
 
 
 _Version: 3.6.1.0_
