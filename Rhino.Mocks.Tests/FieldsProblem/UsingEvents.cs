@@ -240,6 +240,27 @@ namespace Rhino.Mocks.Tests.FieldsProblem
 
             Assert.True(called);
 		}
+
+		[Fact]
+		public void UsingEventRaiserWithNullableArgumentInEvent()
+		{
+			IWithNullableArgsEvents eventHolder = (IWithNullableArgsEvents)mocks.Stub(typeof(IWithNullableArgsEvents));
+			IEventRaiser eventRaiser = eventHolder.GetEventRaiser(stub => stub.Foo += null);
+
+			mocks.ReplayAll();
+
+			bool called = false;
+			eventHolder.Foo += delegate
+			{
+				called = true;
+			};
+
+			eventRaiser.Raise(default(int?));
+
+			mocks.VerifyAll();
+
+			Assert.True(called);
+		}
 	}
 
 	public interface IWithEvents
@@ -268,4 +289,8 @@ namespace Rhino.Mocks.Tests.FieldsProblem
 		#endregion
 	}
 
+	public interface IWithNullableArgsEvents
+	{
+		event Action<int?> Foo;
+	}
 }
