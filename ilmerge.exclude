@@ -1,9 +1,9 @@
 Castle.DynamicProxy.AbstractInvocation
-Castle.DynamicProxy.CompositionInvocation
+Castle.DynamicProxy.Internal.CompositionInvocation
 Castle.DynamicProxy.IInterceptor
 Castle.DynamicProxy.IInterceptorSelector
 Castle.DynamicProxy.IInvocation
-Castle.DynamicProxy.InheritanceInvocation
+Castle.DynamicProxy.Internal.InheritanceInvocation
 Castle.DynamicProxy.IProxyGenerationHook
 Castle.DynamicProxy.IProxyTargetAccessor
 Castle.DynamicProxy.Generators.AttributesToAvoidReplicating
