@@ -1,13 +1,18 @@
 Rhino Mocks
 ======================================================================
 
-_Version: 3.6.2.0 (vNext - unreleased)_
+_Version: 3.6.3.0 (vNext - unreleased)_
+
+* 
+
+_Version: 3.6.2.0_
 
 * Better encapsulation of the ordered AAA API.
 * Fixed corner case bug when working with nested recorders ([reported by honggoff](https://groups.google.com/d/topic/rhinomocks/tMAbfs2qBec/discussion)).
 * Avoid unnecessary first chance NotImplementedExcption if abstract method is called in the constructor of a mocked object.
-* Fixed bug introduced with during Castle.Core update (affects v3.6.1).
+* Fixed bug introduced during Castle.Core update (affects v3.6.1).
 * Applied patch for fixing event raiser to be callable with nullable arguments from romanfq.
+* Updated xunit to v1.9.1.
 
 _Version: 3.6.1.0_
 

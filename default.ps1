@@ -4,8 +4,8 @@ properties {
   $build_dir = "$base_dir\build" 
   
   $sln_file = "$base_dir\Rhino.Mocks.sln" 
-  $version = "3.6.2.0"
-  $humanReadableversion = "3.6.2"
+  $version = "3.6.3.0"
+  $humanReadableversion = "3.6.3"
   $tools_dir = "$base_dir\Tools"
   $release_dir = "$base_dir\Release"
   $uploadCategory = "Rhino-Mocks"
