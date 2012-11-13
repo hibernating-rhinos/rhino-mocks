@@ -173,6 +173,9 @@
     <Compile Include="FieldsProblem\FieldProblem_Andreas2.cs" />
     <Compile Include="FieldsProblem\FieldProblem_Honggoff.cs" />
     <Compile Include="FieldsProblem\FieldProblem_Norbi.cs" />
+    <Compile Include="FieldsProblem\FieldProblem_Steinkauz.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="FieldsProblem\FieldProblem_Ted.cs" />
     <Compile Include="OrderingExpectationTest.cs" />
     <Compile Include="PartialStubTestsAAA.cs" />

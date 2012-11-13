@@ -80,6 +80,10 @@ namespace Rhino.Mocks.Expectations
 				throw new InvalidOperationException("Number of argument doesn't match the number of parameters!");
 			for (int i = 0; i < args.Length; i++)
 			{
+				var parameterType = Method.GetParameters()[i].ParameterType.IsByRef ? Method.GetParameters()[i].ParameterType.GetElementType() :
+				                    Method.GetParameters()[i].ParameterType;
+				if ((args[i] != null) && !parameterType.IsAssignableFrom(args[i].GetType()))
+					return false;
 				if (constraints[i].Eval(args[i]) == false)
 					return false;
 			}
