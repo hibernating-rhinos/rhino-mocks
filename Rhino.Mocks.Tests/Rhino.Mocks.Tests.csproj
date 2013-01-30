@@ -171,6 +171,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="FieldsProblem\FieldProblem_Andreas2.cs" />
+    <Compile Include="FieldsProblem\FieldProblem_Andri.cs" />
     <Compile Include="FieldsProblem\FieldProblem_Honggoff.cs" />
     <Compile Include="FieldsProblem\FieldProblem_Norbi.cs" />
     <Compile Include="FieldsProblem\FieldProblem_Steinkauz.cs">

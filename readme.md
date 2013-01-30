@@ -3,6 +3,7 @@ Rhino Mocks
 
 _Version: 3.6.3.0 (vNext - unreleased)_
 
+* Fixed ref parameters on COM interfaces. The value of a variable used as a ref parameter should be used as a constraint on an expectation even when if it is marked with an InteropServices.OutAttribute ([patched by andriniaina](https://github.com/andriniaina/rhino-mocks/commit/e707bdfddabb49b573e41afad82403e89c99ab2c)).
 * Better support generic methods ([reported by Steinkauz](https://groups.google.com/forum/?fromgroups=#!topic/RhinoMocks/gta6a6bHhT8)).
 * Updated to Castle.Core 3.1.0.
 * Fixed corner case bug in AllPropertiesMatchConstraint (MemberInfo.MetadataToken can differ even on identical types).
