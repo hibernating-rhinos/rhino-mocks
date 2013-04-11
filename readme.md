@@ -1,6 +1,8 @@
 Rhino Mocks
 ======================================================================
 
+[Downloads for .Net 4.0](https://github.com/alaendle/rhino-mocks/downloads)
+
 _Version: 3.6.3.0 (vNext - unreleased)_
 
 * Fixed ref parameters on COM interfaces. The value of a variable used as a ref parameter should be used as a constraint on an expectation even when if it is marked with an InteropServices.OutAttribute ([patched by andriniaina](https://github.com/andriniaina/rhino-mocks/commit/e707bdfddabb49b573e41afad82403e89c99ab2c)).
