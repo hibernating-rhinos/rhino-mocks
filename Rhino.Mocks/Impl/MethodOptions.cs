@@ -437,8 +437,12 @@ namespace Rhino.Mocks.Impl
 					continue;
 				types.Add(args[i].ParameterType);
 			}
-			PropertyInfo prop = expectation.Method.DeclaringType.GetProperty(propName,
-			                                                                 (Type[]) types.ToArray(typeof (Type)));
+            PropertyInfo prop = expectation.Method.DeclaringType.GetProperty(propName,
+                BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly,
+                null, method.ReturnType,
+                (Type[])types.ToArray(typeof(Type)),
+                null);
+
 			return prop;
 		}
 
