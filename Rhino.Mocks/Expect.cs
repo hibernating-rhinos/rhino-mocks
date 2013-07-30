@@ -44,6 +44,7 @@ namespace Rhino.Mocks
 	/// Allows to set expectation on methods that has return values.
 	/// For methods with void return value, you need to use LastCall
 	/// </summary>
+	[Obsolete("Please switch to AAA syntax (reference can be found at http://svengrand.blogspot.de/2011/02/rhino-mocks-arange-act-assert-aaa.html).")]
 	public static class Expect
 	{
 		///<summary>

@@ -126,11 +126,31 @@ namespace Rhino.Mocks
 			var isInReplayMode = mocks.IsInReplayMode(mock);
 			mocks.BackToRecord(mock, BackToRecordOptions.None);
 			action(mock);
-			IMethodOptions<R> options = LastCall.GetOptions<R>();
+			IMethodOptions<R> options = RhinoMocksExtensions.GetOptions<R>();
 			options.TentativeReturn();
 			if (isInReplayMode)
 				mocks.ReplayCore(mock, false);
 			return options;
+		}
+
+		/*
+		 * Method: GetOptions
+		 * *Internal!*
+		 * 
+		 * Get the method options for the last method call from *all* the mock objects.
+		 * Throws an exception if there is no such call.
+		 * 
+		 * Thread safety:
+		 * *Not* safe for mutli threading, use <On>
+		 */
+		internal static IMethodOptions<T> GetOptions<T>()
+		{
+			if (MockRepository.LastMockedObject == null)
+			{
+				throw new InvalidOperationException("Invalid call, the last call has been used or no call has been made (make sure that you are calling a virtual (C#) / Overridable (VB) method).");
+			}
+
+			return MockRepository.lastRepository.LastMethodCall<T>(MockRepository.LastMockedObject);
 		}
 
 		/// <summary>

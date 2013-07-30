@@ -35,6 +35,7 @@ namespace Rhino.Mocks
     /// For methods with void return value, you need to use LastCall or
     /// DoNotExpect.Call() with a delegate.
     /// </summary>
+    [Obsolete("Please switch to AAA syntax (reference can be found at http://svengrand.blogspot.de/2011/02/rhino-mocks-arange-act-assert-aaa.html).")]
     public static class DoNotExpect
     {
         /// <summary>

@@ -220,7 +220,7 @@ namespace Rhino.Mocks
 
           if (lastRepository == null)
           {
-            lastRepository = new MockRepository();
+            lastRepository = new MockRepository(false);
           }
 
           AttributesToAvoidReplicating.Add<UIPermissionAttribute>();
@@ -230,7 +230,13 @@ namespace Rhino.Mocks
         /// <summary>
         /// Creates a new <see cref="MockRepository"/> instance.
         /// </summary>
+        [Obsolete("Please switch to AAA syntax (reference can be found at http://svengrand.blogspot.de/2011/02/rhino-mocks-arange-act-assert-aaa.html).")]
         public MockRepository()
+          : this(false)
+        {
+        }
+
+        private MockRepository(bool ignored)
         {
             proxyGenerationOptions = new ProxyGenerationOptions
             {
@@ -1314,7 +1320,7 @@ namespace Rhino.Mocks
         /// <returns>The mock object in the replay mode.</returns>
         private static T CreateMockInReplay<T>(Func<MockRepository, T> createMock)
         {
-            var repository = new MockRepository();
+            var repository = new MockRepository(false);
             var mockObject = createMock(repository);
             repository.Replay(mockObject);
             return mockObject;
