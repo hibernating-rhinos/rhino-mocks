@@ -176,6 +176,7 @@
     <Compile Include="FieldsProblem\FieldProblem_Bill.cs" />
     <Compile Include="FieldsProblem\FieldProblem_JPBoodhoo.cs" />
     <Compile Include="FieldsProblem\FieldProblem_KeithD.cs" />
+    <Compile Include="FieldsProblem\FieldProblem_PropertyBehaviorOnInternalProperty.cs" />
     <Compile Include="MethodProblems\MethodProblem_JPBoodhoo.cs" />
     <Compile Include="PartialMockTestsAAA.cs" />
     <Compile Include="MultiMocksWithAAA.cs" />
