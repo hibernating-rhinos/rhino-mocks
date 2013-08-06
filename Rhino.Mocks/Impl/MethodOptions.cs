@@ -218,6 +218,7 @@ namespace Rhino.Mocks.Impl
 		public IMethodOptions<T> Do(Delegate action)
 		{
 			expectation.ActionToExecute = action;
+			expectation.AllowTentativeReturn = false;
 			return this;
 		}
 
@@ -241,6 +242,7 @@ namespace Rhino.Mocks.Impl
 		public IMethodOptions<T> Return(T objToReturn)
 		{
 			expectation.ReturnValue = objToReturn;
+			expectation.AllowTentativeReturn = false;
 			return this;
 		}
 
@@ -262,6 +264,7 @@ namespace Rhino.Mocks.Impl
 		public IMethodOptions<T> Throw(Exception exception)
 		{
 			expectation.ExceptionToThrow = exception;
+			expectation.AllowTentativeReturn = false; 
 			return this;
 		}
 
