@@ -242,6 +242,13 @@ namespace Rhino.Mocks.Tests
     }
     #endregion
 
+    [Fact]
+    public void CanGenerateMocksWithNullParameters()
+    {
+      MockRepository.GenerateStrictMock(typeof(IFormatProvider), null, null);
+      MockRepository.GenerateMock(typeof(IFormatProvider), null, null);
+    }
+
     #region CanCreateADynamicMultiMockWithConstructorArgs
     [Fact]
     public void CanCreateADynamicMultiMockWithConstructorArgsNonGeneric()

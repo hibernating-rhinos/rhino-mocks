@@ -1160,6 +1160,9 @@ namespace Rhino.Mocks
         /// <seealso cref="DynamicMultiMock(System.Type,System.Type[],object[])"/>
         public static object GenerateMock(Type type, Type[] extraTypes, params object[] argumentsForConstructor)
         {
+            if (extraTypes == null) extraTypes = new Type[0];
+            if (argumentsForConstructor == null) argumentsForConstructor = new object[0];
+
             return CreateMockInReplay(r => r.DynamicMultiMock(type, extraTypes, argumentsForConstructor));
         }
 
