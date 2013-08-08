@@ -5,6 +5,7 @@ Rhino Mocks
 
 _Version: 3.6.3.0 (vNext - unreleased)_
 
+* Fixed property behavior for internal properties ([patched by Jorge Martines](https://github.com/jorgehmv/rhino-mocks/commit/24abfef37e4c0e66d140f246013a5df5eddbc932)).
 * Harmonized handling of null parameter in MockRepository.GenerateMock(Type, Type[], params object[]) to follow MockRepsoitory.GenerateStrictMock(Type type, Type[] extraTypes, params object[] argumentsForConstructor).
 * Do not allow multiple return/throw/do options in one expect/stub call.
 * Marking parts of the old classic/using/fluent syntax as deprectated - to enforce AAA style ([Rhino Mocks AAA Syntax Quick Reference](http://www.scribd.com/doc/49587062/RhinoMocksAAAQuickReference)).
