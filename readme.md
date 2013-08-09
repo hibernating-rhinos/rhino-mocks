@@ -7,7 +7,7 @@ _Version: 3.6.3.0 (vNext - unreleased)_
 
 * Fixed property behavior for internal properties ([patched by Jorge Martines](https://github.com/jorgehmv/rhino-mocks/commit/24abfef37e4c0e66d140f246013a5df5eddbc932)).
 * Harmonized handling of null parameter in MockRepository.GenerateMock(Type, Type[], params object[]) to follow MockRepsoitory.GenerateStrictMock(Type type, Type[] extraTypes, params object[] argumentsForConstructor).
-* Do not allow multiple return/throw/do options in one expect/stub call.
+* Do not allow multiple return/throw/do/never options in one expect/stub call.
 * Marking parts of the old classic/using/fluent syntax as deprectated - to enforce AAA style ([Rhino Mocks AAA Syntax Quick Reference](http://www.scribd.com/doc/49587062/RhinoMocksAAAQuickReference)).
 * Adapted copyright information for the year 2013.
 * Fixed ref parameters on COM interfaces. The value of a variable used as a ref parameter should be used as a constraint on an expectation even when if it is marked with an InteropServices.OutAttribute ([patched by andriniaina](https://github.com/andriniaina/rhino-mocks/commit/e707bdfddabb49b573e41afad82403e89c99ab2c)).

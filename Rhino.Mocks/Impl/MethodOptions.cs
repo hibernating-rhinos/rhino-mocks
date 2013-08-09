@@ -504,6 +504,7 @@ namespace Rhino.Mocks.Impl
 			expectation.ExceptionToThrow = new InvalidOperationException("This is a method that should not be called");
 			expectation.RepeatableOption = RepeatableOption.Never;
 			repository.Replayer.AddToRepeatableMethods(proxy, expectation.Method, expectation);
+			expectation.AllowTentativeReturn = false;
 			return this;
 		}
 
