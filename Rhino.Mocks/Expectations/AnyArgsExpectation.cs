@@ -64,6 +64,15 @@ namespace Rhino.Mocks.Expectations
 		/// <param name="args">The arguments with which the method was called</param>
 		protected override bool DoIsExpected(object[] args)
 		{
+			Validate.IsNotNull(args, "args");
+			for (int i = 0; i < args.Length; i++)
+			{
+				var parameterType = Method.GetParameters()[i].ParameterType.IsByRef ? Method.GetParameters()[i].ParameterType.GetElementType() :
+									Method.GetParameters()[i].ParameterType;
+				if ((args[i] != null) && !parameterType.IsAssignableFrom(args[i].GetType()))
+					return false;
+			}
+
 			return true;
 		}
 

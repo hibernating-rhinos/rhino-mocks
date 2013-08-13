@@ -5,6 +5,7 @@ Rhino Mocks
 
 _Version: 3.6.3.0 (vNext - unreleased)_
 
+* Fixed corner case bug in AnyArgsExpectation - even this expectation should verify that the given arguments are valid for the methods signature.
 * Fixed property behavior for internal properties ([patched by Jorge Martines](https://github.com/jorgehmv/rhino-mocks/commit/24abfef37e4c0e66d140f246013a5df5eddbc932)).
 * Harmonized handling of null parameter in MockRepository.GenerateMock(Type, Type[], params object[]) to follow MockRepsoitory.GenerateStrictMock(Type type, Type[] extraTypes, params object[] argumentsForConstructor).
 * Do not allow multiple return/throw/do/never options in one expect/stub call.
