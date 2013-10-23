@@ -96,7 +96,7 @@ task Merge {
 		Castle.Core.dll `
 		/out:Rhino.Mocks.dll `
 		/t:library `
-		/targetplatform:v4 `
+		/targetplatform:"v4,C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0" `
 		"/keyfile:$base_dir\ayende-open-source.snk" `
 		"/internalize:$base_dir\ilmerge.exclude"
 	if ($lastExitCode -ne 0) {

@@ -17,6 +17,8 @@ _Version: 3.6.3.0 (vNext - unreleased)_
 * Fixed corner case bug in AllPropertiesMatchConstraint (MemberInfo.MetadataToken can differ even on identical types).
 * Updated psake to trunk version (https://github.com/psake/psake - a20bd7f52f20cc60a6b885fb02cfa1f492cec9a4).
 * Updated xunit to v1.9.2.
+* Update ILmerge to v2.13.
+* Adapted merge process to be compatible with .Net 4.0 (even if .Net 4.5 is installed on the build machine).
 
 _Version: 3.6.2.0_
 
