@@ -13,7 +13,7 @@ _Version: 3.6.3.0 (vNext - unreleased)_
 * Adapted copyright information for the year 2013.
 * Fixed ref parameters on COM interfaces. The value of a variable used as a ref parameter should be used as a constraint on an expectation even when if it is marked with an InteropServices.OutAttribute ([patched by andriniaina](https://github.com/andriniaina/rhino-mocks/commit/e707bdfddabb49b573e41afad82403e89c99ab2c)).
 * Better support generic methods ([reported by Steinkauz](https://groups.google.com/forum/?fromgroups=#!topic/RhinoMocks/gta6a6bHhT8)).
-* Updated to Castle.Core 3.2.1.
+* Updated to Castle.Core 3.2.2 (for .Net 4.0 Client Profile).
 * Fixed corner case bug in AllPropertiesMatchConstraint (MemberInfo.MetadataToken can differ even on identical types).
 * Updated psake to trunk version (https://github.com/psake/psake - a20bd7f52f20cc60a6b885fb02cfa1f492cec9a4).
 * Updated xunit to v1.9.2.
