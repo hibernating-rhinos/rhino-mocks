@@ -28,30 +28,19 @@
     [Fact]
     public void TestBackToRecordAll()
     {
-      MockRepository mock = new MockRepository();
-      IDummy test = mock.StrictMock<IDummy>();
+      IDummy test = MockRepository.GenerateStrictMock<IDummy>();
 
-      using (mock.Unordered())
-      {
-        Expect.Call(test.GetValue())
-          .Return(true)
-          .Repeat.AtLeastOnce();
-      }
-
-      mock.ReplayAll();
+      test.Expect(x => x.GetValue()).Return(true).Repeat.AtLeastOnce();
 
       Assert.True(test.GetValue());
-      mock.VerifyAll();
+      test.VerifyAllExpectations();
 
-      mock.BackToRecordAll(BackToRecordOptions.All);
-      Expect.Call(test.GetValue())
-        .Return(false)
-        .Repeat.AtLeastOnce();
-
-      mock.ReplayAll();
+      test.BackToRecord(BackToRecordOptions.All);
+      test.Expect(x => x.GetValue()).Return(false).Repeat.AtLeastOnce();
+      test.Replay();
 
       Assert.False(test.GetValue());
-      mock.VerifyAll();
+      test.VerifyAllExpectations();
     }
   }
 }

@@ -1,6 +1,4 @@
 using System;
-using System.Collections.Generic;
-using System.Text;
 using Xunit;
 
 namespace Rhino.Mocks.Tests.FieldsProblem
@@ -15,38 +13,22 @@ namespace Rhino.Mocks.Tests.FieldsProblem
         String ChildString { get; set; }
     }
 
-    
     public class StubDemoTestFixture : IDisposable
     {
-
-        #region Variables
-
-        private MockRepository _mocks;
         private IBase _mockBase;
         private IChild _mockChild;
 
-        #endregion
-
-        #region Setup and Teardown
-
-		public StubDemoTestFixture()
+        public StubDemoTestFixture()
         {
-            _mocks = new MockRepository();
-
-            _mockBase = _mocks.Stub<IBase>();
-            _mockChild = _mocks.Stub<IChild>();
-
-            _mocks.ReplayAll();
+            _mockBase = MockRepository.GenerateStub<IBase>();
+            _mockChild = MockRepository.GenerateStub<IChild>();
         }
 
         public void Dispose()
         {
-            _mocks.VerifyAll();
+            _mockBase.VerifyAllExpectations();
+            _mockChild.VerifyAllExpectations();
         }
-
-        #endregion
-
-        #region Tests
 
         [Fact]
         public void BaseStubSetsBasePropertiesCorrectly()
@@ -77,8 +59,5 @@ namespace Rhino.Mocks.Tests.FieldsProblem
 
             Assert.Equal(str, _mockChild.BaseString);
         }
-
-        #endregion
-
     }
 }

@@ -27,34 +27,24 @@ namespace Rhino.Mocks.Tests.FieldsProblem
 {
 	using Exceptions;
 	using Xunit;
-
 	
 	public class FieldProblem_Mike
 	{
 		[Fact]
 		public void Can_do_nested_virtual_calls()
 		{
-			var mocks = new MockRepository();
-			var subject = mocks.PartialMock<SUT>();
-			mocks.ReplayAll();
-
+			var subject = MockRepository.GeneratePartialMock<SUT>();
 			subject.VirtualMethod();
-
 			subject.AssertWasCalled(it => it.NestedVirtualMethod());
 		}
 
 		[Fact]
 		public void Can_do_nested_virtual_calls_when_not_called()
 		{
-			var mocks = new MockRepository();
-			var subject = mocks.PartialMock<SUT>();
-			mocks.ReplayAll();
-
-
+			var subject = MockRepository.GeneratePartialMock<SUT>();
 			var ex = Assert.Throws<ExpectationViolationException>(() => subject.AssertWasCalled(it => it.NestedVirtualMethod()));
 			Assert.Equal("SUT.NestedVirtualMethod(); Expected #1, Actual #0.", ex.Message);
 		}
-
 
 		#region Nested type: SUT
 

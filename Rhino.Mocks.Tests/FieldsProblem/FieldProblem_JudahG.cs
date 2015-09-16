@@ -4,7 +4,6 @@ using Rhino.Mocks.Constraints;
 
 namespace Rhino.Mocks.Tests.FieldsProblem
 {
-	
 	public class FieldProblem_JudahG
 	{
 		public interface IView
@@ -15,21 +14,11 @@ namespace Rhino.Mocks.Tests.FieldsProblem
 		[Fact]
 		public void IsMatching()
 		{
-			MockRepository mocks = new MockRepository();
-			IView view = mocks.StrictMock<IView>();
-			using (mocks.Record())
-			{
-				view.Foo = null;
-				Predicate<int> alwaysReturnsTrue = delegate(int input)
-				{
-					return true;
-				};
-				LastCall.Constraints(Is.Matching(alwaysReturnsTrue));
-			}
-			using (mocks.Playback())
-			{
-				view.Foo = 1;
-			}
+			IView view = MockRepository.GenerateStrictMock<IView>();
+			Predicate<int> alwaysReturnsTrue = delegate { return true; };
+			view.Expect(x => x.Foo = null).Constraints(Is.Matching(alwaysReturnsTrue));
+			view.Foo = 1;
+			view.VerifyAllExpectations();
 		}
 	}
 }

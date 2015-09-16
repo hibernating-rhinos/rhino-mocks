@@ -38,8 +38,7 @@ namespace Rhino.Mocks.Tests.FieldsProblem
 		[Fact]
 		public void CanMockClassWithCoClass()
 		{
-			MockRepository mocks = new MockRepository();
-			clsDBRecordSet contacts = mocks.StrictMock<clsDBRecordSet>();
+			clsDBRecordSet contacts = MockRepository.GenerateStrictMock<clsDBRecordSet>();
 		}
 	}
 

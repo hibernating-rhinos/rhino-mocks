@@ -28,14 +28,10 @@
 
 
 using System;
-using System.Data;
-using Xunit;
-using Rhino.Mocks;
+using System.Collections.Generic;
 using Rhino.Mocks.Constraints;
 using Rhino.Mocks.Exceptions;
-using Rhino.Mocks.Impl;
-using Rhino.Mocks.Tests.Callbacks;
-using System.Collections.Generic;
+using Xunit;
 
 namespace Rhino.Mocks.Tests
 {
@@ -45,80 +41,76 @@ namespace Rhino.Mocks.Tests
 		event EventHandler<EventArgs> AnEvent;
 		void RefOut(string str, out int i, string str2, ref int j, string str3);
 		void VoidList(List<string> list);
-		void VoidObject (object obj);
+		void VoidObject(object obj);
 	}
 
-	
 	public class ArgConstraintTests
 	{
 		private IDemo demoMock;
 		ITestInterface testMock;
-		private MockRepository mocks;
 		private delegate string StringDelegateWithParams(int a, string b);
 
 		public ArgConstraintTests()
 		{
-			mocks = new MockRepository();
-			demoMock = this.mocks.StrictMock<IDemo>();
-			testMock = mocks.StrictMock<ITestInterface>();
+			demoMock = MockRepository.GenerateStrictMock<IDemo>();
+			testMock = MockRepository.GenerateStrictMock<ITestInterface>();
 		}
 
 		[Fact]
 		public void ThreeArgs_Pass()
 		{
-			demoMock.VoidThreeArgs(
+			demoMock.Expect(x => x.VoidThreeArgs(
 				Arg<int>.Is.Anything,
 				Arg.Text.Contains("eine"),
-				Arg<float>.Is.LessThan(2.5f));
-			mocks.ReplayAll();
+				Arg<float>.Is.LessThan(2.5f)));
+
 			demoMock.VoidThreeArgs(3, "Steinegger", 2.4f);
-			mocks.VerifyAll();
+			demoMock.VerifyAllExpectations();
+			testMock.VerifyAllExpectations();
 		}
 
 		[Fact]
 		public void ThreeArgs_Fail()
 		{
-			demoMock.VoidThreeArgs(
+			demoMock.Expect(x => x.VoidThreeArgs(
 				Arg<int>.Is.Anything,
 				Arg.Text.Contains("eine"),
-				Arg<float>.Is.LessThan(2.5f));
-			mocks.ReplayAll();
+				Arg<float>.Is.LessThan(2.5f)));
+
 			Assert.Throws<ExpectationViolationException>(() => demoMock.VoidThreeArgs(2, "Steinegger", 2.6f));
 		}
 
 		[Fact]
 		public void Matches()
 		{
-			Expect.Call(delegate{
-				demoMock.VoidStringArg(Arg<string>.Matches(Is.Equal("hallo") || Text.EndsWith("b")));})
-				.Repeat.Times(3);
-			mocks.ReplayAll();
+			demoMock.Expect(x => x.VoidStringArg(Arg<string>.Matches(Is.Equal("hallo") || Text.EndsWith("b")))).Repeat.Times(3);
+
 			demoMock.VoidStringArg("hallo");
 			demoMock.VoidStringArg("ab");
 			demoMock.VoidStringArg("bb");
-			mocks.VerifyAll();
+			demoMock.VerifyAllExpectations();
+			testMock.VerifyAllExpectations();
 		}
 
 		[Fact]
 		public void ConstraintsThatWerentCallCauseVerifyFailure()
 		{
-			this.demoMock.VoidStringArg(Arg.Text.Contains("World"));
-			this.mocks.Replay(this.demoMock);
-			var ex = Assert.Throws<ExpectationViolationException>(() => this.mocks.Verify(this.demoMock));
+			this.demoMock.Expect(x => x.VoidStringArg(Arg.Text.Contains("World")));
+
+			var ex = Assert.Throws<ExpectationViolationException>(() => this.demoMock.VerifyAllExpectations());
 			Assert.Equal("IDemo.VoidStringArg(contains \"World\"); Expected #1, Actual #0.", ex.Message);
 		}
 
 		[Fact]
 		public void RefAndOutArgs()
 		{
-			testMock.RefOut(
+			testMock.Expect(x => x.RefOut(
 				Arg<string>.Is.Anything,
 				out Arg<int>.Out(3).Dummy,
 				Arg<string>.Is.Equal("Steinegger"),
 				ref Arg<int>.Ref(Is.Equal(2), 7).Dummy,
 				Arg<string>.Is.NotNull
-			);
-			mocks.ReplayAll();
+			));
 
 			int iout = 0;
 			int iref = 2;
@@ -126,41 +118,42 @@ namespace Rhino.Mocks.Tests
 			Assert.Equal(3, iout);
 			Assert.Equal(7, iref);
 
-			mocks.VerifyAll();
+			demoMock.VerifyAllExpectations();
+			testMock.VerifyAllExpectations();
 		}
 
 		[Fact]
 		public void Event()
 		{
-			ITestInterface eventMock = mocks.StrictMock<ITestInterface>();
-			eventMock.AnEvent += Arg<EventHandler<EventArgs>>.Is.Anything;
-			mocks.ReplayAll();
+			ITestInterface eventMock = MockRepository.GenerateStrictMock<ITestInterface>();
+			eventMock.Expect(x => x.AnEvent += Arg<EventHandler<EventArgs>>.Is.Anything);
+
 			eventMock.AnEvent += handler;
-			mocks.VerifyAll();
+			demoMock.VerifyAllExpectations();
+			testMock.VerifyAllExpectations();
+			eventMock.VerifyAllExpectations();
 		}
 
 		[Fact]
 		public void ListTest()
 		{
-			ITestInterface testMock = mocks.StrictMock<ITestInterface>();
-			testMock.VoidList(Arg<List<string>>.List.Count(Is.GreaterThan(3)));
-			testMock.VoidList(Arg<List<string>>.List.IsIn("hello"));
-
-			mocks.ReplayAll();
+			ITestInterface testMock = MockRepository.GenerateStrictMock<ITestInterface>();
+			testMock.Expect(x => x.VoidList(Arg<List<string>>.List.Count(Is.GreaterThan(3))));
+			testMock.Expect(x => x.VoidList(Arg<List<string>>.List.IsIn("hello")));
 
 			testMock.VoidList(new List<string>(new string[] { "1", "2", "4", "5" }));
 
 			var ex = Assert.Throws<ExpectationViolationException>(() => testMock.VoidList(new List<string>(new string[] { "1", "3" })));
 			Assert.Equal("ITestInterface.VoidList(System.Collections.Generic.List`1[System.String]); Expected #0, Actual #1.", ex.Message);
 		}
-		
+
 		[Fact]
 		public void ConstraintWithTooFewArguments_ThrowsException()
 		{
-			var ex = Assert.Throws<InvalidOperationException>(() => this.demoMock.VoidThreeArgs(
+			var ex = Assert.Throws<InvalidOperationException>(() => this.demoMock.Expect(x => x.VoidThreeArgs(
 				Arg<int>.Is.Equal(4),
 				Arg.Text.Contains("World"),
-				3.14f));
+				3.14f)));
 			Assert.Equal("When using Arg<T>, all arguments must be defined using Arg<T>.Is, Arg<T>.Text, Arg<T>.List, Arg<T>.Ref or Arg<T>.Out. 3 arguments expected, 2 have been defined.", ex.Message);
 		}
 
@@ -168,11 +161,7 @@ namespace Rhino.Mocks.Tests
 		public void ConstraintToManyArgs_ThrowsException()
 		{
 			Arg<int>.Is.Equal(4);
-			var ex = Assert.Throws<InvalidOperationException>(() =>
-			                                                  this.demoMock.VoidThreeArgs(
-			                                                  	Arg<int>.Is.Equal(4),
-			                                                  	Arg.Text.Contains("World"),
-			                                                  	Arg<float>.Is.Equal(3.14f)));
+			var ex = Assert.Throws<InvalidOperationException>(() => this.demoMock.Expect(x => x.VoidThreeArgs(Arg<int>.Is.Equal(4), Arg.Text.Contains("World"), Arg<float>.Is.Equal(3.14f))));
 			Assert.Equal("Use Arg<T> ONLY within a mock method call while recording. 3 arguments expected, 4 have been defined.", ex.Message);
 		}
 
@@ -182,61 +171,56 @@ namespace Rhino.Mocks.Tests
 			Arg<int>.Is.Equal(4);
 			Arg<int>.Is.Equal(4);
 
-			// create new Mockrepositor yto see if the Arg data has been cleared
-			mocks = new MockRepository();
-			demoMock = this.mocks.StrictMock<IDemo>();
-			
-			demoMock.VoidThreeArgs(
-				Arg<int>.Is.Equal(4),
-				Arg.Text.Contains("World"),
-				Arg<float>.Is.Equal(3.14f));
+			// create new MockRepository to see if the Arg data has been cleared
+			demoMock = MockRepository.GenerateStrictMock<IDemo>();
+
+			demoMock.Expect(x => x.VoidThreeArgs(Arg<int>.Is.Equal(4), Arg.Text.Contains("World"), Arg<float>.Is.Equal(3.14f)));
 		}
-		
 
 		[Fact]
 		public void TooFewOutArgs()
 		{
 			int iout = 2;
-			var ex = Assert.Throws<InvalidOperationException>(() => this.testMock.RefOut(
+			var ex = Assert.Throws<InvalidOperationException>(() => this.testMock.Expect(x => x.RefOut(
 				Arg<string>.Is.Anything,
 				out iout,
 				Arg.Text.Contains("Steinegger"),
 				ref Arg<int>.Ref(Is.Equal(2), 7).Dummy,
-				Arg<string>.Is.NotNull
-			                                                        	));
+				Arg<string>.Is.NotNull)));
+
 			Assert.Equal("When using Arg<T>, all arguments must be defined using Arg<T>.Is, Arg<T>.Text, Arg<T>.List, Arg<T>.Ref or Arg<T>.Out. 5 arguments expected, 4 have been defined.", ex.Message);
 		}
 
 		[Fact]
 		public void RefInsteadOfOutArg()
 		{
-			var ex = Assert.Throws<InvalidOperationException>(() => this.testMock.RefOut(
+			var ex = Assert.Throws<InvalidOperationException>(() => this.testMock.Expect(x => x.RefOut(
 				Arg<string>.Is.Anything,
 				out Arg<int>.Ref(Is.Equal(2), 7).Dummy,
 				Arg.Text.Contains("Steinegger"),
 				ref Arg<int>.Ref(Is.Equal(2), 7).Dummy,
-				Arg<string>.Is.NotNull
-			                                                        	));
+				Arg<string>.Is.NotNull)));
+
 			Assert.Equal("Argument 1 must be defined as: out Arg<T>.Out(returnvalue).Dummy", ex.Message);
 		}
 
 		[Fact]
 		public void OutInsteadOfRefArg()
 		{
-			var ex = Assert.Throws<InvalidOperationException>(() => this.testMock.RefOut(
+			var ex = Assert.Throws<InvalidOperationException>(() => this.testMock.Expect(x => x.RefOut(
 				Arg<string>.Is.Anything,
 				out Arg<int>.Out(7).Dummy,
 				Arg.Text.Contains("Steinegger"),
 				ref Arg<int>.Out(7).Dummy,
-				Arg<string>.Is.NotNull
-			                                                        	));
+				Arg<string>.Is.NotNull)));
+
 			Assert.Equal("Argument 3 must be defined as: ref Arg<T>.Ref(constraint, returnvalue).Dummy", ex.Message);
 		}
 
 		[Fact]
 		public void OutInsteadOfInArg()
 		{
-			var ex = Assert.Throws<InvalidOperationException>(() => this.testMock.VoidObject(Arg<object>.Out(null)));
+			var ex = Assert.Throws<InvalidOperationException>(() => this.testMock.Expect(x => x.VoidObject(Arg<object>.Out(null))));
 			Assert.Equal("Argument 0 must be defined using: Arg<T>.Is, Arg<T>.Text or Arg<T>.List", ex.Message);
 		}
 
@@ -267,225 +251,205 @@ namespace Rhino.Mocks.Tests
 		[Fact]
 		public void MockStringDelegateWithParams()
 		{
-			StringDelegateWithParams d = (StringDelegateWithParams)mocks.StrictMock(typeof(StringDelegateWithParams));
+			StringDelegateWithParams d = (StringDelegateWithParams)MockRepository.GenerateStrictMock(typeof(StringDelegateWithParams), null, null);
 
-			Expect.On(d).Call(
-				d(
-					Arg<int>.Is.Equal(1),
-					Arg<string>.Is.Equal("111")))
-				.Return("abc");
-			Expect.On(d).Call(
-				d(
-					Arg<int>.Is.Equal(2),
-					Arg<string>.Is.Equal("222")))
-				.Return("def");
-
-			mocks.Replay(d);
+			d.Expect(x => x(Arg<int>.Is.Equal(1), Arg<string>.Is.Equal("111"))).Return("abc");
+			d.Expect(x => x(Arg<int>.Is.Equal(2), Arg<string>.Is.Equal("222"))).Return("def");
 
 			Assert.Equal("abc", d(1, "111"));
 			Assert.Equal("def", d(2, "222"));
 
-			try
-			{
-				d(3, "333");
-				Assert.False(true, "Expected an expectation violation to occur.");
-			}
-			catch (ExpectationViolationException)
-			{
-				// Expected.
-			}
+			Assert.Throws<ExpectationViolationException>(() => d(3, "333"));
 		}
-		
+
 		private void handler(object o, EventArgs e)
 		{
-			
+
 		}
 
 
-        [Fact]
-        public void Mock_object_using_ExpectMethod_with_ArgConstraints_allow_for_multiple_calls_as_default_behavior()
-        {
-            // Arrange
-            var mock = MockRepository.GenerateMock<IDemo>();
-            mock.Expect(x => x.StringArgString(Arg<string>.Is.Equal("input"))).Return("output");
+		[Fact]
+		public void Mock_object_using_ExpectMethod_with_ArgConstraints_allow_for_multiple_calls_as_default_behavior()
+		{
+			// Arrange
+			var mock = MockRepository.GenerateMock<IDemo>();
+			mock.Expect(x => x.StringArgString(Arg<string>.Is.Equal("input"))).Return("output");
 
-            // Act
-            var firstCallResult = mock.StringArgString("input");
-            var secondCallResult = mock.StringArgString("input");
+			// Act
+			var firstCallResult = mock.StringArgString("input");
+			var secondCallResult = mock.StringArgString("input");
 
-            // Assert
-            Assert.Equal("output", firstCallResult);
-            Assert.Equal(firstCallResult, secondCallResult);
-        }
+			// Assert
+			Assert.Equal("output", firstCallResult);
+			Assert.Equal(firstCallResult, secondCallResult);
+		}
 
-        [Fact]
-        public void Stub_object_using_ExpectMethod_with_ArgConstraints_allow_for_multiple_calls_as_default_behavior()
-        {
-            // Arrange
-            var mock = MockRepository.GenerateStub<IDemo>();
-            mock.Expect(x => x.StringArgString(Arg<string>.Is.Equal("input"))).Return("output");
+		[Fact]
+		public void Stub_object_using_ExpectMethod_with_ArgConstraints_allow_for_multiple_calls_as_default_behavior()
+		{
+			// Arrange
+			var mock = MockRepository.GenerateStub<IDemo>();
+			mock.Expect(x => x.StringArgString(Arg<string>.Is.Equal("input"))).Return("output");
 
-            // Act
-            var firstCallResult = mock.StringArgString("input");
-            var secondCallResult = mock.StringArgString("input");
+			// Act
+			var firstCallResult = mock.StringArgString("input");
+			var secondCallResult = mock.StringArgString("input");
 
-            // Assert
-            Assert.Equal("output", firstCallResult);
-            Assert.Equal(firstCallResult, secondCallResult);
-        }
+			// Assert
+			Assert.Equal("output", firstCallResult);
+			Assert.Equal(firstCallResult, secondCallResult);
+		}
 
-        [Fact]
-        public void Stub_object_using_StubMethod_with_ArgConstraints_allow_for_multiple_calls_as_default_behavior()
-        {
-            // Arrange
-            var stub = MockRepository.GenerateStub<IDemo>();
-            stub.Stub(x => x.StringArgString(Arg<string>.Is.Equal("input"))).Return("output");
+		[Fact]
+		public void Stub_object_using_StubMethod_with_ArgConstraints_allow_for_multiple_calls_as_default_behavior()
+		{
+			// Arrange
+			var stub = MockRepository.GenerateStub<IDemo>();
+			stub.Stub(x => x.StringArgString(Arg<string>.Is.Equal("input"))).Return("output");
 
-            // Act
-            var firstCallResult = stub.StringArgString("input");
-            var secondCallResult = stub.StringArgString("input");
+			// Act
+			var firstCallResult = stub.StringArgString("input");
+			var secondCallResult = stub.StringArgString("input");
 
-            // Assert
-            Assert.Equal("output", firstCallResult);
-            Assert.Equal(firstCallResult, secondCallResult);
-        }
+			// Assert
+			Assert.Equal("output", firstCallResult);
+			Assert.Equal(firstCallResult, secondCallResult);
+		}
 
-        [Fact]
-        public void Mock_object_using_StubMethod_with_ArgConstraints_allow_for_multiple_calls_as_default_behavior()
-        {
-            // Arrange
-            var mock = MockRepository.GenerateMock<IDemo>();
-            mock.Stub(x => x.StringArgString(Arg<string>.Is.Equal("input"))).Return("output");
+		[Fact]
+		public void Mock_object_using_StubMethod_with_ArgConstraints_allow_for_multiple_calls_as_default_behavior()
+		{
+			// Arrange
+			var mock = MockRepository.GenerateMock<IDemo>();
+			mock.Stub(x => x.StringArgString(Arg<string>.Is.Equal("input"))).Return("output");
 
-            // Act
-            var firstCallResult = mock.StringArgString("input");
-            var secondCallResult = mock.StringArgString("input");
+			// Act
+			var firstCallResult = mock.StringArgString("input");
+			var secondCallResult = mock.StringArgString("input");
 
-            // Assert
-            Assert.Equal("output", firstCallResult);
-            Assert.Equal(firstCallResult, secondCallResult);
-        }
+			// Assert
+			Assert.Equal("output", firstCallResult);
+			Assert.Equal(firstCallResult, secondCallResult);
+		}
 
-        [Fact]
-        public void ImplicitlyConverted_parameter_is_properly_compared_when_using_IsEqual()
-        {
-            // Arrange
-            var stub = MockRepository.GenerateStub<ITestService>();
-            stub.Stub(x => x.GetUser(Arg<long>.Is.Equal(1))).Return("test"); // 1 is inferred as Int32 (not Int64)
+		[Fact]
+		public void ImplicitlyConverted_parameter_is_properly_compared_when_using_IsEqual()
+		{
+			// Arrange
+			var stub = MockRepository.GenerateStub<ITestService>();
+			stub.Stub(x => x.GetUser(Arg<long>.Is.Equal(1))).Return("test"); // 1 is inferred as Int32 (not Int64)
 
-            // Assert
-            Assert.Equal(null, stub.GetUser(0));
-            Assert.Equal("test", stub.GetUser(1));
-        }
+			// Assert
+			Assert.Equal(null, stub.GetUser(0));
+			Assert.Equal("test", stub.GetUser(1));
+		}
 
-        [Fact]
-        public void ImplicitlyConverted_parameter_is_properly_compared_when_using_IsNotEqual()
-        {
-            // Arrange
-            var stub = MockRepository.GenerateStub<ITestService>();
-            stub.Stub(x => x.GetUser(Arg<long>.Is.NotEqual(1))).Return("test"); // 1 is inferred as Int32 (not Int64)
+		[Fact]
+		public void ImplicitlyConverted_parameter_is_properly_compared_when_using_IsNotEqual()
+		{
+			// Arrange
+			var stub = MockRepository.GenerateStub<ITestService>();
+			stub.Stub(x => x.GetUser(Arg<long>.Is.NotEqual(1))).Return("test"); // 1 is inferred as Int32 (not Int64)
 
-            var actual = stub.GetUser(0);
+			var actual = stub.GetUser(0);
 
-            // Assert
-            Assert.Equal("test", actual);
-            Assert.Equal(null, stub.GetUser(1));
-        }
+			// Assert
+			Assert.Equal("test", actual);
+			Assert.Equal(null, stub.GetUser(1));
+		}
 
-        [Fact]
-        public void ImplicitlyConverted_parameter_is_properly_compared_when_using_IsGreaterThan()
-        {
-            // Arrange
-            var stub = MockRepository.GenerateStub<ITestService>();
-            stub.Stub(x => x.GetUser(Arg<long>.Is.GreaterThan(1))).Return("test"); // 1 is inferred as Int32 (not Int64)
+		[Fact]
+		public void ImplicitlyConverted_parameter_is_properly_compared_when_using_IsGreaterThan()
+		{
+			// Arrange
+			var stub = MockRepository.GenerateStub<ITestService>();
+			stub.Stub(x => x.GetUser(Arg<long>.Is.GreaterThan(1))).Return("test"); // 1 is inferred as Int32 (not Int64)
 
-            // Assert
-            Assert.Equal(null, stub.GetUser(0));
-            Assert.Equal(null, stub.GetUser(1));
-            Assert.Equal("test", stub.GetUser(2));
-        }
+			// Assert
+			Assert.Equal(null, stub.GetUser(0));
+			Assert.Equal(null, stub.GetUser(1));
+			Assert.Equal("test", stub.GetUser(2));
+		}
 
-        [Fact]
-        public void ImplicitlyConverted_parameter_is_properly_compared_when_using_IsGreaterThanOrEqual()
-        {
-            // Arrange
-            var stub = MockRepository.GenerateStub<ITestService>();
-            stub.Stub(x => x.GetUser(Arg<long>.Is.GreaterThanOrEqual(2))).Return("test"); // 1 is inferred as Int32 (not Int64)
+		[Fact]
+		public void ImplicitlyConverted_parameter_is_properly_compared_when_using_IsGreaterThanOrEqual()
+		{
+			// Arrange
+			var stub = MockRepository.GenerateStub<ITestService>();
+			stub.Stub(x => x.GetUser(Arg<long>.Is.GreaterThanOrEqual(2))).Return("test"); // 1 is inferred as Int32 (not Int64)
 
-            // Assert
-            Assert.Equal(null, stub.GetUser(1));
-            Assert.Equal("test", stub.GetUser(2));
-            Assert.Equal("test", stub.GetUser(3));
-        }
+			// Assert
+			Assert.Equal(null, stub.GetUser(1));
+			Assert.Equal("test", stub.GetUser(2));
+			Assert.Equal("test", stub.GetUser(3));
+		}
 
-        [Fact]
-        public void ImplicitlyConverted_parameter_is_properly_compared_when_using_IsLessThan()
-        {
-            // Arrange
-            var stub = MockRepository.GenerateStub<ITestService>();
-            stub.Stub(x => x.GetUser(Arg<long>.Is.LessThan(2))).Return("test"); // 1 is inferred as Int32 (not Int64)
+		[Fact]
+		public void ImplicitlyConverted_parameter_is_properly_compared_when_using_IsLessThan()
+		{
+			// Arrange
+			var stub = MockRepository.GenerateStub<ITestService>();
+			stub.Stub(x => x.GetUser(Arg<long>.Is.LessThan(2))).Return("test"); // 1 is inferred as Int32 (not Int64)
 
-            // Assert
-            Assert.Equal("test", stub.GetUser(1));
-            Assert.Equal(null, stub.GetUser(2));
-            Assert.Equal(null, stub.GetUser(3));
-        }
+			// Assert
+			Assert.Equal("test", stub.GetUser(1));
+			Assert.Equal(null, stub.GetUser(2));
+			Assert.Equal(null, stub.GetUser(3));
+		}
 
-        [Fact]
-        public void ImplicitlyConverted_parameter_is_properly_compared_when_using_IsLessThanOrEqual()
-        {
-            // Arrange
-            var stub = MockRepository.GenerateStub<ITestService>();
-            stub.Stub(x => x.GetUser(Arg<long>.Is.LessThanOrEqual(2))).Return("test"); // 1 is inferred as Int32 (not Int64)
+		[Fact]
+		public void ImplicitlyConverted_parameter_is_properly_compared_when_using_IsLessThanOrEqual()
+		{
+			// Arrange
+			var stub = MockRepository.GenerateStub<ITestService>();
+			stub.Stub(x => x.GetUser(Arg<long>.Is.LessThanOrEqual(2))).Return("test"); // 1 is inferred as Int32 (not Int64)
 
-            // Assert
-            Assert.Equal("test", stub.GetUser(1));
-            Assert.Equal("test", stub.GetUser(2));
-            Assert.Equal(null, stub.GetUser(3));
-        }
+			// Assert
+			Assert.Equal("test", stub.GetUser(1));
+			Assert.Equal("test", stub.GetUser(2));
+			Assert.Equal(null, stub.GetUser(3));
+		}
 
-        public interface ITestService
-        {
-            string GetUser(long id);
-            int GetUserId(string firstName, string lastName);
-        }
+		public interface ITestService
+		{
+			string GetUser(long id);
+			int GetUserId(string firstName, string lastName);
+		}
 	}
 
-    public class ArgConstraintTests2
-    {
+	public class ArgConstraintTests2
+	{
+		[Fact]
+		public void Can_use_partial_constraints_API()
+		{
+			// Arrange
+			var stub = MockRepository.GenerateStub<ITestService>();
 
-        [Fact]
-        public void Can_use_partial_constraints_API()
-        {
-            // Arrange
-            var stub = MockRepository.GenerateStub<ITestService>();
-
-            //stub.Stub(x => x.GetUser(1)).Return("tim").Repeat.Once();
-            stub.Stub(x => x.GetUser(Arg<int>.Is.Anything)).Return("barcz");
-
-            
-            Console.WriteLine(stub.GetUser(1));
-            Console.WriteLine(stub.GetUser(1));
-
-            // stub.Stub(x => x.GetUserId("Tim", "Barcz")).Return(12);
-
-            //stub.Stub(x => 
-            //    x.GetUserId(
-            //        Arg<string>.Is.Equal("Tim"), 
-            //        "Barcz"))
-            //    .Return(12);
-
-            // Act & Assert
-            //Assert.Equal(12, stub.GetUserId("Tim","Barcz"));
-            //Assert.NotNull(stub);
-        }
+			//stub.Stub(x => x.GetUser(1)).Return("tim").Repeat.Once();
+			stub.Stub(x => x.GetUser(Arg<int>.Is.Anything)).Return("barcz");
 
 
-        public interface ITestService
-        {
-            string GetUser(long id);
-            int GetUserId(string firstName, string lastName);
-        }
+			Console.WriteLine(stub.GetUser(1));
+			Console.WriteLine(stub.GetUser(1));
 
-    }
+			// stub.Stub(x => x.GetUserId("Tim", "Barcz")).Return(12);
+
+			//stub.Stub(x => 
+			//    x.GetUserId(
+			//        Arg<string>.Is.Equal("Tim"), 
+			//        "Barcz"))
+			//    .Return(12);
+
+			// Act & Assert
+			//Assert.Equal(12, stub.GetUserId("Tim","Barcz"));
+			//Assert.NotNull(stub);
+		}
+
+
+		public interface ITestService
+		{
+			string GetUser(long id);
+			int GetUserId(string firstName, string lastName);
+		}
+	}
 }

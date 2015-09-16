@@ -30,26 +30,21 @@ using Rhino.Mocks.Exceptions;
 
 namespace Rhino.Mocks.Tests
 {
-    using System;
     using Xunit;
 
-    
     public class DoNotExpectTests
     {
-        private MockRepository mocks;
         private IDemo demo;
 
 		public DoNotExpectTests()
         {
-            mocks = new MockRepository();
-            demo = mocks.DynamicMock<IDemo>();
+            demo = MockRepository.GenerateMock<IDemo>();
         }
 
         [Fact]
         public void ShouldNotExpect()
         {
-            DoNotExpect.Call(demo.StringArgString("Ayende"));
-            mocks.ReplayAll();
+            demo.Expect(x => x.StringArgString("Ayende")).Repeat.Never();
         	var ex = Assert.Throws<ExpectationViolationException>(() => this.demo.StringArgString("Ayende"));
         	Assert.Equal("IDemo.StringArgString(\"Ayende\"); Expected #0, Actual #1.", ex.Message);
         }
@@ -57,61 +52,32 @@ namespace Rhino.Mocks.Tests
         [Fact]
         public void CanUseAnonymousDelegatesToCallVoidMethods()
         {
-            DoNotExpect.Call(delegate { demo.VoidNoArgs(); });
-            mocks.ReplayAll();
-        	var ex = Assert.Throws<ExpectationViolationException>(() => this.demo.VoidNoArgs());
+            demo.Expect(x => x.VoidNoArgs()).Repeat.Never();
+          var ex = Assert.Throws<ExpectationViolationException>(() => this.demo.VoidNoArgs());
         	Assert.Equal("IDemo.VoidNoArgs(); Expected #0, Actual #1.", ex.Message);
         }
 
         [Fact]
         public void CanUseAnonymousDelegatesToCallVoidMethods_WithStringArg()
         {
-            DoNotExpect.Call(delegate { demo.VoidStringArg("Ayende"); });
-            mocks.ReplayAll();
-        	var ex = Assert.Throws<ExpectationViolationException>(() => this.demo.VoidStringArg("Ayende"));
+            demo.Expect(x => x.VoidStringArg("Ayende")).Repeat.Never();
+          var ex = Assert.Throws<ExpectationViolationException>(() => this.demo.VoidStringArg("Ayende"));
         	Assert.Equal("IDemo.VoidStringArg(\"Ayende\"); Expected #0, Actual #1.", ex.Message);
-        }
-
-        [Fact]
-        public void CanUseAnonymousDelegatesToCallVoidMethods_WithoutAnonymousDelegate()
-        {
-            DoNotExpect.Call(demo.VoidNoArgs);
-            mocks.ReplayAll();
-        	var ex = Assert.Throws<ExpectationViolationException>(() => this.demo.VoidNoArgs());
-        	Assert.Equal("IDemo.VoidNoArgs(); Expected #0, Actual #1.", ex.Message);
-        }
-
-        [Fact]
-        public void CanUseAnonymousDelegatesToCallStringMethods_WithoutAnonymousDelegate()
-        {
-            DoNotExpect.Call(demo.StringArgString("Ayende"));
-            mocks.ReplayAll();
-        	var ex = Assert.Throws<ExpectationViolationException>(() => this.demo.StringArgString("Ayende"));
-        	Assert.Equal("IDemo.StringArgString(\"Ayende\"); Expected #0, Actual #1.", ex.Message);
         }
 
         [Fact]
         public void DoNotExpectCallRespectsArguments()
         {
-            DoNotExpect.Call(demo.StringArgString("Ayende"));
-            mocks.ReplayAll();
+            demo.Expect(x => x.StringArgString("Ayende")).Repeat.Never();
             demo.StringArgString("Sneal");
         	var ex = Assert.Throws<ExpectationViolationException>(() => this.demo.StringArgString("Ayende"));
         	Assert.Equal("IDemo.StringArgString(\"Ayende\"); Expected #0, Actual #1.", ex.Message);
         }
 
         [Fact]
-        public void ThrowWhenCallIsNull()
-        {
-        	Assert.Throws<ArgumentNullException>(() => DoNotExpect.Call(null));
-        }
-
-        [Fact]
         public void CanUseDoNotCallOnPropertySet()
         {
-            DoNotExpect.Call(delegate { demo.Prop = "Ayende"; });
-            mocks.ReplayAll();
-
+            demo.Expect(x => x.Prop = "Ayende").Repeat.Never();
         	var ex = Assert.Throws<ExpectationViolationException>(() => this.demo.Prop = "Ayende");
         	Assert.Equal("IDemo.set_Prop(\"Ayende\"); Expected #0, Actual #1.", ex.Message);
         }
@@ -119,12 +85,8 @@ namespace Rhino.Mocks.Tests
         [Fact]
         public void CanUseDoNotCallOnPropertyGet()
         {
-            DoNotExpect.Call(demo.Prop);
-            mocks.ReplayAll();
-        	var ex = Assert.Throws<ExpectationViolationException>(() =>
-        	                                                      	{
-        	                                                      		string soItCompiles = this.demo.Prop;
-        	                                                      	});
+            demo.Expect(x => { var y = x.Prop; }).Repeat.Never();
+        	var ex = Assert.Throws<ExpectationViolationException>(() => { string soItCompiles = this.demo.Prop; });
         	Assert.Equal("IDemo.get_Prop(); Expected #0, Actual #1.", ex.Message);
         }
     }

@@ -4,56 +4,42 @@ using Rhino.Mocks.Constraints;
 
 namespace Rhino.Mocks.Tests.FieldsProblem
 {
-    
     public class FieldProblem_Roy
     {
         [Fact]
         public void StubNeverFailsTheTest()
         {
-            MockRepository repository = new MockRepository();
-            IGetResults resultGetter = repository.Stub<IGetResults>();
-            using (repository.Record())
-            {
-                resultGetter.GetSomeNumber("a");
-                LastCall.Return(1);
-            }
+            IGetResults resultGetter = MockRepository.GenerateStub<IGetResults>();
+            resultGetter.Expect(x => x.GetSomeNumber("a")).Return(1);
 
             int result = resultGetter.GetSomeNumber("b");
             Assert.Equal(0, result);
-            repository.VerifyAll(); //<- should not fail the test methinks
+            resultGetter.VerifyAllExpectations(); //<- should not fail the test methinks
         }
 
         [Fact]
         public void CanGetSetupResultFromStub()
         {
-            MockRepository repository = new MockRepository();
-            IGetResults resultGetter = repository.Stub<IGetResults>();
-            using (repository.Record())
-            {
-                resultGetter.GetSomeNumber("a");
-                LastCall.Return(1);
-            }
+            IGetResults resultGetter = MockRepository.GenerateStub<IGetResults>();
+            resultGetter.Expect(x => x.GetSomeNumber("a")).Return(1);
 
             int result = resultGetter.GetSomeNumber("a");
             Assert.Equal(1, result);
-            repository.VerifyAll(); 
+            resultGetter.VerifyAllExpectations(); 
         }
 
         [Fact]
         public void CannotCallLastCallConstraintsMoreThanOnce()
         {
-            MockRepository repository = new MockRepository();
-            IGetResults resultGetter = repository.Stub<IGetResults>();
-        	var ex = Assert.Throws<InvalidOperationException>(() =>
-        	                                                  	{
-        	                                                  		using (repository.Record())
-        	                                                  		{
-        	                                                  			resultGetter.GetSomeNumber("a");
-        	                                                  			LastCall.Constraints(Text.Contains("b"));
-        	                                                  			LastCall.Constraints(Text.Contains("a"));
-        	                                                  		}
-        	                                                  	});
-        	Assert.Equal("You have already specified constraints for this method. (IGetResults.GetSomeNumber(contains \"b\");)", ex.Message);
+            IGetResults resultGetter = MockRepository.GenerateStub<IGetResults>();
+            var ex = Assert.Throws<InvalidOperationException>(() =>
+              {
+                resultGetter.Expect(x => x.GetSomeNumber("a"))
+                  .Constraints(Text.Contains("b"))
+                  .Constraints(Text.Contains("a"));
+                });
+
+            Assert.Equal("You have already specified constraints for this method. (IGetResults.GetSomeNumber(contains \"b\");)", ex.Message);
         }
     }
 

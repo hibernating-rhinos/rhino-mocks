@@ -29,22 +29,16 @@ namespace Rhino.Mocks.Tests.FieldsProblem
         [Fact]
         public void TestMethod1()
         {
-            MockRepository mock = new MockRepository();
-
-            MyInterface myInterface = mock.StrictMock<MyInterface>();
+            MyInterface myInterface = MockRepository.GenerateStrictMock<MyInterface>();
 
             A a = new A();
             a.a = 10;
             a.b = 12;
 
-            myInterface.retValue(a);
-            LastCall.Return(5).Constraints(
-                Property.Value("a",10) && Property.Value("b",12)
-                );
-            mock.ReplayAll();
+            myInterface.Expect(x => x.retValue(a)).Return(5).Constraints(Property.Value("a",10) && Property.Value("b",12));
 
             int ret = myInterface.retValue(a);
-            mock.VerifyAll();
+            myInterface.VerifyAllExpectations();
             Assert.True(ret == 5);
         }
     }

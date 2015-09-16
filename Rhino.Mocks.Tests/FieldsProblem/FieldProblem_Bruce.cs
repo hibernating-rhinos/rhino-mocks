@@ -26,9 +26,6 @@
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endregion
 
-
-using System;
-using System.Text;
 using Xunit;
 using Rhino.Mocks.Impl;
 
@@ -40,8 +37,7 @@ namespace Rhino.Mocks.Tests.FieldsProblem
         [Fact]
         public void CreateClassWithDefaultCtor()
         {
-            MockRepository mocks = new MockRepository();
-            ClassWithDefaultCtor cwdc = (ClassWithDefaultCtor)mocks.DynamicMock(typeof(ClassWithDefaultCtor));
+            ClassWithDefaultCtor cwdc = (ClassWithDefaultCtor)MockRepository.GenerateMock(typeof(ClassWithDefaultCtor), null, null);
             Assert.NotNull(cwdc);
         }
 

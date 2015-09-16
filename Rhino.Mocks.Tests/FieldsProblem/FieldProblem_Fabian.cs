@@ -26,13 +26,11 @@
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endregion
 
-
 using Xunit;
 using Rhino.Mocks.Interfaces;
 
 namespace Rhino.Mocks.Tests.FieldsProblem
 {
-	
 	public class FieldProblem_Fabian
 	{
 		public delegate R Func<A1, R>(A1 a1);
@@ -50,50 +48,38 @@ namespace Rhino.Mocks.Tests.FieldsProblem
 		[Fact]
 		public void TestExpectCall()
 		{
-			MockRepository mocks = new MockRepository();
-			ICache<string, int> mockCache = mocks.StrictMock<ICache<string, int>>();
-			Expect.Call(mockCache.GetValue("a")).Do((Func<string, int>)delegate
-			{
-				return 1;
-			});
-			mocks.ReplayAll();
+			ICache<string, int> mockCache = MockRepository.GenerateStrictMock<ICache<string, int>>();
+			mockCache.Expect(x => x.GetValue("a")).Do((Func<string, int>)delegate { return 1; });
 
 			int i = mockCache.GetValue("a");
-			Assert.Equal(1,i );
+			Assert.Equal(1, i);
 
-			mocks.VerifyAll();
+			mockCache.VerifyAllExpectations();
 		}
 
 		[Fact]
 		public void TestLastCall()
 		{
-			MockRepository mocks = new MockRepository();
-			ICache<string, int> mockCache = mocks.StrictMock<ICache<string, int>>();
-			mockCache.Add("a", 1);
-			LastCall.Do((Proc<string, int>)delegate
-			{
-			});
-			mocks.ReplayAll();
+			ICache<string, int> mockCache = MockRepository.GenerateStrictMock<ICache<string, int>>();
+			mockCache.Expect(x => x.Add("a", 1)).Do((Proc<string, int>)delegate { });
 
 			mockCache.Add("a", 1);
 
-			mocks.VerifyAll();
+			mockCache.VerifyAllExpectations();
 		}
 
 		[Fact]
 		public void TestExpectCallWithNonGenericDelegate()
 		{
-			MockRepository mocks = new MockRepository();
-			ICache<string, int> mockCache = mocks.StrictMock<ICache<string, int>>();
-			IMethodOptions<int> opts = Expect.Call(mockCache.GetValue("a"));
+			ICache<string, int> mockCache = MockRepository.GenerateStrictMock<ICache<string, int>>();
+			IMethodOptions<int> opts = mockCache.Expect(x => x.GetValue("a"));
 			opts.Do(new StringInt(GetValue));
-			mocks.ReplayAll();
 
 			int i = mockCache.GetValue("a");
 
 			Assert.Equal(2, i);
 
-			mocks.VerifyAll();
+			mockCache.VerifyAllExpectations();
 		}
 
 		private int GetValue(string s)

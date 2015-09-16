@@ -32,43 +32,27 @@ using Xunit;
 using Rhino.Mocks.Constraints;
 using Rhino.Mocks.Exceptions;
 using Rhino.Mocks.Interfaces;
-using Rhino.Mocks.Tests.Callbacks;
 
 namespace Rhino.Mocks.Tests
 {
-	
 	public class LastCallTests : IDisposable
 	{
-		private MockRepository mocks;
 		private IDemo demo;
 		private bool delegateWasCalled;
 
 		[Fact]
 		public void LastCallOnNonMockObjectThrows()
 		{
-			try
-			{
-				var ex = Assert.Throws<InvalidOperationException>(() => LastCall.On(new object()));
+				var ex = Assert.Throws<InvalidOperationException>(() => (new object()).Expect(x => x.ToString()));
 				Assert.Equal("The object 'System.Object' is not a mocked object.", ex.Message);
-			}
-			finally
-			{
-				mocks.ReplayAll(); //for the tear down
-			}
 		}
 
 		[Fact]
 		public void LastCallConstraints()
 		{
-			mocks.ReplayAll();//we aren't using this, because we force an exception, which will be re-thrown on verify()
-			
-			MockRepository seperateMocks = new MockRepository();
-			demo = (IDemo)seperateMocks.StrictMock(typeof (IDemo));
-			demo.StringArgString("");
-			LastCall.Constraints(Is.Null());
-			LastCall.Return("aaa").Repeat.Twice();
-			seperateMocks.ReplayAll();
-			Assert.Equal("aaa",demo.StringArgString(null));
+			var demo = (IDemo)MockRepository.GenerateStrictMock(typeof (IDemo), null, null);
+			demo.Expect(x => x.StringArgString("")).Constraints(Is.Null()).Return("aaa").Repeat.Twice();
+			Assert.Equal("aaa", demo.StringArgString(null));
 
 			try
 			{
@@ -77,19 +61,16 @@ namespace Rhino.Mocks.Tests
 			}
 			catch(Exception e)
 			{
-				Assert.Equal("IDemo.StringArgString(\"\"); Expected #0, Actual #1.\r\nIDemo.StringArgString(equal to null); Expected #2, Actual #1.",e.Message);
+				Assert.Equal("IDemo.StringArgString(\"\"); Expected #0, Actual #1.\r\nIDemo.StringArgString(equal to null); Expected #2, Actual #1.", e.Message);
 			}
 		}
 
         [Fact]
         public void LastCallCallOriginalMethod()
         {
-            CallOriginalMethodFodder comf1 = (CallOriginalMethodFodder)mocks.DynamicMock(typeof(CallOriginalMethodFodder));
-            CallOriginalMethodFodder comf2 = (CallOriginalMethodFodder)mocks.DynamicMock(typeof(CallOriginalMethodFodder));
-            comf2.TheMethod();
-            LastCall.CallOriginalMethod(OriginalCallOptions.CreateExpectation);
-
-            mocks.ReplayAll();
+            CallOriginalMethodFodder comf1 = (CallOriginalMethodFodder)MockRepository.GenerateMock(typeof(CallOriginalMethodFodder), null, null);
+            CallOriginalMethodFodder comf2 = (CallOriginalMethodFodder)MockRepository.GenerateMock(typeof(CallOriginalMethodFodder), null, null);
+            comf2.Expect(x => x.TheMethod()).CallOriginalMethod(OriginalCallOptions.CreateExpectation);
 
             comf1.TheMethod();
             Assert.Equal(false, comf1.OriginalMethodCalled);
@@ -101,14 +82,9 @@ namespace Rhino.Mocks.Tests
 		[Fact]
 		public void LastCallOriginalMethod_WithExpectation()
 		{
-			MockRepository mockRepository = new MockRepository();
-			CallOriginalMethodFodder comf1 = (CallOriginalMethodFodder)mockRepository.DynamicMock(typeof(CallOriginalMethodFodder));
-            CallOriginalMethodFodder comf2 = (CallOriginalMethodFodder)mockRepository.DynamicMock(typeof(CallOriginalMethodFodder));
-            comf2.TheMethod();
-			LastCall.CallOriginalMethod(OriginalCallOptions.CreateExpectation)
-				.Repeat.Twice();
-
-            mockRepository.ReplayAll();
+			CallOriginalMethodFodder comf1 = (CallOriginalMethodFodder)MockRepository.GenerateMock(typeof(CallOriginalMethodFodder), null, null);
+            CallOriginalMethodFodder comf2 = (CallOriginalMethodFodder)MockRepository.GenerateMock(typeof(CallOriginalMethodFodder), null, null);
+            comf2.Expect(x => x.TheMethod()).CallOriginalMethod(OriginalCallOptions.CreateExpectation).Repeat.Twice();
 
             comf1.TheMethod();
             Assert.Equal(false, comf1.OriginalMethodCalled);
@@ -116,7 +92,7 @@ namespace Rhino.Mocks.Tests
             comf2.TheMethod();
             Assert.Equal(true, comf2.OriginalMethodCalled);
 
-			var ex = Assert.Throws<ExpectationViolationException>(() => mockRepository.VerifyAll());
+			var ex = Assert.Throws<ExpectationViolationException>(() => comf2.VerifyAllExpectations());
 			Assert.Equal("CallOriginalMethodFodder.TheMethod(); Expected #2, Actual #1.", ex.Message);
 		}
 
@@ -138,12 +114,10 @@ namespace Rhino.Mocks.Tests
 		[Fact]
 		public void LastCallCallback()
 		{
-			demo.VoidNoArgs();
+			demo.Expect(x => x.VoidNoArgs()).Callback(delegateCalled);
 			delegateWasCalled = false;
-			LastCall.Callback(delegateCalled);
-			mocks.ReplayAll();
 
-			demo	.VoidNoArgs();
+			demo.VoidNoArgs();
 			Assert.True(delegateWasCalled);
 		}
 
@@ -155,22 +129,18 @@ namespace Rhino.Mocks.Tests
 
 		public LastCallTests()
 		{
-			mocks = new MockRepository();
-			demo = (IDemo) mocks.StrictMock(typeof (IDemo));
+			demo = (IDemo)MockRepository.GenerateStrictMock(typeof (IDemo), null, null);
 		}
 
 		public void Dispose()
 		{
-			mocks.ReplayAll();
-			mocks.VerifyAll();
+			demo.VerifyAllExpectations();
 		}
 
 		[Fact]
 		public void LastCallReturn()
 		{
-			demo.ReturnIntNoArgs();
-			LastCall.Return(5);
-			mocks.ReplayAll();
+			demo.Expect(x => x.ReturnIntNoArgs()).Return(5);
 			Assert.Equal(5, demo.ReturnIntNoArgs());
 		}
 
@@ -179,22 +149,19 @@ namespace Rhino.Mocks.Tests
 		{
 			try
 			{
-				var ex = Assert.Throws<InvalidOperationException>(() => LastCall.Return(null));
+				var ex = Assert.Throws<InvalidOperationException>(() => demo.Expect(x => x).Return(null));
 				Assert.Equal("Invalid call, the last call has been used or no call has been made (make sure that you are calling a virtual (C#) / Overridable (VB) method).", ex.Message);
 			}
 			finally
 			{
-				mocks.ReplayAll(); //for the tear down
+				demo.Replay(); //for the tear down
 			}
-
 		}
 
 		[Fact]
 		public void LastCallThrow()
 		{
-			demo.VoidNoArgs();
-			LastCall.Throw(new Exception("Bla!"));
-			mocks.ReplayAll();
+			demo.Expect(x => x.VoidNoArgs()).Throw(new Exception("Bla!"));
 			var ex = Assert.Throws<Exception>(() => this.demo.VoidNoArgs());
 			Assert.Equal("Bla!", ex.Message);
 		}
@@ -202,9 +169,7 @@ namespace Rhino.Mocks.Tests
 		[Fact]
 		public void LastCallRepeat()
 		{
-			demo.VoidNoArgs();
-			LastCall.Repeat.Twice();
-			mocks.ReplayAll();
+			demo.Expect(x => x.VoidNoArgs()).Repeat.Twice();
 			demo.VoidNoArgs();
 			demo.VoidNoArgs();
 		}
@@ -212,12 +177,8 @@ namespace Rhino.Mocks.Tests
 		[Fact]
 		public void LastCallIgnoreArguments()
 		{
-			demo.VoidStringArg("hello");
-			LastCall.IgnoreArguments();
-			mocks.ReplayAll();
+			demo.Expect(x => x.VoidStringArg("hello")).IgnoreArguments();
 			demo.VoidStringArg("bye");
 		}
-
-
 	}
 }

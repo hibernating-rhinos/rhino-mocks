@@ -26,7 +26,6 @@
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endregion
 
-
 using System;
 using Xunit;
 using Rhino.Mocks.Constraints;
@@ -34,46 +33,35 @@ using Rhino.Mocks.Interfaces;
 
 namespace Rhino.Mocks.Tests.FieldsProblem
 {
-	
 	public class FieldProblem_Ernst
 	{
 		[Fact]
 		public void CallOriginalMethodProblem2()
 		{
-			MockRepository mockRepository = new MockRepository();
-			MockedClass mock = mockRepository.StrictMock<MockedClass>();
+			MockedClass mock = MockRepository.GenerateStrictMock<MockedClass>();
 
-			mock.Method(null);
-			LastCall.Constraints(Is.Equal("parameter")).CallOriginalMethod
-				(OriginalCallOptions.CreateExpectation);
-
-			mockRepository.ReplayAll();
+			mock.Expect(x => x.Method(null)).Constraints(Is.Equal("parameter")).CallOriginalMethod(OriginalCallOptions.CreateExpectation);
 
 			mock.Method("parameter");
 
-			mockRepository.VerifyAll();
+			mock.VerifyAllExpectations();
 		}
 
 		[Fact]
 		public void CanUseBackToRecordOnMethodsThatCallToCallOriginalMethod()
 		{
-			MockRepository repository = new MockRepository();
-			TestClass mock = repository.StrictMock<TestClass>();
+			TestClass mock = MockRepository.GenerateStrictMock<TestClass>();
+
+			mock.Expect(x => x.Method()).CallOriginalMethod(OriginalCallOptions.NoExpectation);
 
 			mock.Method();
-			LastCall.CallOriginalMethod
-				(OriginalCallOptions.NoExpectation);
+			mock.VerifyAllExpectations();
 
-			repository.ReplayAll();
-			mock.Method();
-			repository.VerifyAll();
+			mock.BackToRecord();
 
-			repository.BackToRecordAll();
+			mock.Expect(x => x.Method()).Throw(new ApplicationException());
 
-			mock.Method();
-			LastCall.Throw(new ApplicationException());
-
-			repository.ReplayAll();
+			mock.Replay();
 
 			try
 			{
@@ -83,33 +71,31 @@ namespace Rhino.Mocks.Tests.FieldsProblem
 			catch
 			{
 			}
-			repository.VerifyAll();
+			mock.VerifyAllExpectations();
 		}
 
 
 		[Fact]
 		public void CanUseBackToRecordOnMethodsThatCallPropertyBehavior()
 		{
-			MockRepository repository = new MockRepository();
-			TestClass mock = repository.StrictMock<TestClass>();
+			TestClass mock = MockRepository.GenerateStrictMock<TestClass>();
 
-			Expect.Call(mock.Id).PropertyBehavior();
+			mock.Expect(x => x.Id).PropertyBehavior();
 
-			repository.ReplayAll();
 			mock.Id = 4;
 			int d = mock.Id;
-			Assert.Equal(4,d );
-			repository.VerifyAll();
+			Assert.Equal(4,d);
+			mock.VerifyAllExpectations();
 
-			repository.BackToRecordAll();
+			mock.BackToRecord();
 
-			Expect.Call(mock.Id).Return(5);
+			mock.Expect(x => x.Id).Return(5);
 
-			repository.ReplayAll();
+			mock.Replay();
 
 			Assert.Equal(5, mock.Id);
 
-			repository.VerifyAll();
+			mock.VerifyAllExpectations();
 		}
 	}
 

@@ -3,7 +3,6 @@ namespace Rhino.Mocks.Tests.FieldsProblem
 	using System;
 	using Xunit;
 
-	
 	public class FieldProblem_Lopez
 	{
 		public interface GenericContainer<T>
@@ -15,13 +14,9 @@ namespace Rhino.Mocks.Tests.FieldsProblem
 		[Fact]
 		public void PropertyBehaviorForSinglePropertyTypeOfString()
 		{
-			MockRepository mocks = new MockRepository();
+			GenericContainer<string> stringContainer = MockRepository.GenerateStrictMock<GenericContainer<string>>();
 
-			GenericContainer<string> stringContainer = mocks.StrictMock<GenericContainer<string>>();
-
-			Expect.Call(stringContainer.Item).PropertyBehavior();
-
-			mocks.Replay(stringContainer);
+			stringContainer.Expect(x => x.Item).PropertyBehavior();
 
 			for (int i = 1; i < 49; ++i)
 			{
@@ -32,20 +27,16 @@ namespace Rhino.Mocks.Tests.FieldsProblem
 				Assert.Equal(newItem, stringContainer.Item);
 			}
 
-			mocks.Verify(stringContainer);
+			stringContainer.VerifyAllExpectations();
 		}
 
 
 		[Fact]
 		public void PropertyBehaviourForSinglePropertyTypeOfDateTime()
 		{
-			MockRepository mocks = new MockRepository();
+			GenericContainer<DateTime> dateTimeContainer = MockRepository.GenerateStrictMock<GenericContainer<DateTime>>();
 
-			GenericContainer<DateTime> dateTimeContainer = mocks.StrictMock<GenericContainer<DateTime>>();
-
-			Expect.Call(dateTimeContainer.Item).PropertyBehavior();
-
-			mocks.Replay(dateTimeContainer);
+			dateTimeContainer.Expect(x => x.Item).PropertyBehavior();
 
 			for (int i = 1; i < 12; i++)
 			{
@@ -56,20 +47,16 @@ namespace Rhino.Mocks.Tests.FieldsProblem
 				Assert.Equal(date, dateTimeContainer.Item);
 			}
 
-			mocks.Verify(dateTimeContainer);
+			dateTimeContainer.VerifyAllExpectations();
 		}
 
 
 		[Fact]
 		public void PropertyBehaviourForSinglePropertyTypeOfInteger()
 		{
-			MockRepository mocks = new MockRepository();
+			GenericContainer<int> dateTimeContainer = MockRepository.GenerateStrictMock<GenericContainer<int>>();
 
-			GenericContainer<int> dateTimeContainer = mocks.StrictMock<GenericContainer<int>>();
-
-			Expect.Call(dateTimeContainer.Item).PropertyBehavior();
-
-			mocks.Replay(dateTimeContainer);
+			dateTimeContainer.Expect(x => x.Item).PropertyBehavior();
 
 			for (int i = 1; i < 49; i++)
 			{
@@ -78,7 +65,7 @@ namespace Rhino.Mocks.Tests.FieldsProblem
 				Assert.Equal(i, dateTimeContainer.Item);
 			}
 
-			mocks.Verify(dateTimeContainer);
+			dateTimeContainer.VerifyAllExpectations();
 		}
 	}
 }

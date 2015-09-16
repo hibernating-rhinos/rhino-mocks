@@ -1,34 +1,23 @@
-using System;
-using System.Collections.Generic;
-using System.Text;
 using Xunit;
 
 namespace Rhino.Mocks.Tests.FieldsProblem
 {
-    
     public class FieldProblem_SamW
     {
         [Fact]
         public void UsingArrayAndOutParam()
         {
-            MockRepository mockRepository = new MockRepository();
-            ITest test = mockRepository.StrictMock<ITest>();
+            ITest test = MockRepository.GenerateStrictMock<ITest>();
             string b;
-            test.ArrayWithOut(new string[] { "data" }, out b);
+            test.Expect(x => x.ArrayWithOut(new string[] { "data" }, out b)).Return("SuccessWithOut1").OutRef("SuccessWithOut2");
 
-            LastCall.Return("SuccessWithOut1").OutRef("SuccessWithOut2");
-
-            mockRepository.ReplayAll();
-            Console.WriteLine(test.ArrayWithOut(new string[] { "data" }, out b));
-            Console.WriteLine(b);
+            Assert.Equal("SuccessWithOut1", test.ArrayWithOut(new string[] { "data" }, out b));
+            Assert.Equal("SuccessWithOut2", b);
         }
-
 
         public interface ITest
         {
             string ArrayWithOut(string[] a, out string b);
         }
-
-
     }
 }

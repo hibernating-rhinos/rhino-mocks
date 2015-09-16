@@ -236,7 +236,13 @@ namespace Rhino.Mocks
         {
         }
 
-        private MockRepository(bool ignored)
+        /// <summary>
+        /// Creates a new <see cref="MockRepository"/> instance.
+        /// </summary>
+        /// <remarks>
+        /// Just a constructor used temporarily to avoid the obsolete warning on 'public MockRepository()' - subject to be replaced by 'protected MockRepository()'.
+        /// </remarks>
+        protected MockRepository(bool ignored)
         {
             proxyGenerationOptions = new ProxyGenerationOptions
             {
@@ -511,6 +517,12 @@ namespace Rhino.Mocks
         {
             if (type.IsInterface)
                 throw new InvalidOperationException("Can't create a partial stub from an interface");
+
+            if (extraTypes == null)
+            {
+              extraTypes = new Type[0];
+            }
+
             List<Type> extraTypesWithMarker = new List<Type>(extraTypes);
             extraTypesWithMarker.Add(typeof(IPartialMockMarker));
             CreateMockState createStub = mockedObject => new StubRecordMockState(mockedObject, this, true);
@@ -1254,7 +1266,10 @@ namespace Rhino.Mocks
         ///<returns></returns>
         public static object GeneratePartialMock(Type type, Type[] extraTypes, params object[] argumentsForConstructor)
         {
-            return CreateMockInReplay(r => r.PartialMultiMock(type, extraTypes, argumentsForConstructor));
+          if (extraTypes == null) extraTypes = new Type[0];
+          if (argumentsForConstructor == null) argumentsForConstructor = new object[0];
+
+          return CreateMockInReplay(r => r.PartialMultiMock(type, extraTypes, argumentsForConstructor));
         }
 
         ///<summary>

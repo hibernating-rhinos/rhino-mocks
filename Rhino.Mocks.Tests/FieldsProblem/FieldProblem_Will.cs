@@ -6,21 +6,18 @@ using Xunit;
 
 namespace Rhino.Mocks.Tests.FieldsProblem
 {
-    
     public class FieldProblem_Will
     {
         [Fact]
         public void HostingMockedService()
         {
-            MockRepository mocks = new MockRepository();
-            IServiceClassInterface mock = mocks.StrictMock<ServiceClassImpl>();
+            IServiceClassInterface mock = MockRepository.GenerateStrictMock<ServiceClassImpl>();
 
             ServiceHost host = new ServiceHost(mock, new Uri("net.tcp://localhost:9876/MyService"));
             ServiceEndpoint endpoint = host.AddServiceEndpoint(typeof(IServiceClassInterface), new NetTcpBinding(), "net.tcp://localhost:9876/MyService");
             KeyedByTypeCollection<IEndpointBehavior> behaviors = endpoint.Behaviors;
             host.Open();
             host.Close();
-
         }
     }
 
@@ -36,7 +33,6 @@ namespace Rhino.Mocks.Tests.FieldsProblem
     {
         public virtual void Foo()
         {
-            
         }
     }
 }

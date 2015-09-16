@@ -26,14 +26,10 @@
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endregion
 
-
-using System;
-using System.Text;
 using Xunit;
 
 namespace Rhino.Mocks.Tests.FieldsProblem
 {
-	
 	public class FieldProblem_Michael
 	{
 		public interface IProvider
@@ -45,22 +41,17 @@ namespace Rhino.Mocks.Tests.FieldsProblem
 		[Fact]
 		public void TestChar()
 		{
-			MockRepository mocks = new MockRepository();
-			IProvider mockProvider = (IProvider)mocks.StrictMock(typeof(IProvider));
-			SetupResult.For(mockProvider.GetChar()).Return('X');
-			mocks.ReplayAll();
+			IProvider mockProvider = (IProvider)MockRepository.GenerateStrictMock(typeof(IProvider), null, null);
+			mockProvider.Expect(x => x.GetChar()).Return('X');
 			Assert.Equal('X', mockProvider.GetChar()); // actual is a random char
 		}
 
 		[Fact]
 		public void TestInt32()
 		{
-			MockRepository mocks = new MockRepository();
-			IProvider mockProvider = (IProvider)mocks.StrictMock(typeof(IProvider));
-			SetupResult.For(mockProvider.GetInt32()).Return(100);
-			mocks.ReplayAll();
+			IProvider mockProvider = (IProvider)MockRepository.GenerateStrictMock(typeof(IProvider), null, null);
+			mockProvider.Expect(x => x.GetInt32()).Return(100);
 			Assert.Equal(100, mockProvider.GetInt32()); // actual is 100
 		}
-
 	}
 }

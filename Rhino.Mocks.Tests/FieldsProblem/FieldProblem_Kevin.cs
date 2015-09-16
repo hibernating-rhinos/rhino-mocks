@@ -30,7 +30,6 @@ using Xunit;
 
 namespace Rhino.Mocks.Tests.FieldsProblem
 {
-	
 	public class FieldProblem_Kevin
 	{
 		//This is related to an initialization mechanism in use for the CodeGenerationServices on Castle.Contrib
@@ -42,16 +41,13 @@ namespace Rhino.Mocks.Tests.FieldsProblem
 		{
 			string mockedResult = "mocked result";
 
-			MockRepository mockRepository = new MockRepository();
-			ConcreteProtectedMethodCalledFromCtor concreteProtectedMethodCalledFromCtor = mockRepository.PartialMock<ConcreteProtectedMethodCalledFromCtor>();
+			ConcreteProtectedMethodCalledFromCtor concreteProtectedMethodCalledFromCtor = MockRepository.GeneratePartialMock<ConcreteProtectedMethodCalledFromCtor>();
 
-			Expect.Call(concreteProtectedMethodCalledFromCtor.SimplyHereSoThereIsSomethingToMock()).Return(mockedResult);
-
-			mockRepository.ReplayAll();
+			concreteProtectedMethodCalledFromCtor.Expect(x => x.SimplyHereSoThereIsSomethingToMock()).Return(mockedResult);
 
 			string result = concreteProtectedMethodCalledFromCtor.SimplyHereSoThereIsSomethingToMock();
 
-			mockRepository.VerifyAll();
+			concreteProtectedMethodCalledFromCtor.VerifyAllExpectations();
 
 			Assert.Equal(mockedResult, result);
 			Assert.Equal(true, concreteProtectedMethodCalledFromCtor.WasAbstractMethodCalledFromCtor);
@@ -62,16 +58,13 @@ namespace Rhino.Mocks.Tests.FieldsProblem
 		{
 			string mockedResult = "mocked result";
 
-			MockRepository mockRepository = new MockRepository();
-			ConcretePublicMethodCalledFromCtor concretePublicMethodCalledFromCtor = mockRepository.PartialMock<ConcretePublicMethodCalledFromCtor>();
+			ConcretePublicMethodCalledFromCtor concretePublicMethodCalledFromCtor = MockRepository.GeneratePartialMock<ConcretePublicMethodCalledFromCtor>();
 
-			Expect.Call(concretePublicMethodCalledFromCtor.SimplyHereSoThereIsSomethingToMock()).Return(mockedResult);
-
-			mockRepository.ReplayAll();
+			concretePublicMethodCalledFromCtor.Expect(x => x.SimplyHereSoThereIsSomethingToMock()).Return(mockedResult);
 
 			string result = concretePublicMethodCalledFromCtor.SimplyHereSoThereIsSomethingToMock();
 
-			mockRepository.VerifyAll();
+			concretePublicMethodCalledFromCtor.VerifyAllExpectations();
 
 			Assert.Equal(mockedResult, result);
 			Assert.Equal(true, concretePublicMethodCalledFromCtor.WasAbstractMethodCalledFromCtor);
@@ -140,5 +133,4 @@ namespace Rhino.Mocks.Tests.FieldsProblem
 	        return "If this value is returned the method was not mocked";
 	    }
 	}
-
 }

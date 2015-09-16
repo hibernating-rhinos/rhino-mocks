@@ -29,56 +29,48 @@
 
 using System;
 using Xunit;
-using Rhino.Mocks.Exceptions;
 
 namespace Rhino.Mocks.Tests
 {
 	
 	public class DotNet2Tests : IDisposable
 	{
-		MockRepository mocks;
         IDotNet2Features demo;
 		public DotNet2Tests()
 		{
-			mocks = new MockRepository();
-            demo = mocks.DynamicMock<IDotNet2Features>();
+            demo = MockRepository.GenerateMock<IDotNet2Features>();
 		}
 
         public void Dispose()
         {
-            mocks.VerifyAll();
+            demo.VerifyAllExpectations();
         }
 
         [Fact]
         public void DefaultValueOfNullableIsNull()
         {
-            mocks.ReplayAll();
             Assert.Null(demo.NullableInt(3));
         }
 
         [Fact]
         public void CanUseNullAsReturnValueForNullables()
         {
-            Expect.Call(demo.NullableInt(5)).Return(null);
-            mocks.ReplayAll();
+            demo.Expect(x => x.NullableInt(5)).Return(null);
             Assert.Null(demo.NullableInt(5));
         }
 
         [Fact]
         public void CanPassNonNullableValues()
         {
-            Expect.Call(demo.NullableInt(53)).Return(5);
-            mocks.ReplayAll();
+            demo.Expect(x => x.NullableInt(53)).Return(5);
             Assert.Equal(5, demo.NullableInt(53));
         }
 
 		[Fact]
 		public void CanStrictMockOnClassWithInternalMethod()
 		{
-			WithInternalMethod withInternalMethod = mocks.StrictMock<WithInternalMethod>();
-			withInternalMethod.Foo();
-			LastCall.Throw(new Exception("foo"));
-			mocks.ReplayAll();
+			WithInternalMethod withInternalMethod = MockRepository.GenerateStrictMock<WithInternalMethod>();
+			withInternalMethod.Expect(x => x.Foo()).Throw(new Exception("foo"));
 			try
 			{
 				withInternalMethod.Foo();
@@ -88,6 +80,8 @@ namespace Rhino.Mocks.Tests
 			{
 				Assert.Equal("foo", e.Message);
 			}
+
+			withInternalMethod.VerifyAllExpectations();
 		}
 
 		internal interface IDotNet2Features

@@ -1,18 +1,15 @@
 using System;
 using System.Collections.Generic;
-using System.Text;
 using Xunit;
 
 namespace Rhino.Mocks.Tests.FieldsProblem
 {
-	
 	public class FieldProblem_OrenEl
 	{
 		[Fact]
 		public void GenericUnsignTypes()
 		{
-			MockRepository mocks = new MockRepository();
-			IDictionary<ulong, ushort> stubClusterNodesMap = mocks.Stub<IDictionary<ulong, ushort>>();
+			IDictionary<ulong, ushort> stubClusterNodesMap = MockRepository.GenerateStub<IDictionary<ulong, ushort>>();
 		}
 
 		[Fact]

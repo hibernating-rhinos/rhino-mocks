@@ -26,12 +26,10 @@
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endregion
 
-
 using Xunit;
 
 namespace Rhino.Mocks.Tests
 {
-	
 	public class IndexerTests
 	{
 		public interface IndexerInterface
@@ -43,12 +41,10 @@ namespace Rhino.Mocks.Tests
 		[Fact]
 		public void SettingExpectationOnIndexer()
 		{
-			MockRepository mocks = new MockRepository();
-			IndexerInterface indexer = (IndexerInterface) mocks.StrictMock(typeof (IndexerInterface));
-			Expect.On(indexer).Call(indexer["1"]).Return("First");
-			mocks.ReplayAll();
+			IndexerInterface indexer = (IndexerInterface)MockRepository.GenerateStrictMock(typeof(IndexerInterface), null, null);
+			indexer.Expect(x => x["1"]).Return("First");
 			Assert.Equal("First", indexer["1"]);
-			mocks.VerifyAll();
+			indexer.VerifyAllExpectations();
 		}
 	}
 }

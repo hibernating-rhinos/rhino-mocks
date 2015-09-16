@@ -26,33 +26,25 @@
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endregion
 
-
 using Xunit;
 using Rhino.Mocks.Interfaces;
 
 namespace Rhino.Mocks.Tests.FieldsProblem
 {
-	using System;
-	using System.Diagnostics;
-	using System.IO;
-
-	
 	public class PropertyWithTypeParameterTest
 	{
 		[Fact]
 		public void CreatedClosedGenericType()
 		{
-			MockRepository mocks = new MockRepository();
-			mocks.StrictMock<ClosedGenericType>();
+			MockRepository.GenerateStrictMock<ClosedGenericType>();
 		}
 
 
 		[Fact]
 		public void UsingdoOnMethodWithGenericReturnValue()
 		{
-			MockRepository mocks = new MockRepository();
-			IGenericType<object> mock = mocks.StrictMock<IGenericType<object>>();
-			IMethodOptions<object> methodOptions = Expect.Call(mock.MyMethod());
+			IGenericType<object> mock = MockRepository.GenerateStrictMock<IGenericType<object>>();
+			IMethodOptions<object> methodOptions = mock.Expect(x => x.MyMethod());
 			methodOptions.Do((MyDelegate)delegate { return new object(); });
 		}
 
@@ -64,9 +56,8 @@ namespace Rhino.Mocks.Tests.FieldsProblem
 		[Fact]
 		public void DoubleGeneric()
 		{
-			MockRepository mocks = new MockRepository();
-			IDoubleGeneric<int> mock = mocks.StrictMock<IDoubleGeneric<int>>();
-			Expect.Call(mock.Method(1, ""));
+			IDoubleGeneric<int> mock = MockRepository.GenerateStrictMock<IDoubleGeneric<int>>();
+			mock.Expect(x => x.Method(1, ""));
 		}
 	}
 

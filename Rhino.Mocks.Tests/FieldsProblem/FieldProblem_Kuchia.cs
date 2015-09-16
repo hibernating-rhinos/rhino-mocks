@@ -3,10 +3,8 @@ using Xunit;
 
 namespace Rhino.Mocks.Tests.FieldsProblem
 {
-    
     public class FieldProblem_Kuchia : IDisposable
     {
-        private MockRepository _mocks;
         private IProblem _problem;
         private IDaoFactory _daoFactory;
         private IBLFactory _blFactory;
@@ -15,36 +13,25 @@ namespace Rhino.Mocks.Tests.FieldsProblem
         public void Method1_CallWithMocks_Returns10()
         {
             int result = Problem.Method1();
-            Mocks.ReplayAll();
-            Mocks.VerifyAll();
+            _daoFactory.VerifyAllExpectations();
+            _blFactory.VerifyAllExpectations();
             Assert.Equal(10, result);
-
-        }
-
-        public MockRepository Mocks
-        {
-            get
-            {
-                _mocks = _mocks ?? new MockRepository();
-                return _mocks;
-            }
         }
 
         public IDaoFactory DaoFactoryMock
         {
             get
             {
-                _daoFactory = _daoFactory ?? Mocks.StrictMock<IDaoFactory>();
+                _daoFactory = _daoFactory ?? MockRepository.GenerateStrictMock<IDaoFactory>();
                 return _daoFactory;
             }
         }
-
 
         public IBLFactory BLFactoryMock
         {
             get
             {
-                _blFactory = _blFactory ?? Mocks.StrictMock<IBLFactory>();
+                _blFactory = _blFactory ?? MockRepository.GenerateStrictMock<IBLFactory>();
                 return _blFactory;
             }
         }
@@ -65,13 +52,11 @@ namespace Rhino.Mocks.Tests.FieldsProblem
             _problem = null;
             _blFactory = null;
             _daoFactory = null;
-            _mocks = null;
         }
     }
 
     public interface IBLFactory
     {
-
     }
 
     public interface IDaoFactory
@@ -88,7 +73,6 @@ namespace Rhino.Mocks.Tests.FieldsProblem
         public Problem(IBLFactory blFactory, IDaoFactory daoFactory)
             : base(blFactory, daoFactory)
         {
-
         }
 
         public int Method1()

@@ -26,30 +26,23 @@
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endregion
 
-
-using System;
-using System.Text;
 using Xunit;
 
 namespace Rhino.Mocks.Tests.FieldsProblem
 {
-    
     public class FieldProblem_JohanIndexProp 
     {
         [Fact]
         public void StrictMockWithIndexedProp()
         {
-            MockRepository mocks = new MockRepository();
-            IWithIndexedProperty index = (IWithIndexedProperty)mocks.StrictMock(typeof(IWithIndexedProperty));
-            Expect.Call(index.get_Foo("Blah")).Return(5);
-            index.set_Foo("Foo",2);
-            mocks.ReplayAll();
+            IWithIndexedProperty index = (IWithIndexedProperty)MockRepository.GenerateStrictMock(typeof(IWithIndexedProperty), null, null);
+            index.Expect(x => x.get_Foo("Blah")).Return(5);
+            index.Expect(x => x.set_Foo("Foo",2));
 
             Assert.Equal(5, index.get_Foo("Blah"));
             index.set_Foo("Foo", 2);
 
-            mocks.VerifyAll();
-
+            index.VerifyAllExpectations();
         }
     }
 

@@ -33,19 +33,16 @@ namespace Rhino.Mocks.Tests
 {
     public class PartialStubTests
     {
-        MockRepository mocks;
         AbstractClass abs;
 
         public PartialStubTests()
         {
-            mocks = new MockRepository();
-            abs = (AbstractClass)mocks.PartialStub(typeof(AbstractClass));
+            abs = (AbstractClass)MockRepository.GeneratePartialStub(typeof(AbstractClass), null);
         }
 
         [Fact]
         public void AutomaticallCallBaseMethodIfNoExpectationWasSet()
         {
-            mocks.ReplayAll();
             Assert.Equal(1, abs.Increment());
             Assert.Equal(6, abs.Add(5));
             Assert.Equal(6, abs.Count);
@@ -54,9 +51,8 @@ namespace Rhino.Mocks.Tests
         [Fact]
         public void CanStubVirtualMethods()
         {
-            Expect.Call(abs.Increment()).Return(5);
-            Expect.Call(abs.Add(2)).Return(3);
-            mocks.ReplayAll();
+            abs.Expect(x => x.Increment()).Return(5);
+            abs.Expect(x => x.Add(2)).Return(3);
             Assert.Equal(5, abs.Increment());
             Assert.Equal(3, abs.Add(2));
             Assert.Equal(0, abs.Count);
@@ -65,8 +61,7 @@ namespace Rhino.Mocks.Tests
         [Fact]
         public void CanStubAbstractMethods()
         {
-            Expect.Call(abs.Decrement()).Return(5);
-            mocks.ReplayAll();
+            abs.Expect(x => x.Decrement()).Return(5);
             Assert.Equal(5, abs.Decrement());
             Assert.Equal(0, abs.Count);
         }
@@ -74,23 +69,21 @@ namespace Rhino.Mocks.Tests
         [Fact]
         public void CantCreatePartialStubFromInterfaces()
         {
-            var ex = Assert.Throws<InvalidOperationException>(() => new MockRepository().PartialStub(typeof(IDemo)));
+            var ex = Assert.Throws<InvalidOperationException>(() => MockRepository.GeneratePartialStub(typeof(IDemo), null));
             Assert.Equal("Can't create a partial stub from an interface", ex.Message);
         }
 
         [Fact]
         public void CallAnAbstractMethodWithoutSettingExpectation()
         {
-            mocks.ReplayAll();
             Assert.Equal(0, this.abs.Decrement());
         }
 
         [Fact]
         public void CanStubWithCtorParams()
         {
-            WithParameters withParameters = mocks.PartialStub<WithParameters>(1);
+            WithParameters withParameters = MockRepository.GeneratePartialStub<WithParameters>(1);
             withParameters.Int = 4;
-            mocks.ReplayAll();
             Assert.Equal(4, withParameters.Int);
         }
     }

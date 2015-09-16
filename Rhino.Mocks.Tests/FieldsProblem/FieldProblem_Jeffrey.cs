@@ -26,45 +26,36 @@
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endregion
 
-
 using System;
-using System.Collections.Generic;
-using System.Net.Mail;
-using System.Text;
 using Xunit;
 
 namespace Rhino.Mocks.Tests.FieldsProblem
 {
-	
 	public class FieldProblem_Jeffrey
 	{
 		[Fact]
 		public void DelegateToGenericMock()
 		{
-			MockRepository mocks = new MockRepository();
-			IEMailFormatter<string> formatterMock = mocks.StrictMock<IEMailFormatter<string>>();
-			SmtpEMailSenderBase<string> senderMock = (SmtpEMailSenderBase<string>)mocks.StrictMock(typeof(SmtpEMailSenderBase<string>));
-			senderMock.SetFormatter(formatterMock);
-			LastCall.Do((Action<IEMailFormatter<string>>)delegate(IEMailFormatter<string> formatter)
+			IEMailFormatter<string> formatterMock = MockRepository.GenerateStrictMock<IEMailFormatter<string>>();
+			SmtpEMailSenderBase<string> senderMock = (SmtpEMailSenderBase<string>)MockRepository.GenerateStrictMock(typeof(SmtpEMailSenderBase<string>), null, null);
+			senderMock.Expect(x => x.SetFormatter(formatterMock)).Do((Action<IEMailFormatter<string>>)delegate(IEMailFormatter<string> formatter)
 			{
 				Assert.NotNull(formatter);
 			});
-			mocks.ReplayAll();
 
-			senderMock.SetFormatter( formatterMock );
+			senderMock.SetFormatter(formatterMock);
 
-			mocks.VerifyAll();
+			formatterMock.VerifyAllExpectations();
+			senderMock.VerifyAllExpectations();
 		}
 
 		[Fact]
 		public void Invalid_DelegateToGenericMock()
 		{
-			MockRepository mocks = new MockRepository();
-			IEMailFormatter<string> formatterMock = mocks.StrictMock<IEMailFormatter<string>>();
-			SmtpEMailSenderBase<string> senderMock = (SmtpEMailSenderBase<string>)mocks.StrictMock(typeof(SmtpEMailSenderBase<string>));
-			senderMock.SetFormatter(formatterMock);
-			var ex = Assert.Throws<InvalidOperationException>(() =>
-			                                                  LastCall.Do(
+			IEMailFormatter<string> formatterMock = MockRepository.GenerateStrictMock<IEMailFormatter<string>>();
+			SmtpEMailSenderBase<string> senderMock = (SmtpEMailSenderBase<string>)MockRepository.GenerateStrictMock(typeof(SmtpEMailSenderBase<string>), null, null);
+
+			var ex = Assert.Throws<InvalidOperationException>(() => senderMock.Expect(x => x.SetFormatter(formatterMock)).Do(
 			                                                  	(Action<IEMailFormatter<int>>) delegate(IEMailFormatter<int> formatter)
 			                                                  	                               	{
 			                                                  	                               		Assert.NotNull(formatter);

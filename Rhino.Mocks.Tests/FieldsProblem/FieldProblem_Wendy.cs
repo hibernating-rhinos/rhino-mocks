@@ -1,31 +1,23 @@
-using System;
-using System.Collections.Generic;
-using System.Text;
 using Xunit;
 using Rhino.Mocks.Exceptions;
 
 namespace Rhino.Mocks.Tests.FieldsProblem
 {
-    
     public class FieldProblem_Wendy
     {
         private ISearchPatternBuilder _searchPatternBuilder;
-        private MockRepository _mocks;
         private ImageFinder _imageFinder;
 
 		public FieldProblem_Wendy()
         {
-            _mocks = new MockRepository();
-            _searchPatternBuilder = _mocks.DynamicMock<ISearchPatternBuilder>();
+            _searchPatternBuilder = MockRepository.GenerateMock<ISearchPatternBuilder>();
             _imageFinder = new ImageFinder(_searchPatternBuilder);
         }
 
         [Fact]
         public void SendingNullParamsValueShouldNotThrowNullReferenceException()
         {
-            Expect.Call(_searchPatternBuilder.CreateFromExtensions(ImageFinder.ImageExtensions))
-                .Return(null);
-            _mocks.ReplayAll();
+            _searchPatternBuilder.Expect(x => x.CreateFromExtensions(ImageFinder.ImageExtensions)).Return(null);
             _imageFinder.FindImagePath();
         	var ex = Assert.Throws<ExpectationViolationException>(() => this.Verify(this._searchPatternBuilder));
         	Assert.Equal("ISearchPatternBuilder.CreateFromExtensions([\"png\", \"gif\", \"jpg\", \"bmp\"]); Expected #1, Actual #0.", ex.Message);
@@ -34,9 +26,7 @@ namespace Rhino.Mocks.Tests.FieldsProblem
 		[Fact]
 		public void VerifyShouldFailIfDynamicMockWasCalledWithRepeatNever()
 		{
-			_searchPatternBuilder.CreateFromExtensions();
-			LastCall.Repeat.Never();
-			_mocks.ReplayAll();
+			_searchPatternBuilder.Expect(x => x.CreateFromExtensions()).Repeat.Never();
 			try
 			{
 				_searchPatternBuilder.CreateFromExtensions();
@@ -51,7 +41,7 @@ namespace Rhino.Mocks.Tests.FieldsProblem
 
         private void Verify(ISearchPatternBuilder builder)
         {
-            _mocks.Verify(builder);
+            builder.VerifyAllExpectations();
         }
 
         public string FindImagePath(string directoryToSearch)

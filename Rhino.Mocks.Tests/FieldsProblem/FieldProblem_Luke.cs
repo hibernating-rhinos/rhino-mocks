@@ -26,7 +26,6 @@
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endregion
 
-
 using System;
 using System.Runtime.InteropServices;
 using Xunit;
@@ -34,38 +33,32 @@ using MSHTML;
 
 namespace Rhino.Mocks.Tests.FieldsProblem
 {
-	
 	public class FieldProblem_Luke
 	{
 		[Fact]
 		public void CanMockIE()
 		{
-			MockRepository mockRepository = new MockRepository();
-			IHTMLEventObj2 mock = mockRepository.StrictMock<IHTMLEventObj2>();
+			IHTMLEventObj2 mock = MockRepository.GenerateStrictMock<IHTMLEventObj2>();
 			Assert.NotNull(mock);
 		}
 
 		[Fact]
 		public void CanMockComInterface()
 		{
-			MockRepository mocks = new MockRepository();
-			IServiceProvider serviceProvider = (IServiceProvider)
-											   mocks.StrictMultiMock(typeof(IServiceProvider), typeof(IHTMLDataTransfer));
+			IServiceProvider serviceProvider = (IServiceProvider)MockRepository.GenerateStrictMock(typeof(IServiceProvider), new[] { typeof(IHTMLDataTransfer) }, null);
 			Assert.NotNull(serviceProvider);
 		}
 
 		[Fact] 
 		public void TryToMockClassWithProtectedInternalAbstractClass()
 		{
-			MockRepository mockRepository = new MockRepository();
-			mockRepository.StrictMock<SomeClassWithProtectedInternalAbstractClass>();
+			MockRepository.GenerateStrictMock<SomeClassWithProtectedInternalAbstractClass>();
 		}
 
 		[Fact] 
 		public void TryToMockClassWithProtectedAbstractClass()
 		{
-			MockRepository mockRepository = new MockRepository();
-			mockRepository.StrictMock<SomeClassWithProtectedAbstractClass>();
+			MockRepository.GenerateStrictMock<SomeClassWithProtectedAbstractClass>();
 		}
 
 		public abstract class

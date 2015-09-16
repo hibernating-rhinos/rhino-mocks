@@ -26,14 +26,11 @@
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endregion
 
-
 using System;
-using System.Text;
 using Xunit;
 
 namespace Rhino.Mocks.Tests
 {
-    
     public class UsingComObject
     {
         public interface IMockTest
@@ -44,15 +41,12 @@ namespace Rhino.Mocks.Tests
         [Fact]
         public void UsingScriptingFileSystem()
         {
-            MockRepository mocks = new MockRepository();
             Type fsoType = Type.GetTypeFromProgID("Scripting.FileSystemObject");
             Scripting.FileSystemObject fso = (Scripting.FileSystemObject)Activator.CreateInstance(fsoType);
-            IMockTest test = mocks.StrictMock(typeof(IMockTest)) as IMockTest;
-            Expect.Call(test.GetFileSystemObject()).Return(fso);
-            mocks.ReplayAll();
+            IMockTest test = (IMockTest)MockRepository.GenerateStrictMock(typeof(IMockTest), null, null);
+            test.Expect(x => x.GetFileSystemObject()).Return(fso);
             Assert.Same(fso, test.GetFileSystemObject());
-            mocks.VerifyAll();
-
+            test.VerifyAllExpectations();
         }
     }
 }

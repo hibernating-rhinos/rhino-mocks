@@ -3,14 +3,12 @@ using RhinoMocksCPPInterfaces;
 
 namespace Rhino.Mocks.Tests.FieldsProblem
 {
-	
 	public class FieldProblem_Shanon
 	{
 		[Fact]
 		public void CanMockInterfaceWithMethodsHavingModOpt()
 		{
-			MockRepository mocks = new MockRepository();
-			IHaveMethodWithModOpts mock = mocks.StrictMock<IHaveMethodWithModOpts>();
+			IHaveMethodWithModOpts mock = MockRepository.GenerateStrictMock<IHaveMethodWithModOpts>();
 			Assert.NotNull(mock);
 		}
 	}

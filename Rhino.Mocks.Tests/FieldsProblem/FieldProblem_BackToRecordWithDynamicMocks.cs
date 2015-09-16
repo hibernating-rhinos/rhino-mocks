@@ -26,34 +26,29 @@
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endregion
 
-
-using System;
-using System.Text;
 using Xunit;
 
 namespace Rhino.Mocks.Tests.FieldsProblem
 {
-    
     public class FieldProblem_BackToRecordWithDynamicMocks
     {
         [Fact]
         public void BackToRecordOnADynamicMock()
         {
-            MockRepository repository = new MockRepository();
-            ITest test = (ITest)repository.DynamicMock(typeof(ITest));
+            ITest test = (ITest)MockRepository.GenerateMock(typeof(ITest), null, null);
 
             test.DoSomething(1);
 
-            repository.BackToRecord(test);
+            test.BackToRecord();
 
-            test.DoSomething(2);
+            test.Expect(x => x.DoSomething(2));
 
-            repository.ReplayAll();
+            test.Replay();
 
             test.DoSomething(2);
             test.DoSomething(3);
 
-            repository.VerifyAll();
+            test.VerifyAllExpectations();
         }
 
         public interface ITest
@@ -61,5 +56,4 @@ namespace Rhino.Mocks.Tests.FieldsProblem
             void DoSomething(int number);
         }
     }
-
 }

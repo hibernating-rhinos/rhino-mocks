@@ -4,7 +4,6 @@ namespace Rhino.Mocks.Tests.FieldsProblem
 	using Interfaces;
 	using Xunit;
 
-	
 	public class FieldProblem_Keith
 	{
 		public class Model
@@ -48,23 +47,17 @@ namespace Rhino.Mocks.Tests.FieldsProblem
 		[Fact]
 		public void Test_View_Events_WiredUp()
 		{
-			MockRepository mocks = new MockRepository();
-
-			IView view = mocks.StrictMock<IView>();
+			IView view = MockRepository.GenerateStrictMock<IView>();
 
 			// expect that the model is set on the view
 			// NOTE: if I move this Expect.Call above
 			// the above Expect.Call, Rhino mocks blows up on with an
 			// "This method has already been set to ArgsEqualExpectation."
 			// not sure why. Its a side issue.
-			Expect.Call(view.Model = Arg<Model>.Is.NotNull);
+			view.Expect(x => x.Model = Arg<Model>.Is.NotNull);
 
 			// expect the event ClickButton to be wired up
-			IEventRaiser clickButtonEvent =
-					Expect.Call(delegate
-					{
-						view.ClickButton += null;
-					}).IgnoreArguments().GetEventRaiser();
+			IEventRaiser clickButtonEvent = view.Expect(x => x.ClickButton += null).IgnoreArguments().GetEventRaiser();
 
 			// Q: How do i set an expectation that checks that the controller
 			// correctly updates the model in the event handler.
@@ -74,12 +67,10 @@ namespace Rhino.Mocks.Tests.FieldsProblem
 			// The following wont work, because Model is null:
 			// Expect.Call(view.Model.UserName = Arg<String>.Is.Anything);
 
-			mocks.ReplayAll();
-
 			Controller controller = new Controller(view);
 			clickButtonEvent.Raise(null, null);
 
-			mocks.VerifyAll();
+			view.VerifyAllExpectations();
 		}
 	}
 }

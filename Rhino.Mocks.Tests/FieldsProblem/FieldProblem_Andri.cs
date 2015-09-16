@@ -40,14 +40,10 @@ namespace Rhino.Mocks.Tests.FieldsProblem
             [Fact]
             public void OutByRefTest()
             {
-                MockRepository mockery = new MockRepository();
-                IFoo mockFoo = mockery.StrictMock<IFoo>();
+                IFoo mockFoo = MockRepository.GenerateStrictMock<IFoo>();
                 int three = 3;
                 int six = 6;
-                using (mockery.Record())
-                {
-                    SetupResult.For(mockFoo.foo(ref three)).OutRef(six).Return(true);
-                }
+                mockFoo.Expect(x => x.foo(ref three)).OutRef(six).Return(true);
 
                 Assert.Throws<Rhino.Mocks.Exceptions.ExpectationViolationException>(() => mockFoo.foo(ref six));
             }

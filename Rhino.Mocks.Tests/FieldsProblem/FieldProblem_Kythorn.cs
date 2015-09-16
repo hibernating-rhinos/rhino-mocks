@@ -37,7 +37,8 @@ namespace Rhino.Mocks.Tests.FieldsProblem
 		public void CallingAssertWasCalledOnAnObjectThatIsInRecordModeShouldResultInFailure()
 		{
 			var service = MockRepository.GenerateStub<IService>();
-			var view = new MockRepository().Stub<IView>();
+			var view = MockRepository.GenerateStub<IView>();
+			view.BackToRecord();
 			service.Stub(x => x.GetString()).Return("Test");
 			var presenter = new Presenter(view, service);
 			presenter.OnViewLoaded();
@@ -48,12 +49,10 @@ namespace Rhino.Mocks.Tests.FieldsProblem
 		[Fact]
 		public void CanUseStubSyntaxOnMocksInRecordMode()
 		{
-			MockRepository mocks = new MockRepository();
-			var service = mocks.Stub<IService>();
-			var view = mocks.Stub<IView>();
+			var service = MockRepository.GenerateStub<IService>();
+			var view = MockRepository.GenerateStub<IView>();
 			service.Stub(x => x.GetString()).Return("Test");
 			var presenter = new Presenter(view, service);
-			mocks.ReplayAll();
 			presenter.OnViewLoaded();
 			view.AssertWasCalled(x => x.Message = "Test");
 		}
@@ -79,6 +78,7 @@ namespace Rhino.Mocks.Tests.FieldsProblem
 		{
 			string Message { set; }
 		}
+
 		public class Presenter
 		{
 			private readonly IService service;
@@ -89,7 +89,6 @@ namespace Rhino.Mocks.Tests.FieldsProblem
 				this.view = view;
 				this.service = service;
 			}
-
 
 			public void OnViewLoaded()
 			{

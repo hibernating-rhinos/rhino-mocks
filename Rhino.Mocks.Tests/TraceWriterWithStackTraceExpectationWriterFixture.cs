@@ -4,7 +4,6 @@ namespace Rhino.Mocks.Tests
 	using Xunit;
 	using Rhino.Mocks.Impl;
 
-	
 	public class TraceWriterWithStackTraceExpectationWriterFixture
 	{
 		[Fact]
@@ -16,15 +15,12 @@ namespace Rhino.Mocks.Tests
 
 			RhinoMocks.Logger = expectationWriter;
 
-			MockRepository mocks = new MockRepository();
-			IDemo mock = mocks.StrictMock<IDemo>();
+			IDemo mock = MockRepository.GenerateStrictMock<IDemo>();
+			mock.Expect(x => x.VoidNoArgs());
 			mock.VoidNoArgs();
-			mocks.ReplayAll();
-			mock.VoidNoArgs();
-			mocks.VerifyAll();
+			mock.VerifyAllExpectations();
 
-			Assert.Contains("WillPrintLogInfoWithStackTrace",
-				writer.GetStringBuilder().ToString());
+			Assert.Contains("WillPrintLogInfoWithStackTrace", writer.GetStringBuilder().ToString());
 		}
 	}
 }

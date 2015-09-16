@@ -55,7 +55,7 @@ namespace Rhino.Mocks.Tests
     public abstract class ProcessorBase
     {
         public int Register;
-        
+
         public virtual int Inc()
         {
             Register = Add(1);
@@ -64,7 +64,7 @@ namespace Rhino.Mocks.Tests
 
         public abstract int Add(int i);
     }
-    
+
     public class Cage
     {
         //lots of info about cage
@@ -81,75 +81,57 @@ namespace Rhino.Mocks.Tests
         void MoveToCage(Cage cage);
     }
 
-    
+
     public class IntegrationTests
     {
         public delegate bool CageDelegate(Cage cage);
 
         public Cage recordedCage;
 
-[Fact]
-public void UsingPartialMocks()
-{
-    MockRepository mocks = new MockRepository();
-    ProcessorBase proc = (ProcessorBase) mocks.PartialMock(typeof (ProcessorBase));
-    Expect.Call(proc.Add(1)).Return(1);
-    Expect.Call(proc.Add(1)).Return(2);
-    
-    mocks.ReplayAll();
-    
-    proc.Inc();
-    Assert.Equal(1, proc.Register);
-    proc.Inc();
-    Assert.Equal(2, proc.Register);
-    
-    mocks.VerifyAll();
-}
-        
+        [Fact]
+        public void UsingPartialMocks()
+        {
+            ProcessorBase proc = (ProcessorBase)MockRepository.GeneratePartialMock(typeof(ProcessorBase), null, null);
+            proc.Expect(x => x.Add(1)).Return(1);
+            proc.Expect(x => x.Add(1)).Return(2);
+
+            proc.Inc();
+            Assert.Equal(1, proc.Register);
+            proc.Inc();
+            Assert.Equal(2, proc.Register);
+
+            proc.VerifyAllExpectations();
+        }
+
         [Fact]
         public void ExampleUsingCallbacks()
         {
-            MockRepository mocks = new MockRepository();
+            ISongBird maleBird = (ISongBird)MockRepository.GenerateStrictMock(typeof(ISongBird), null, null),
+                femaleBird = (ISongBird)MockRepository.GenerateStrictMock(typeof(ISongBird), null, null);
 
-            ISongBird maleBird = (ISongBird)mocks.StrictMock(typeof(ISongBird)),
-                femaleBird = (ISongBird)mocks.StrictMock(typeof(ISongBird));
-
-            using (mocks.Ordered())
-            {
-                using (mocks.Unordered())
-                {
-                    maleBird.MoveToCage(null);
-                    LastCall.On(maleBird).Callback(new CageDelegate(IsSameCage));
-                    femaleBird.MoveToCage(null);
-                    LastCall.On(femaleBird).Callback(new CageDelegate(IsSameCage));
-                }
-                maleBird.Eat("seeds", 250);
-                femaleBird.Eat("seeds", 250);
-                using (mocks.Unordered())
-                {
-                    maleBird.Mate(femaleBird);
-                    femaleBird.Mate(maleBird);
-                }
-            }
-            mocks.ReplayAll();
+            maleBird.Expect(x => x.MoveToCage(null)).Callback(new CageDelegate(IsSameCage));
+            femaleBird.Expect(x => x.MoveToCage(null)).Callback(new CageDelegate(IsSameCage));
+            maleBird.Expect(x => x.Eat("seeds", 250));
+            femaleBird.Expect(x => x.Eat("seeds", 250));
+            maleBird.Expect(x => x.Mate(femaleBird));
+            femaleBird.Expect(x => x.Mate(maleBird));
 
             BirdVeterinary vet = new BirdVeterinary();
             vet.Mate(maleBird, femaleBird);
-            mocks.VerifyAll();
+
+            maleBird.AssertWasCalled(x => x.Eat("seeds", 250)).Before(femaleBird.AssertWasCalled(x => x.Eat("seeds", 250)));
+            maleBird.VerifyAllExpectations();
+            femaleBird.VerifyAllExpectations();
         }
 
         [Fact]
         public void ExampleUsingParameterMatchingAndConstraints()
         {
-            MockRepository mocks = new MockRepository();
-            ISongBird bird = (ISongBird)mocks.StrictMock(typeof(ISongBird));
-            bird.Eat("seeds", 500); //verifying expected values
-            bird.Sing();
-            LastCall.On(bird).Return("Chirp, Chirp");
-            bird.Sing();
+            ISongBird bird = (ISongBird)MockRepository.GenerateStrictMock(typeof(ISongBird), null, null);
+            bird.Expect(x => x.Eat("seeds", 500));
+            bird.Expect(x => x.Sing()).Return("Chirp, Chirp");
             string exceptionMessage = "No food, no song";
-            LastCall.On(bird).Throw(new Exception(exceptionMessage));
-            mocks.ReplayAll();
+            bird.Expect(x => x.Sing()).Throw(new Exception(exceptionMessage));
 
             bird.Eat("seeds", 500);
             Assert.Equal("Chirp, Chirp", bird.Sing());
@@ -162,59 +144,44 @@ public void UsingPartialMocks()
             {
                 Assert.Equal(exceptionMessage, e.Message);
             }
-            mocks.VerifyAll();
+            bird.VerifyAllExpectations();
         }
 
         [Fact]
         public void UnorderedExecutionOfOrderedSequence()
         {
-            MockRepository mocks = new MockRepository();
-            ISongBird maleBird = (ISongBird)mocks.StrictMock(typeof(ISongBird)),
-                femaleBird = (ISongBird)mocks.StrictMock(typeof(ISongBird));
+            ISongBird maleBird = (ISongBird)MockRepository.GenerateStrictMock(typeof(ISongBird), null, null),
+                femaleBird = (ISongBird)MockRepository.GenerateStrictMock(typeof(ISongBird), null, null);
 
-            using (mocks.Ordered())
-            {
-                maleBird.Eat("seeds", 250);
-                femaleBird.Eat("seeds", 250);
-            }
+            maleBird.Expect(x => x.Eat("seeds", 250));
+            femaleBird.Expect(x => x.Eat("seeds", 250));
 
-            using (mocks.Ordered())
-            {
-                maleBird.Mate(femaleBird);
-                femaleBird.Mate(maleBird);
-            }
-            mocks.ReplayAll();
+            maleBird.Expect(x => x.Mate(femaleBird));
+            femaleBird.Expect(x => x.Mate(maleBird));
 
             maleBird.Mate(femaleBird);
             femaleBird.Mate(maleBird);
 
             maleBird.Eat("seeds", 250);
             femaleBird.Eat("seeds", 250);
-            mocks.VerifyAll();
+
+            maleBird.AssertWasCalled(x => x.Eat("seeds", 250)).Before(femaleBird.AssertWasCalled(x => x.Eat("seeds", 250)));
+            maleBird.AssertWasCalled(x => x.Mate(femaleBird)).Before(femaleBird.AssertWasCalled(x => x.Mate(maleBird)));
+            maleBird.VerifyAllExpectations();
+            femaleBird.VerifyAllExpectations();
         }
 
         [Fact]
         public void OrderedExecutionOfUnorderedSequence()
         {
-            MockRepository mocks = new MockRepository();
-            ISongBird maleBird = (ISongBird)mocks.StrictMock(typeof(ISongBird)),
-                femaleBird = (ISongBird)mocks.StrictMock(typeof(ISongBird));
+            ISongBird maleBird = (ISongBird)MockRepository.GenerateStrictMock(typeof(ISongBird), null, null),
+                femaleBird = (ISongBird)MockRepository.GenerateStrictMock(typeof(ISongBird), null, null);
 
-            using (mocks.Ordered())
-            {
-                using (mocks.Unordered())
-                {
-                    maleBird.Eat("seeds", 250);
-                    femaleBird.Eat("seeds", 250);
-                }
+            maleBird.Expect(x => x.Eat("seeds", 250));
+            femaleBird.Expect(x => x.Eat("seeds", 250));
 
-                using (mocks.Unordered())
-                {
-                    maleBird.Mate(femaleBird);
-                    femaleBird.Mate(maleBird);
-                }
-            }
-            mocks.ReplayAll();
+            maleBird.Expect(x => x.Mate(femaleBird));
+            femaleBird.Expect(x => x.Mate(maleBird));
 
             femaleBird.Eat("seeds", 250);
             maleBird.Eat("seeds", 250);
@@ -222,32 +189,25 @@ public void UsingPartialMocks()
             femaleBird.Mate(maleBird);
             maleBird.Mate(femaleBird);
 
-            mocks.VerifyAll();
+            maleBird.AssertWasCalled(x => x.Eat("seeds", 250)).Before(maleBird.AssertWasCalled(x => x.Mate(femaleBird)));
+            femaleBird.AssertWasCalled(x => x.Eat("seeds", 250)).Before(femaleBird.AssertWasCalled(x => x.Mate(maleBird)));
+
+            maleBird.VerifyAllExpectations();
+            femaleBird.VerifyAllExpectations();
         }
 
         [Fact]
         public void SetupResultWithNestedOrdering()
         {
-            MockRepository mocks = new MockRepository();
-            ISongBird maleBird = (ISongBird)mocks.StrictMock(typeof(ISongBird)),
-                femaleBird = (ISongBird)mocks.StrictMock(typeof(ISongBird));
+            ISongBird maleBird = (ISongBird)MockRepository.GenerateStrictMock(typeof(ISongBird), null, null),
+                femaleBird = (ISongBird)MockRepository.GenerateStrictMock(typeof(ISongBird), null, null);
 
-            SetupResult.On(maleBird).Call(maleBird.Sing()).Return("");
-            using (mocks.Ordered())
-            {
-                using (mocks.Unordered())
-                {
-                    maleBird.Eat("seeds", 250);
-                    femaleBird.Eat("seeds", 250);
-                }
+            maleBird.Expect(x => x.Sing()).Return(string.Empty).Repeat.AtLeastOnce();
+            maleBird.Expect(x => x.Eat("seeds", 250));
+            femaleBird.Expect(x => x.Eat("seeds", 250));
 
-                using (mocks.Unordered())
-                {
-                    maleBird.Mate(femaleBird);
-                    femaleBird.Mate(maleBird);
-                }
-            }
-            mocks.ReplayAll();
+            maleBird.Expect(x => x.Mate(femaleBird));
+            femaleBird.Expect(x => x.Mate(maleBird));
 
             maleBird.Sing();
             femaleBird.Eat("seeds", 250);
@@ -259,17 +219,23 @@ public void UsingPartialMocks()
             maleBird.Sing();
             maleBird.Mate(femaleBird);
             maleBird.Sing();
-            mocks.VerifyAll();
+
+            maleBird.AssertWasCalled(x => x.Eat("seeds", 250)).Before(maleBird.AssertWasCalled(x => x.Mate(femaleBird)));
+            femaleBird.AssertWasCalled(x => x.Eat("seeds", 250)).Before(femaleBird.AssertWasCalled(x => x.Mate(maleBird)));
+
+            maleBird.VerifyAllExpectations();
+            femaleBird.VerifyAllExpectations();
         }
 
         private bool IsSameCage(Cage cageFromCallback)
         {
-            //Can do any sort of valiation here
+            // Can do any sort of valiation here
             if (this.recordedCage == null)
             {
                 this.recordedCage = cageFromCallback;
                 return true;
             }
+
             return this.recordedCage == cageFromCallback;
         }
     }

@@ -29,18 +29,16 @@
 
 using System;
 using System.Reflection;
-using Xunit;
 using Rhino.Mocks.Expectations;
 using Rhino.Mocks.Impl;
 using Rhino.Mocks.Interfaces;
 using Rhino.Mocks.Tests.Callbacks;
+using Xunit;
 
 namespace Rhino.Mocks.Tests.Expectations
 {
-	
 	public class CallbackExpectationTests :AbstractExpectationTests
 	{
-		private MockRepository mocks;
 		private IDemo demo;
 		private CallbackExpectation callback;
 		private MethodInfo method;
@@ -55,8 +53,7 @@ namespace Rhino.Mocks.Tests.Expectations
 
 		public CallbackExpectationTests()
 		{
-			mocks = new MockRepository();
-			demo = (IDemo) mocks.StrictMock(typeof (IDemo));
+			demo = (IDemo) MockRepository.GenerateStrictMock(typeof (IDemo), null, null);
 			method = typeof (IDemo).GetMethod("VoidThreeArgs");
 			callbackCalled = false;
 		}

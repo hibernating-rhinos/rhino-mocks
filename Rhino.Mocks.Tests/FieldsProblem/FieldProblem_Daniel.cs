@@ -26,14 +26,10 @@
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endregion
 
-
-using System;
-using System.Text;
 using Xunit;
 
 namespace Rhino.Mocks.Tests.FieldsProblem
 {
-    
     public class FieldProblem_Daniel
     {
         public class ClassThatOverrideEquals
@@ -52,13 +48,10 @@ namespace Rhino.Mocks.Tests.FieldsProblem
         [Fact]
         public void MockClassWithEquals()
         {
-            MockRepository mocks = new MockRepository();
-            ClassThatOverrideEquals c = (ClassThatOverrideEquals)mocks.StrictMock(typeof(ClassThatOverrideEquals));
-            c.Equals(c);
-            LastCall.Return(false);
-            mocks.Replay(c);
+            ClassThatOverrideEquals c = (ClassThatOverrideEquals)MockRepository.GenerateStrictMock(typeof(ClassThatOverrideEquals), null, null);
+            c.Expect(x => x.Equals(c)).Return(false);
             Assert.False(c.Equals(c));
-            mocks.Verify(c);
+            c.VerifyAllExpectations();
         }
     }
 }

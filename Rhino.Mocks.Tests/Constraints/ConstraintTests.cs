@@ -26,89 +26,56 @@
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endregion
 
-
 using System;
 using System.Data;
-using Xunit;
 using Rhino.Mocks.Constraints;
 using Rhino.Mocks.Exceptions;
-using Rhino.Mocks.Impl;
-using Rhino.Mocks.Tests.Callbacks;
+using Xunit;
 
 namespace Rhino.Mocks.Tests.Constraints
 {
-	
 	public class ConstraintTests
 	{
 		private IDemo demo;
-		private MockRepository mocks;
 
 		public ConstraintTests()
 		{
-			mocks = new MockRepository();
-			demo = (IDemo) this.mocks.StrictMock(typeof (IDemo));
+			demo = (IDemo) MockRepository.GenerateStrictMock(typeof (IDemo), null, null);
 		}
 
-        [Fact]
+		[Fact]
 		public void UsingPredicate()
 		{
-			demo.VoidStringArg(null);
-			LastCall.Constraints(
-				Is.Matching<string>(delegate(string s) 
-				{
-					return s.Length == 2;  
-				}) 
-				&&
-				Is.Matching<string>(delegate(string s)
-				{
-					return s.EndsWith("b");	
-				}));
-			mocks.Replay(demo);
+			demo.Expect(x => x.VoidStringArg(null)).Constraints(Is.Matching<string>(s => s.Length == 2) && Is.Matching<string>(s => s.EndsWith("b")));
 			
 			demo.VoidStringArg("ab");
 
-			mocks.VerifyAll();
+			demo.VerifyAllExpectations();
 		}
 
 		[Fact]
 		public void UsingPredicateConstraintWhenTypesNotMatching()
 		{
-			demo.VoidStringArg(null);
-			LastCall.Constraints(
-				Is.Matching<DataSet>(delegate(DataSet s)
-				{
-					return false;
-				}));
-			mocks.Replay(demo);
+			demo.Expect(x => x.VoidStringArg(null)).Constraints(Is.Matching<DataSet>(s => false));
 
 			var ex = Assert.Throws<InvalidOperationException>(() => this.demo.VoidStringArg("ab"));
 			Assert.Equal("Predicate accept System.Data.DataSet but parameter is System.String which is not compatible", ex.Message);
 		}
 
-        [Fact]
-        public void UsingPredicateConstraintWithSubtype()
-        {
-            demo.VoidStringArg(null);
-            LastCall.Constraints(
-                Is.Matching<object>(delegate(object o)
-            {
-                return o.Equals("ab");
-            }));
-            mocks.Replay(demo);
+		[Fact]
+		public void UsingPredicateConstraintWithSubtype()
+		{
+			demo.Expect(x => x.VoidStringArg(null)).Constraints(Is.Matching<object>(o => o.Equals("ab")));
 
-            demo.VoidStringArg("ab");
+			demo.VoidStringArg("ab");
 
-            mocks.VerifyAll();
-        }
+			demo.VerifyAllExpectations();
+		}
 
 		[Fact]
 		public void UsingPredicateWhenExpectationViolated()
 		{
-			demo.VoidStringArg(null);
-			LastCall.Constraints(
-				Is.Matching<string>(JustPredicate)
-				);
-			mocks.Replay(demo);
+			demo.Expect(x => x.VoidStringArg(null)).Constraints(Is.Matching<string>(JustPredicate));
 
 			var ex = Assert.Throws<ExpectationViolationException>(() => this.demo.VoidStringArg("cc"));
 			Assert.Equal("IDemo.VoidStringArg(\"cc\"); Expected #0, Actual #1.\r\nIDemo.VoidStringArg(Predicate (ConstraintTests.JustPredicate(obj);)); Expected #1, Actual #0.", ex.Message);
@@ -119,21 +86,21 @@ namespace Rhino.Mocks.Tests.Constraints
 			return false;
 		}
 
-        [Fact]
-        public void AndSeveralConstraings()
-        {
-            AbstractConstraint all = Is.NotEqual("bar") & Is.TypeOf(typeof(string)) & Is.NotNull();
-            Assert.True(all.Eval("foo"));
-            Assert.Equal("not equal to bar and type of {System.String} and not equal to null", all.Message);
-        }
+		[Fact]
+		public void AndSeveralConstraings()
+		{
+			AbstractConstraint all = Is.NotEqual("bar") & Is.TypeOf(typeof(string)) & Is.NotNull();
+			Assert.True(all.Eval("foo"));
+			Assert.Equal("not equal to bar and type of {System.String} and not equal to null", all.Message);
+		}
 
-		 [Fact]
-        public void AndSeveralConstraings_WithGenerics()
-        {
-            AbstractConstraint all = Is.NotEqual("bar") && Is.TypeOf<string>() && Is.NotNull();
-            Assert.True(all.Eval("foo"));
-            Assert.Equal("not equal to bar and type of {System.String} and not equal to null", all.Message);
-        }
+		[Fact]
+		public void AndSeveralConstraings_WithGenerics()
+		{
+			AbstractConstraint all = Is.NotEqual("bar") && Is.TypeOf<string>() && Is.NotNull();
+			Assert.True(all.Eval("foo"));
+			Assert.Equal("not equal to bar and type of {System.String} and not equal to null", all.Message);
+		}
 
 		[Fact]
 		public void AndConstraints()
@@ -166,19 +133,15 @@ namespace Rhino.Mocks.Tests.Constraints
 		[Fact]
 		public void SettingConstraintOnAMock()
 		{
-			demo.VoidStringArg("Ayende");
-			LastCall.On(demo).Constraints(Text.Contains("World"));
-			mocks.Replay(demo);
+			demo.Expect(x => x.VoidStringArg("Ayende")).Constraints(Text.Contains("World"));
 			demo.VoidStringArg("Hello, World");
-			mocks.Verify(demo);
+			demo.VerifyAllExpectations();
 		}
 
 		[Fact]
 		public void ConstraintFailingThrows()
 		{
-			demo.VoidStringArg("Ayende");
-			LastCall.On(demo).Constraints(Text.Contains("World"));
-			mocks.Replay(demo);
+			demo.Expect(x => x.VoidStringArg("Ayende")).Constraints(Text.Contains("World"));
 			var ex = Assert.Throws<ExpectationViolationException>(() => this.demo.VoidStringArg("Hello, world"));
 			Assert.Equal("IDemo.VoidStringArg(\"Hello, world\"); Expected #0, Actual #1.\r\nIDemo.VoidStringArg(contains \"World\"); Expected #1, Actual #0.", ex.Message);
 		}
@@ -186,38 +149,30 @@ namespace Rhino.Mocks.Tests.Constraints
 		[Fact]
 		public void ConstraintWithTooMuchForArguments()
 		{
-			demo.VoidStringArg("Ayende");
-			var ex = Assert.Throws<InvalidOperationException>(() => LastCall.On(this.demo).Constraints(Text.Contains("World"), Is.Equal("Rahien")));
+			var ex = Assert.Throws<InvalidOperationException>(() => demo.Expect(x => x.VoidStringArg("Ayende")).Constraints(Text.Contains("World"), Is.Equal("Rahien")));
 			Assert.Equal("The number of constraints is not the same as the number of the method's parameters!", ex.Message);
 		}
 
 		[Fact]
 		public void ConstraintWithTooFewForArguments()
 		{
-			demo.VoidThreeArgs(1, "Ayende", 3.14f);
-			var ex = Assert.Throws<InvalidOperationException>(() => LastCall.On(this.demo).Constraints(Text.Contains("World"), Is.Equal("Rahien")));
+			var ex = Assert.Throws<InvalidOperationException>(() => demo.Expect(x => x.VoidThreeArgs(1, "Ayende", 3.14f)).Constraints(Text.Contains("World"), Is.Equal("Rahien")));
 			Assert.Equal("The number of constraints is not the same as the number of the method's parameters!", ex.Message);
 		}
 
 		[Fact]
 		public void ConstraintsThatWerentCallCauseVerifyFailure()
 		{
-			this.demo.VoidStringArg("Ayende");
-			LastCall.On(this.demo).Constraints(Text.Contains("World"));
-			this.mocks.Replay(this.demo);
-			var ex = Assert.Throws<ExpectationViolationException>(() => this.mocks.Verify(this.demo));
+			this.demo.Expect(x => x.VoidStringArg("Ayende")).Constraints(Text.Contains("World"));
+			var ex = Assert.Throws<ExpectationViolationException>(() => this.demo.VerifyAllExpectations());
 			Assert.Equal("IDemo.VoidStringArg(contains \"World\"); Expected #1, Actual #0.", ex.Message);
 		}
 
 		[Fact]
 		public void AddConstraintAndThenTryToIgnoreArgs()
 		{
-			this.demo.VoidStringArg("Ayende");
-			var ex = Assert.Throws<InvalidOperationException>(() =>
-			                                                  LastCall.On(this.demo).Constraints(Text.Contains("World")).Callback<string>(
-			                                                  	"".StartsWith));
+			var ex = Assert.Throws<InvalidOperationException>(() => this.demo.Expect(x => x.VoidStringArg("Ayende")).Constraints(Text.Contains("World")).Callback<string>("".StartsWith));
 			Assert.Equal("This method has already been set to ConstraintsExpectation.", ex.Message);
 		}
-
 	}
 }

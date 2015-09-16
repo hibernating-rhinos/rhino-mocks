@@ -26,17 +26,12 @@
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endregion
 
-
-using System;
-using System.Text;
 using Xunit;
 
 namespace Rhino.Mocks.Tests.FieldsProblem
 {
-    
     public class FieldProblem_AviOrdering
     {
-
         public interface ISumbition
         {
             long UserID { get; set; }
@@ -71,40 +66,29 @@ namespace Rhino.Mocks.Tests.FieldsProblem
 
                 submition.Save();
             }
-
         }
 
         [Fact]
         public void SubmitDataToDB()
         {
-            //Setup a mock view and ISumbition
-            MockRepository mocks = new MockRepository();
-            IView myMockView = (IView) mocks.DynamicMock(typeof (IView));
-            ISumbition myMockSubmition = (ISumbition) mocks.DynamicMock(typeof (ISumbition));
+            // Setup a mock view and ISumbition
+            IView myMockView = (IView)MockRepository.GenerateMock(typeof(IView), null, null);
+            ISumbition myMockSubmition = (ISumbition)MockRepository.GenerateMock(typeof(ISumbition), null, null);
 
-            //Record expectations
-            SetupResult.For(myMockView.UserID).Return(3105596L);
-            SetupResult.For(myMockView.Name).Return("Someone");
-            SetupResult.For(myMockView.Address).Return("Somewhere");
+            // Record expectations
+            myMockView.Expect(x => x.UserID).Return(3105596L);
+            myMockView.Expect(x => x.Name).Return("Someone");
+            myMockView.Expect(x => x.Address).Return("Somewhere");
 
-            using (mocks.Ordered())
-            {
-                using (mocks.Unordered())
-                {
-                    myMockSubmition.Name = "Someone";
-                    myMockSubmition.Address = "Somewhere";
-                    myMockSubmition.UserID = 3105596L;
-                }
-                myMockSubmition.Save();
-            }
-            
-            //setup the present
-            mocks.ReplayAll();
-            
             Presneter myPresenter = new Presneter(myMockView, myMockSubmition);
             myPresenter.Sumbit();
-            
-            mocks.VerifyAll();
+
+            myMockSubmition.AssertWasCalled(x => x.Save()).After(myMockSubmition.AssertWasCalled(x => x.Name = "Someone", o => o.Repeat.Once()));
+            myMockSubmition.AssertWasCalled(x => x.Save()).After(myMockSubmition.AssertWasCalled(x => x.Address = "Somewhere", o => o.Repeat.Once()));
+            myMockSubmition.AssertWasCalled(x => x.Save()).After(myMockSubmition.AssertWasCalled(x => x.UserID = 3105596L, o => o.Repeat.Once()));
+
+            myMockSubmition.VerifyAllExpectations();
+            myMockView.VerifyAllExpectations();
         }
     }
 
