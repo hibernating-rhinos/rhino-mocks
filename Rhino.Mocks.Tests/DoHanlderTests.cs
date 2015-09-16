@@ -26,41 +26,33 @@
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endregion
 
-
 using System;
-using System.Text;
 using Xunit;
 
 namespace Rhino.Mocks.Tests
 {
-    
     public class DoHanlderTests
     {
-        MockRepository mocks;
         IDemo demo;
 
-		public DoHanlderTests()
+        public DoHanlderTests()
         {
-            mocks = new MockRepository();
-            demo = (IDemo)mocks.StrictMock(typeof(IDemo));
+            demo = (IDemo)MockRepository.GenerateStrictMock(typeof(IDemo), null, null);
         }
 
         [Fact]
         public void CanModifyReturnValue()
         {
-            Expect.Call(demo.EnumNoArgs()).Do(new GetDay(GetSunday));
-            mocks.ReplayAll();
+            demo.Expect(x => x.EnumNoArgs()).Do(new GetDay(GetSunday));
             Assert.Equal(DayOfWeek.Sunday, demo.EnumNoArgs());
-            mocks.VerifyAll();
+            demo.VerifyAllExpectations();
         }
 
         [Fact]
         public void SayHelloWorld()
         {
-            INameSource nameSource = (INameSource)mocks.StrictMock(typeof(INameSource));
-            Expect.Call(nameSource.CreateName(null,null)).IgnoreArguments().
-                    Do(new NameSourceDelegate(Formal));
-            mocks.ReplayAll();
+            INameSource nameSource = (INameSource)MockRepository.GenerateStrictMock(typeof(INameSource), null, null);
+            nameSource.Expect(x => x.CreateName(null, null)).IgnoreArguments().Do(new NameSourceDelegate(Formal));
             string expected = "Hi, my name is Ayende Rahien";
             string actual = new Speaker("Ayende", "Rahien", nameSource).Introduce();
             Assert.Equal(expected, actual);
@@ -102,8 +94,7 @@ namespace Rhino.Mocks.Tests
         [Fact]
         public void CanThrow()
         {
-            Expect.Call(demo.EnumNoArgs()).Do(new GetDay(ThrowDay));
-            mocks.ReplayAll();
+            demo.Expect(x => x.EnumNoArgs()).Do(new GetDay(ThrowDay));
             try
             {
                 demo.EnumNoArgs();
@@ -112,35 +103,31 @@ namespace Rhino.Mocks.Tests
             {
                 Assert.Equal("Not a day", e.Message);
             }
-            mocks.VerifyAll();
+            demo.VerifyAllExpectations();
         }
 
         [Fact]
         public void InvalidReturnValueThrows()
         {
-        	Assert.Throws<InvalidOperationException>(
-        		"The delegate return value should be assignable from System.Int32",
-        		() => Expect.Call(demo.ReturnIntNoArgs()).Do(new GetDay(GetSunday)));
-            
+            var ex = Assert.Throws<InvalidOperationException>(() => this.demo.Expect(x => x.ReturnIntNoArgs()).Do(new GetDay(this.GetSunday)));
+            Assert.Equal("The delegate return value should be assignable from System.Int32", ex.Message);
         }
 
-        [Fact]
+    	[Fact]
         public void InvalidDelegateThrows()
-        {
-        	Assert.Throws<InvalidOperationException>("Callback arguments didn't match the method arguments",
-        	                                         () =>
-        	                                         Expect.Call(demo.ReturnIntNoArgs()).Do(new IntDelegate(IntMethod)));
-        }
+    	{
+            var ex = Assert.Throws<InvalidOperationException>(() => this.demo.Expect(x => x.ReturnIntNoArgs()).Do(new IntDelegate(this.IntMethod)));
+    		Assert.Equal("Callback arguments didn't match the method arguments", ex.Message);
+    	}
 
-        [Fact]
+    	[Fact]
         public void CanOnlySpecifyOnce()
-        {
-        	Assert.Throws<InvalidOperationException>(
-        		"Can set only a single return value or exception to throw or delegate to execute on the same method call.",
-        		() => Expect.Call(demo.EnumNoArgs()).Do(new GetDay(ThrowDay)).Return(DayOfWeek.Saturday));
-        }
+    	{
+            var ex = Assert.Throws<InvalidOperationException>(() => this.demo.Expect(x => x.EnumNoArgs()).Do(new GetDay(this.ThrowDay)).Return(DayOfWeek.Saturday));
+    		Assert.Equal("Can set only a single return value or exception to throw or delegate to execute on the same method call.", ex.Message);
+    	}
 
-        public delegate DayOfWeek GetDay();
+    	public delegate DayOfWeek GetDay();
 
         private DayOfWeek GetSunday()
         {

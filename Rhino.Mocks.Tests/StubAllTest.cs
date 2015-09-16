@@ -32,7 +32,6 @@ using Rhino.Mocks.Interfaces;
 
 namespace Rhino.Mocks.Tests
 {
-	
 	public class StubAllTest
 	{
 		[Fact]
@@ -46,8 +45,7 @@ namespace Rhino.Mocks.Tests
 		[Fact]
 		public void StubAllHasPropertyBehaviorForAllProperties()
 		{
-			MockRepository mocks = new MockRepository();
-			ICat cat = mocks.Stub<ICat>();
+			ICat cat = MockRepository.GenerateStub<ICat>();
 			cat.Legs = 4;
 			Assert.Equal(4, cat.Legs);
 
@@ -65,8 +63,7 @@ namespace Rhino.Mocks.Tests
 		[Fact]
 		public void StubAllHasPropertyBehaviorForAllPropertiesWhenStubbingClasses()
 		{
-			MockRepository mocks = new MockRepository();
-			Housecat housecat = mocks.Stub<Housecat>();
+			Housecat housecat = MockRepository.GenerateStub<Housecat>();
 
 			housecat.FurLength = 7;
 			Assert.Equal(7, housecat.FurLength);
@@ -78,10 +75,8 @@ namespace Rhino.Mocks.Tests
 		[Fact]
 		public void StubAllCanRegisterToEventsAndRaiseThem()
 		{
-			MockRepository mocks = new MockRepository();
-			ICat cat = mocks.Stub<ICat>();
-			cat.Hungry += null; //Note, no expectation!
-			IEventRaiser eventRaiser = LastCall.GetEventRaiser();
+			ICat cat = MockRepository.GenerateStub<ICat>();
+			IEventRaiser eventRaiser = cat.Stub(x => x.Hungry += null).GetEventRaiser();
 
 			bool raised = false;
 			cat.Hungry += delegate
@@ -96,17 +91,13 @@ namespace Rhino.Mocks.Tests
 		[Fact]
 		public void CallingMethodOnStubAllDoesNotCreateExpectations()
 		{
-			MockRepository mocks = new MockRepository();
-			ICat cat = mocks.Stub<ICat>();
-			using (mocks.Record())
-			{
-				cat.Legs = 4;
-				cat.Name = "Esther";
-				cat.Species = "Ordinary housecat";
-				cat.IsDeclawed = true;
-				cat.GetMood();
-			}
-			mocks.VerifyAll();
+			ICat cat = MockRepository.GenerateStub<ICat>();
+			cat.Legs = 4;
+			cat.Name = "Esther";
+			cat.Species = "Ordinary housecat";
+			cat.IsDeclawed = true;
+			cat.Stub(x => x.GetMood());
+			cat.VerifyAllExpectations();
 		}
 
 		[Fact]
@@ -125,26 +116,20 @@ namespace Rhino.Mocks.Tests
 		[Fact]
 		public void StubAllCanCreateExpectationOnMethod()
 		{
-			MockRepository mocks = new MockRepository();
-			ICat cat = mocks.Stub<ICat>();
-			using (mocks.Record())
-			{
-				cat.Legs = 4;
-				cat.Name = "Esther";
-				cat.Species = "Ordinary housecat";
-				cat.IsDeclawed = true;
-				cat.GetMood();
-				LastCall.Return("Happy");
-			}
+			ICat cat = MockRepository.GenerateStub<ICat>();
+			cat.Legs = 4;
+			cat.Name = "Esther";
+			cat.Species = "Ordinary housecat";
+			cat.IsDeclawed = true;
+			cat.Stub(x => x.GetMood()).Return("Happy");
 			Assert.Equal("Happy", cat.GetMood());
-			mocks.VerifyAll();
+			cat.VerifyAllExpectations();
 		}
 
 		[Fact]
 		public void StubAllCanHandlePropertiesGettingRegisteredMultipleTimes()
 		{
-			MockRepository mocks = new MockRepository();
-			SpecificFish fish = mocks.Stub<SpecificFish>();
+			SpecificFish fish = MockRepository.GenerateStub<SpecificFish>();
 
 			fish.IsFreshWater = true;
 			Assert.True(fish.IsFreshWater);
@@ -161,11 +146,42 @@ namespace Rhino.Mocks.Tests
             Assert.Equal(5, aquarium.DetermineAge(new SpecificFish()));
         }
 
+        [Fact]
+        public void StubDoesNotDistinguishInheritedPropertiesWithSameName()
+        {
+            IDog dog = MockRepository.GenerateStub<IDog>();
+            dog.Name = "Bello";
+
+            Assert.Equal("Bello", ((IAnimal)dog).Name);
+        }
+
+        [Fact]
+        public void StubDoesNotDistinguishInheritedReadOnlyPropertiesWithSameName()
+        {
+          IDog dog = MockRepository.GenerateStub<IDog>();
+          dog.FullName = "Bello";
+
+          Assert.Equal("Bello", ((IAnimal)dog).FullName);
+        }
+
+        [Fact]
+        public void CanStubWithAbstractCtorCalls()
+        {
+            var sut = MockRepository.GenerateStub<AbstractMethodCall>();
+            Assert.NotNull(sut);
+            Assert.False(sut is IPartialMockMarker);
+        }
 	}
 
 	public interface ICat : IAnimal
 	{
 		bool IsDeclawed { get; set; }
+	}
+
+	public interface IDog : IAnimal
+	{
+		new string Name { get; set; }
+		new string FullName { get; set; }
 	}
 
 	public class Feline
@@ -223,5 +239,4 @@ namespace Rhino.Mocks.Tests
 			set { _isFreshWater = value; }
 		}		
 	}
-
 }

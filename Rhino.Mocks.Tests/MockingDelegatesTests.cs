@@ -26,69 +26,53 @@
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endregion
 
-
 using System;
-using System.IO;
 using System.Reflection;
 using Xunit;
 using Rhino.Mocks.Exceptions;
-using Rhino.Mocks.Interfaces;
 
 namespace Rhino.Mocks.Tests
 {
     public delegate object ObjectDelegateWithNoParams();
 
-    
     public class MockingDelegatesTests
     {
-        private MockRepository mocks;
         private delegate object ObjectDelegateWithNoParams();
         private delegate void VoidDelegateWithParams(string a);
         private delegate string StringDelegateWithParams(int a, string b);
         private delegate int IntDelegateWithRefAndOutParams(ref int a, out string b);
 
-		public MockingDelegatesTests()
-        {
-            mocks = new MockRepository();
-        }
-
         [Fact]
         public void CallingMockedDelegatesWithoutOn()
         {
-            ObjectDelegateWithNoParams d1 = (ObjectDelegateWithNoParams)mocks.StrictMock(typeof(ObjectDelegateWithNoParams));
-            Expect.Call(d1()).Return(1);
-
-            mocks.ReplayAll();
-
+            ObjectDelegateWithNoParams d1 = (ObjectDelegateWithNoParams)MockRepository.GenerateStrictMock(typeof(ObjectDelegateWithNoParams), null, null);
+            d1.Expect(x => x()).Return(1);
             Assert.Equal(1, d1());
         }
 
         [Fact]
         public void MockTwoDelegatesWithTheSameName()
         {
-            ObjectDelegateWithNoParams d1 = (ObjectDelegateWithNoParams)mocks.StrictMock(typeof(ObjectDelegateWithNoParams));
-            Tests.ObjectDelegateWithNoParams d2 = (Tests.ObjectDelegateWithNoParams)mocks.StrictMock(typeof(Tests.ObjectDelegateWithNoParams));
+            ObjectDelegateWithNoParams d1 = (ObjectDelegateWithNoParams)MockRepository.GenerateStrictMock(typeof(ObjectDelegateWithNoParams), null, null);
+            Tests.ObjectDelegateWithNoParams d2 = (Tests.ObjectDelegateWithNoParams)MockRepository.GenerateStrictMock(typeof(Tests.ObjectDelegateWithNoParams), null, null);
 
-            Expect.On(d1).Call(d1()).Return(1);
-            Expect.On(d2).Call(d2()).Return(2);
-
-            mocks.ReplayAll();
+            d1.Expect(x => x()).Return(1);
+            d2.Expect(x => x()).Return(2);
 
             Assert.Equal(1, d1());
             Assert.Equal(2, d2());
 
-            mocks.VerifyAll();
+            d1.VerifyAllExpectations();
+            d2.VerifyAllExpectations();
         }
 
         [Fact]
         public void MockObjectDelegateWithNoParams()
         {
-            ObjectDelegateWithNoParams d = (ObjectDelegateWithNoParams)mocks.StrictMock(typeof(ObjectDelegateWithNoParams));
+            ObjectDelegateWithNoParams d = (ObjectDelegateWithNoParams)MockRepository.GenerateStrictMock(typeof(ObjectDelegateWithNoParams), null, null);
 
-            Expect.On(d).Call(d()).Return("abc");
-            Expect.On(d).Call(d()).Return("def");
-
-            mocks.Replay(d);
+            d.Expect(x => x()).Return("abc");
+            d.Expect(x => x()).Return("def");
 
             Assert.Equal("abc", d());
             Assert.Equal("def", d());
@@ -107,11 +91,9 @@ namespace Rhino.Mocks.Tests
         [Fact]
         public void MockVoidDelegateWithNoParams()
         {
-            VoidDelegateWithParams d = (VoidDelegateWithParams)mocks.StrictMock(typeof(VoidDelegateWithParams));
-            d("abc");
-            d("efg");
-
-            mocks.Replay(d);
+            VoidDelegateWithParams d = (VoidDelegateWithParams)MockRepository.GenerateStrictMock(typeof(VoidDelegateWithParams), null, null);
+            d.Expect(x => x("abc"));
+            d.Expect(x => x("efg"));
 
             d("abc");
             d("efg");
@@ -130,12 +112,10 @@ namespace Rhino.Mocks.Tests
         [Fact]
         public void MockStringDelegateWithParams()
         {
-            StringDelegateWithParams d = (StringDelegateWithParams)mocks.StrictMock(typeof(StringDelegateWithParams));
+            StringDelegateWithParams d = (StringDelegateWithParams)MockRepository.GenerateStrictMock(typeof(StringDelegateWithParams), null, null);
 
-            Expect.On(d).Call(d(1, "111")).Return("abc");
-            Expect.On(d).Call(d(2, "222")).Return("def");
-
-            mocks.Replay(d);
+            d.Expect(x => x(1, "111")).Return("abc");
+            d.Expect(x => x(2, "222")).Return("def");
 
             Assert.Equal("abc", d(1, "111"));
             Assert.Equal("def", d(2, "222"));
@@ -154,13 +134,11 @@ namespace Rhino.Mocks.Tests
         [Fact]
         public void MockIntDelegateWithRefAndOutParams()
         {
-            IntDelegateWithRefAndOutParams d = (IntDelegateWithRefAndOutParams)mocks.StrictMock(typeof(IntDelegateWithRefAndOutParams));
+            IntDelegateWithRefAndOutParams d = (IntDelegateWithRefAndOutParams)MockRepository.GenerateStrictMock(typeof(IntDelegateWithRefAndOutParams), null, null);
 
             int a = 3;
             string b = null;
-            Expect.On(d).Call(d(ref a, out b)).Do(new IntDelegateWithRefAndOutParams(Return1_Plus2_A));
-
-            mocks.Replay(d);
+            d.Expect(x => x(ref a, out b)).Do(new IntDelegateWithRefAndOutParams(Return1_Plus2_A));
 
             Assert.Equal(1, d(ref a, out b));
             Assert.Equal(5, a);
@@ -181,13 +159,11 @@ namespace Rhino.Mocks.Tests
         [Fact]
         public void InterceptsDynamicInvokeAlso()
         {
-            IntDelegateWithRefAndOutParams d = (IntDelegateWithRefAndOutParams)mocks.StrictMock(typeof(IntDelegateWithRefAndOutParams));
+            IntDelegateWithRefAndOutParams d = (IntDelegateWithRefAndOutParams)MockRepository.GenerateStrictMock(typeof(IntDelegateWithRefAndOutParams), null, null);
 
             int a = 3;
             string b = null;
-            Expect.On(d).Call(d(ref a, out b)).Do(new IntDelegateWithRefAndOutParams(Return1_Plus2_A));
-
-            mocks.Replay(d);
+            d.Expect(x => x(ref a, out b)).Do(new IntDelegateWithRefAndOutParams(Return1_Plus2_A));
 
             object[] args = new object[] { 3, null };
             Assert.Equal(1, d.DynamicInvoke(args));
@@ -209,11 +185,11 @@ namespace Rhino.Mocks.Tests
         [Fact]
         public void DelegateBaseTypeCannotBeMocked()
         {
-        	Assert.Throws<InvalidOperationException>("Cannot mock the Delegate base type.",
-        	                                         () => mocks.StrictMock(typeof (Delegate)));
+        	var ex = Assert.Throws<InvalidOperationException>(() => MockRepository.GenerateStrictMock(typeof(Delegate), null, null));
+        	Assert.Equal("Cannot mock the Delegate base type.", ex.Message);
         }
 
-        private int Return1_Plus2_A(ref int a, out string b)
+    	private int Return1_Plus2_A(ref int a, out string b)
         {
             a += 2;
             b = "A";
@@ -223,14 +199,14 @@ namespace Rhino.Mocks.Tests
         [Fact]
         public void GenericDelegate()
         {
-            Action<int> action = mocks.StrictMock<Action<int>>();
+            Action<int> action = MockRepository.GenerateStrictMock<Action<int>>();
             for (int i = 0; i < 10; i++)
             {
-                action(i);
+                action.Expect(x => x(i));
             }
-            mocks.ReplayAll();
+
             ForEachFromZeroToNine(action);
-            mocks.VerifyAll();
+            action.VerifyAllExpectations();
         }
 
         private void ForEachFromZeroToNine(Action<int> act)

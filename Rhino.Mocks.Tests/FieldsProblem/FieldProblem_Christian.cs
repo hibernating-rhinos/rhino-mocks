@@ -2,16 +2,12 @@ using Xunit;
 
 namespace Rhino.Mocks.Tests.FieldsProblem
 {
-    
     public class FieldProblem_Christian
     {
         [Fact]
         public void PropertiesWillBehaveLikeProperties()
         {
-            MockRepository mocks = new MockRepository();
-            TestObject testObject = mocks.Stub<TestObject>();
-
-            mocks.ReplayAll();
+            TestObject testObject = MockRepository.GenerateStub<TestObject>();
 
             Assert.Equal(0, testObject.IntProperty);
         }

@@ -26,8 +26,6 @@
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endregion
 
-
-using System;
 using System.IO;
 using System.Net;
 using System.Text;
@@ -35,86 +33,65 @@ using Xunit;
 
 namespace Rhino.Mocks.Tests.FieldsProblem
 {
-    
-    public class FieldProblem_SpookyET : IDisposable
-    {
-        MockRepository mocks;
+		public class FieldProblem_SpookyET
+		{
+				[Fact]
+				public void MockHttpRequesteRsponse()
+				{
+						byte[] responseData = Encoding.UTF8.GetBytes("200 OK");
+						Stream stream = new MemoryStream(responseData);
+						WebRequest request = (WebRequest)MockRepository.GenerateStrictMock(typeof(WebRequest), null, null);
+						WebResponse response = (WebResponse)MockRepository.GenerateStrictMock(typeof(WebResponse), null, null);
+						request.Expect(x => x.GetResponse()).Return(response);
+						response.Expect(x => x.GetResponseStream()).Return(stream);
 
-		public FieldProblem_SpookyET()
-        {
-            mocks = new MockRepository();
-        }
+						Stream returnedStream = GetResponseStream(request);
 
-        public void Dispose()
-        {
-            mocks.VerifyAll();
-        }
+						Assert.Same(stream, returnedStream);
+						string returnedString = new StreamReader(returnedStream).ReadToEnd();
+						Assert.Equal("200 OK", returnedString);
 
-        [Fact]
-        public void MockHttpRequesteRsponse()
-        {
-            byte[] responseData = Encoding.UTF8.GetBytes("200 OK");
-            Stream stream = new MemoryStream(responseData);
-            WebRequest request = (WebRequest)mocks.StrictMock(typeof(WebRequest));
-            WebResponse response = (WebResponse)mocks.StrictMock(typeof(WebResponse));
-            Expect.On(request).Call(request.GetResponse()).Return(response);
-            Expect.On(response).Call(response.GetResponseStream()).Return(stream);
+						request.VerifyAllExpectations();
+						response.VerifyAllExpectations();
+				}
 
-            mocks.ReplayAll();
+				/// <summary>
+				/// Notice the ordering: First we've a Return and then IgnoreArguments, that
+				/// broke because I didn't copy the returnValueSet in the expectation swapping.
+				/// </summary>
+				[Fact]
+				public void UsingReturnAndThenIgnoreArgs()
+				{
+						IDemo demo = (IDemo)MockRepository.GenerateStrictMock(typeof(IDemo), null, null);
+						demo.Expect(x => x.StringArgString(null)).Return("ayende").IgnoreArguments();
+						Assert.Equal("ayende", demo.StringArgString("rahien"));
+						demo.VerifyAllExpectations();
+				}
 
-            Stream returnedStream = GetResponseStream(request);
+				[Fact]
+				public void WebRequestWhenDisposing()
+				{
+						var webRequestMock = (WebRequest)MockRepository.GenerateStrictMock(typeof(WebRequest), null, null);
+						var webResponseMock = (WebResponse)MockRepository.GenerateStrictMock(typeof(WebResponse), null, null);
 
-            Assert.Same(stream, returnedStream);
-            string returnedString = new StreamReader(returnedStream).ReadToEnd();
-            Assert.Equal("200 OK", returnedString);
-        }
+						webRequestMock.Expect(x => x.GetResponse()).Return(webResponseMock);
+						webResponseMock.Expect(x => x.GetResponseStream()).Return(new MemoryStream());
 
-        /// <summary>
-        /// Notice the ordering: First we've a Return and then IgnoreArguments, that
-        /// broke because I didn't copy the returnValueSet in the expectation swapping.
-        /// </summary>
-        [Fact]
-        public void UsingReturnAndThenIgnoreArgs()
-        {
-            IDemo demo = (IDemo)mocks.StrictMock(typeof(IDemo));
-            Expect.On(demo).Call(demo.StringArgString(null)).Return("ayende").IgnoreArguments();
-            mocks.ReplayAll();
-            Assert.Equal("ayende", demo.StringArgString("rahien"));
-        }
+						webResponseMock.Expect(x => x.Close());
 
-        [Fact]
-        public void WebRequestWhenDisposing()
-        {
-            MockRepository mockRepository;
-            WebRequest webRequestMock;
-            WebResponse webResponseMock;
+						WebResponse response = webRequestMock.GetResponse();
+						response.GetResponseStream();
+						webResponseMock.Close();
 
-            mockRepository = new MockRepository();
-            webRequestMock = (WebRequest)mockRepository.StrictMock(typeof(WebRequest));
-            webResponseMock = (WebResponse)mockRepository.StrictMock(typeof(WebResponse));
+						webRequestMock.AssertWasCalled(x => x.GetResponse()).Before(webResponseMock.AssertWasCalled(x => x.GetResponseStream()));
 
-            using (mockRepository.Ordered())
-            {
-                Expect.On(webRequestMock).
-                    Call(webRequestMock.GetResponse()).
-                    Return(webResponseMock);
-                Expect.On(webResponseMock).
-                    Call(webResponseMock.GetResponseStream()).
-                    Return(new MemoryStream());
-            }
-            webResponseMock.Close();
+						webRequestMock.VerifyAllExpectations();
+						webResponseMock.VerifyAllExpectations();
+				}
 
-            mockRepository.ReplayAll();
-
-            WebResponse response = webRequestMock.GetResponse();
-            response.GetResponseStream();
-            webResponseMock.Close();
-            mockRepository.VerifyAll();
-        }
-
-        private Stream GetResponseStream(WebRequest request)
-        {
-            return request.GetResponse().GetResponseStream();
-        }
-    }
+				private Stream GetResponseStream(WebRequest request)
+				{
+						return request.GetResponse().GetResponseStream();
+				}
+		}
 }

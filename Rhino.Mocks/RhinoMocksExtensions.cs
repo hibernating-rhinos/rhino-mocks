@@ -26,7 +26,6 @@
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endregion
 
-#if DOTNET35
 using System;
 using System.Collections.Generic;
 using Rhino.Mocks.Exceptions;
@@ -127,11 +126,31 @@ namespace Rhino.Mocks
 			var isInReplayMode = mocks.IsInReplayMode(mock);
 			mocks.BackToRecord(mock, BackToRecordOptions.None);
 			action(mock);
-			IMethodOptions<R> options = LastCall.GetOptions<R>();
+			IMethodOptions<R> options = RhinoMocksExtensions.GetOptions<R>();
 			options.TentativeReturn();
 			if (isInReplayMode)
 				mocks.ReplayCore(mock, false);
 			return options;
+		}
+
+		/*
+		 * Method: GetOptions
+		 * *Internal!*
+		 * 
+		 * Get the method options for the last method call from *all* the mock objects.
+		 * Throws an exception if there is no such call.
+		 * 
+		 * Thread safety:
+		 * *Not* safe for mutli threading, use <On>
+		 */
+		internal static IMethodOptions<T> GetOptions<T>()
+		{
+			if (MockRepository.LastMockedObject == null)
+			{
+				throw new InvalidOperationException("Invalid call, the last call has been used or no call has been made (make sure that you are calling a virtual (C#) / Overridable (VB) method).");
+			}
+
+			return MockRepository.lastRepository.LastMethodCall<T>(MockRepository.LastMockedObject);
 		}
 
 		/// <summary>
@@ -214,9 +233,9 @@ namespace Rhino.Mocks
 		/// <typeparam name="T"></typeparam>
 		/// <param name="mock">The mock.</param>
 		/// <param name="action">The action.</param>
-    public static void AssertWasCalled<T>(this T mock, Action<T> action)
+    public static CallRecordCollection AssertWasCalled<T>(this T mock, Action<T> action)
 		{
-			AssertWasCalled(mock, action, DefaultConstraintSetup);
+			return AssertWasCalled(mock, action, DefaultConstraintSetup);
 		}
 
 		private static void DefaultConstraintSetup(IMethodOptions<object> options)
@@ -231,19 +250,21 @@ namespace Rhino.Mocks
 		/// <param name="mock">The mock.</param>
 		/// <param name="action">The action.</param>
 		/// <param name="setupConstraints">The setup constraints.</param>
-    public static void AssertWasCalled<T>(this T mock, Action<T> action, Action<IMethodOptions<object>> setupConstraints)
+    public static CallRecordCollection AssertWasCalled<T>(this T mock, Action<T> action, Action<IMethodOptions<object>> setupConstraints)
 		{
 			ExpectationVerificationInformation verificationInformation = GetExpectationsToVerify(mock, action, setupConstraints);
 
-			foreach (var args in verificationInformation.ArgumentsForAllCalls)
+			var records = new CallRecordCollection();
+			foreach (var record in verificationInformation.AllCallRecords.GetRecordEnumerable())
 			{
-				if (verificationInformation.Expected.IsExpected(args))
+				if (verificationInformation.Expected.IsExpected(record.Arguments))
 				{
 					verificationInformation.Expected.AddActualCall();
+					records.Add(record);
 				}
 			}
 			if (verificationInformation.Expected.ExpectationSatisfied)
-				return;
+				return records;
 			throw new ExpectationViolationException(verificationInformation.Expected.BuildVerificationFailureMessage());
         }
 
@@ -254,10 +275,10 @@ namespace Rhino.Mocks
         /// <typeparam name="T"></typeparam>
         /// <param name="mock">The mock.</param>
         /// <param name="action">The action.</param>
-        public static void AssertWasCalled<T>(this T mock, Func<T, object> action)
+        public static CallRecordCollection AssertWasCalled<T>(this T mock, Func<T, object> action)
         {
             var newAction = new Action<T>(t => action(t));
-            AssertWasCalled(mock, newAction, DefaultConstraintSetup);
+            return AssertWasCalled(mock, newAction, DefaultConstraintSetup);
         }
 
         /// <summary>
@@ -268,10 +289,10 @@ namespace Rhino.Mocks
         /// <param name="mock">The mock.</param>
         /// <param name="action">The action.</param>
         /// <param name="setupConstraints">The setup constraints.</param>
-        public static void AssertWasCalled<T>(this T mock, Func<T, object> action, Action<IMethodOptions<object>> setupConstraints)
+        public static CallRecordCollection AssertWasCalled<T>(this T mock, Func<T, object> action, Action<IMethodOptions<object>> setupConstraints)
         {
             var newAction = new Action<T>(t => action(t));
-            AssertWasCalled(mock, newAction, setupConstraints);
+            return AssertWasCalled(mock, newAction, setupConstraints);
         }
 
 
@@ -362,12 +383,8 @@ namespace Rhino.Mocks
 				throw new InvalidOperationException(
 					"The expectation was removed from the waiting expectations list, did you call Repeat.Any() ? This is not supported in AssertWasCalled()");
 			IExpectation expected = expectationsToVerify[0];
-			ICollection<object[]> argumentsForAllCalls = mockedObject.GetCallArgumentsFor(expected.Method);
-			return new ExpectationVerificationInformation
-					{
-						ArgumentsForAllCalls = new List<object[]>(argumentsForAllCalls),
-						Expected = expected
-					};
+			var argumentsForAllCalls = new CallRecordCollection(mockedObject.GetCallArgumentsFor(expected.Method));
+			return new ExpectationVerificationInformation(argumentsForAllCalls, expected);
         }
 
 		/// <summary>
@@ -450,6 +467,104 @@ namespace Rhino.Mocks
 			eventRaiser.Raise(args);
 		}
 
+        /// <summary>
+        /// Assert that all calls specified by <paramref name="beforeCalls"/> 
+        /// occurred before all calls specified by <paramref name="afterCalls"/>
+        /// </summary>
+        /// <param name="beforeCalls">
+        /// Calls that happens before <paramref name="afterCalls"/>
+        /// </param>
+        /// <param name="afterCalls">
+        /// Calls that happens after <paramref name="beforeCalls"/>
+        /// </param>
+        public static CallRecordCollection Before(this CallRecordCollection beforeCalls, CallRecordCollection afterCalls)
+        {
+            Ordered(Last(beforeCalls), First(afterCalls));
+            return afterCalls;
+        }
+
+        /// <summary>
+        /// Assert that all calls specified by <paramref name="afterCalls"/> 
+        /// occurred after all calls specified by <paramref name="beforeCalls"/>
+        /// </summary>
+        /// <param name="afterCalls">
+        /// Calls that happens after <paramref name="beforeCalls"/>
+        /// </param>
+        /// <param name="beforeCalls">
+        /// Calls that happens before <paramref name="afterCalls"/>
+        /// </param>
+        public static CallRecordCollection After(this CallRecordCollection afterCalls, CallRecordCollection beforeCalls)
+        {
+            Ordered(Last(beforeCalls), First(afterCalls));
+            return beforeCalls;
+        }
+
+        /// <summary>
+        /// Assert that the call specified by <paramref name="before"/> 
+        /// occurred before the call specified by <paramref name="after"/>
+        /// </summary>
+        /// <param name="before">
+        /// Call that occurred before <paramref name="after"/>
+        /// </param>
+        /// <param name="after">
+        /// Call that occurred after <paramref name="before"/>
+        /// </param>
+        public static CallRecord Before(this CallRecord before, CallRecord after)
+        {
+            Ordered(before, after);
+            return after;
+        }
+
+        /// <summary>
+        /// Assert that the call specified by <paramref name="after"/> 
+        /// occurred after the call specified by <paramref name="before"/>
+        /// </summary>
+        /// <param name="after">
+        /// Call that occurred after <paramref name="before"/>
+        /// </param>
+        /// <param name="before">
+        /// Call that occurred before <paramref name="after"/>
+        /// </param>
+        public static CallRecord After(this CallRecord after, CallRecord before)
+        {
+            Ordered(before, after);
+            return before;
+        }
+
+        /// <summary>
+        /// Returns the last executed call in the <paramref name="callRecords"/>.
+        /// </summary>
+        /// <param name="callRecords">
+        /// A list of call records ordered by the time they were executed.
+        /// </param>
+        /// <returns>The last call executed in <paramref name="callRecords"/></returns>
+        public static CallRecord Last(this CallRecordCollection callRecords)
+        {
+            return callRecords[callRecords.Count - 1];
+        }
+
+        /// <summary>
+        /// Returns the first executed call in the <paramref name="callRecords"/>.
+        /// </summary>
+        /// <param name="callRecords">
+        /// A list of call records ordered by the time they were executed.
+        /// </param>
+        /// <returns>The first call executed in <paramref name="callRecords"/></returns>
+        public static CallRecord First(this CallRecordCollection callRecords)
+        {
+            return callRecords[0];
+        }
+	    private static void Ordered(CallRecord before, CallRecord after)
+	    {
+	        if (before.Sequence > after.Sequence)
+	        {
+	            throw new ExpectationViolationException(
+	                "Expected that call " + before.Method +
+	                " occurs before call " + after.Method +
+	                ", but the expectation is not satisfied.");
+	        }
+	    }
+
     /// <summary>TODO: Make this better!  It currently breaks down when mocking classes or
     /// ABC's that call other virtual methods which are getting intercepted too.  I wish
     /// we could just walk Expression{Action{Action{T}} to assert only a single
@@ -526,4 +641,3 @@ namespace Rhino.Mocks
 
 	}
 }
-#endif

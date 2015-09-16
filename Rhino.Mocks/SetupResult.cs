@@ -32,9 +32,12 @@ using Rhino.Mocks.Interfaces;
 
 namespace Rhino.Mocks
 {
+	using System;
+
 	/// <summary>
 	/// Setup method calls to repeat any number of times.
 	/// </summary>
+	[Obsolete("Please switch to AAA syntax (reference can be found at http://svengrand.blogspot.de/2011/02/rhino-mocks-arange-act-assert-aaa.html).")]
 	public static class SetupResult
 	{
 		/*

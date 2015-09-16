@@ -26,27 +26,20 @@
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endregion
 
-
-using System;
-using System.Collections.Generic;
-using System.Text;
 using Xunit;
 
 namespace Rhino.Mocks.Tests.FieldsProblem
 {
-	
 	public class FieldProblem_Ross
 	{
 		[Fact]
 		public void GenericMethodWithConstrait()
 		{
-			MockRepository mocks = new MockRepository();
+			IClass1 class1 = MockRepository.GenerateStrictMock<IClass1>();
+			IClass2 class2 = MockRepository.GenerateStrictMock<IClass2>();
 
-			IClass1 class1 = mocks.StrictMock<IClass1>();
-			IClass2 class2 = mocks.StrictMock<IClass2>();
-
-			class1.Method1<int>(1);
-			class2.Method2(mocks);
+			class1.Expect(x => x.Method1<int>(1));
+			class2.Expect(x => x.Method2(string.Empty));
 		}
 
 		public interface IClass1
@@ -58,6 +51,5 @@ namespace Rhino.Mocks.Tests.FieldsProblem
 		{
 			void Method2<T2>(T2 t2) where T2 : class;
 		}
-
 	}
 }

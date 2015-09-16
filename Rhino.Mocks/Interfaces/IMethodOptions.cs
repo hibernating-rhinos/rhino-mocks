@@ -29,7 +29,7 @@
 #endregion
 
 using System;
-using Castle.Core.Interceptor;
+using Castle.DynamicProxy;
 using Rhino.Mocks.Constraints;
 using System.Reflection;
 
@@ -229,25 +229,6 @@ namespace Rhino.Mocks.Interfaces
 		/// and allow to optionally modify the invocation as needed
 		/// </summary>
 		IMethodOptions<T> WhenCalled(Action<MethodInvocation> action);
-
-		/*
-			 * Method: CallOriginalMethod
-			 * 
-			 * Call the original method on the class, bypassing the mocking layers.
-			 * 
-			 * Important:
-			 * Can only be used on a method that has an implementation. 
-			 * If you try that on an interface method or an abstract method, you'll get an 
-			 * exception.
-			 * 
-			 */
-
-		/// <summary>
-		/// Call the original method on the class, bypassing the mocking layers.
-		/// </summary>
-		/// <returns></returns>
-		[Obsolete("Use CallOriginalMethod(OriginalCallOptions options) overload to explicitly specify the call options")]
-		void CallOriginalMethod();
 
 		/*
 		 * Method: CallOriginalMethod

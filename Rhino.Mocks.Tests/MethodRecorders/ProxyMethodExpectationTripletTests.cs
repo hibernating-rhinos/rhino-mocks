@@ -28,7 +28,9 @@
 
 
 using System;
+using System.Globalization;
 using System.Reflection;
+using System.Threading;
 using Xunit;
 using Rhino.Mocks.Expectations;
 using Rhino.Mocks.Impl;
@@ -106,26 +108,50 @@ namespace Rhino.Mocks.Tests.MethodRecorders
 		[Fact]
 		public void ProxyNullThrows()
 		{
-			Assert.Throws<ArgumentNullException>(
-				"Value cannot be null.\r\nParameter name: proxy",
-				() => new ProxyMethodExpectationTriplet(null, endsWith, expectation));
+			var culture = Thread.CurrentThread.CurrentUICulture;
+			try
+			{
+				Thread.CurrentThread.CurrentUICulture = CultureInfo.InvariantCulture;
+				var ex = Assert.Throws<ArgumentNullException>(() => new ProxyMethodExpectationTriplet(null, this.endsWith, this.expectation));
+				Assert.Equal("Value cannot be null.\r\nParameter name: proxy", ex.Message);
+			}
+			finally
+			{
+				Thread.CurrentThread.CurrentUICulture = culture;
+			}
 		}
 
 		[Fact]
 		public void MethodNullThrows()
 		{
-			Assert.Throws<ArgumentNullException>(
-				"Value cannot be null.\r\nParameter name: method",
-				() => new ProxyMethodExpectationTriplet(proxy, null, expectation));
+			var culture = Thread.CurrentThread.CurrentUICulture;
+			try
+			{
+				Thread.CurrentThread.CurrentUICulture = CultureInfo.InvariantCulture;
+				var ex = Assert.Throws<ArgumentNullException>(() => new ProxyMethodExpectationTriplet(this.proxy, null, this.expectation));
+				Assert.Equal("Value cannot be null.\r\nParameter name: method", ex.Message);
+			}
+			finally
+			{
+				Thread.CurrentThread.CurrentUICulture = culture;
+			}
 		}
 
 		[Fact]
 		public void ExpectationNullThrows()
-		{
-			Assert.Throws<ArgumentNullException>(
-				"Value cannot be null.\r\nParameter name: expectation",
-				() => new ProxyMethodExpectationTriplet(proxy, endsWith, null));
-		}
+			{
+				var culture = Thread.CurrentThread.CurrentUICulture;
+				try
+				{
+					Thread.CurrentThread.CurrentUICulture = CultureInfo.InvariantCulture;
+					var ex = Assert.Throws<ArgumentNullException>(() => new ProxyMethodExpectationTriplet(this.proxy, this.endsWith, null));
+					Assert.Equal("Value cannot be null.\r\nParameter name: expectation", ex.Message);
+				}
+				finally
+				{
+					Thread.CurrentThread.CurrentUICulture = culture;
+				}
+			}
 
 		[Fact]
 		public void FalseOnEqualToNull()

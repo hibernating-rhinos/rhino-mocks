@@ -3,29 +3,22 @@ using Xunit;
 
 namespace Rhino.Mocks.Tests.FieldsProblem
 {
-	
 	public class FieldProblem__Sean
 	{
-		[Fact(Skip = "Not sure what the problem is, and don't know enough about CAS to try to figure it out")]
+		[Fact]
 		public void CanMockMethodWithEnvironmentPermissions()
 		{
-			MockRepository mocks = new MockRepository();
-			IEmployeeRepository employeeRepository = mocks.StrictMock<IEmployeeRepository>();
-			IEmployee employee = mocks.StrictMock<IEmployee>();
+			IEmployeeRepository employeeRepository = MockRepository.GenerateStrictMock<IEmployeeRepository>();
+			IEmployee employee = MockRepository.GenerateStrictMock<IEmployee>();
 			
-			using (mocks.Record())
-			{
-				employeeRepository.GetEmployeeDetails("ayende");
-				LastCall.Return(employee);
-			}
+			employeeRepository.Expect(x => x.GetEmployeeDetails("ayende")).Return(employee);
 
-			using(mocks.Playback())
-			{
-				IEmployee actual = employeeRepository.GetEmployeeDetails("ayende");
-				Assert.Equal(employee, actual);
-			}
+			IEmployee actual = employeeRepository.GetEmployeeDetails("ayende");
+			Assert.Equal(employee, actual);
+
+			employee.VerifyAllExpectations();
+			employeeRepository.VerifyAllExpectations();
 		}
-
 	}
 
 	public interface IEmployeeRepository

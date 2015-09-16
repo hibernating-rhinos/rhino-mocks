@@ -43,7 +43,6 @@ namespace Rhino.Mocks.Tests.Remoting
 	/// Test scenarios where mock objects are called from different
 	/// application domain.
 	/// </summary>
-	
 	public class ContextSwitchTests : IDisposable
 	{
 		private AppDomain otherDomain;
@@ -51,19 +50,13 @@ namespace Rhino.Mocks.Tests.Remoting
 
 		public ContextSwitchTests()
 		{
-			FileInfo assemblyFile = new FileInfo(
-				Assembly.GetExecutingAssembly().Location);
-
 			otherDomain = AppDomain.CreateDomain("other domain", null,
 				AppDomain.CurrentDomain.BaseDirectory, null, false);
 
 			contextSwitcher = (ContextSwitcher)otherDomain.CreateInstanceAndUnwrap(
 				Assembly.GetExecutingAssembly().GetName().Name,
 				typeof(ContextSwitcher).FullName);
-
 		}
-
-
 
 		public void Dispose()
 		{
@@ -73,96 +66,80 @@ namespace Rhino.Mocks.Tests.Remoting
 		[Fact]
 		public void MockInterface()
 		{
-			MockRepository mocks = new MockRepository();
-			IDemo demo = (IDemo)mocks.StrictMock(typeof(IDemo));
-			Expect.Call(demo.ReturnIntNoArgs()).Return(54);
-			demo.VoidStringArg("54");
-			mocks.ReplayAll();
+			IDemo demo = (IDemo)MockRepository.GenerateStrictMock(typeof(IDemo), null, null);
+			demo.Expect(x => x.ReturnIntNoArgs()).Return(54);
+			demo.Expect(x => x.VoidStringArg("54"));
+
 			contextSwitcher.DoStuff(demo);
-			mocks.VerifyAll();
+			
+			demo.VerifyAllExpectations();
 		}
 
-	
 		[Fact]
 		public void MockInterfaceWithSameName()
 		{
-			MockRepository mocks = new MockRepository();
-			IDemo demo = (IDemo)mocks.StrictMock(typeof(IDemo));
-			Expect.Call(demo.ReturnIntNoArgs()).Return(54);
-			demo.VoidStringArg("54");
-			Other.IDemo remotingDemo = (Other.IDemo)mocks.StrictMock(typeof(Other.IDemo));
-			remotingDemo.ProcessString("in");
-			mocks.ReplayAll();
+			IDemo demo = (IDemo)MockRepository.GenerateStrictMock(typeof(IDemo), null, null);
+			demo.Expect(x => x.ReturnIntNoArgs()).Return(54);
+			demo.Expect(x => x.VoidStringArg("54"));
+			Other.IDemo remotingDemo = (Other.IDemo)MockRepository.GenerateStrictMock(typeof(Other.IDemo), null, null);
+			remotingDemo.Expect(x => x.ProcessString("in"));
+
 			contextSwitcher.DoStuff(demo);
 			contextSwitcher.DoStuff(remotingDemo);
-			mocks.VerifyAll();
+			
+			demo.VerifyAllExpectations();
+			remotingDemo.VerifyAllExpectations();
 		}
 
 		[Fact]
 		public void MockInterfaceExpectException()
 		{
-			MockRepository mocks = new MockRepository();
-			IDemo demo = (IDemo)mocks.StrictMock(typeof(IDemo));
-			Expect.Call(demo.ReturnIntNoArgs()).Throw(new InvalidOperationException("That was expected."));
-			mocks.ReplayAll();
-			Assert.Throws<InvalidOperationException>(
-				"That was expected.",
-				() => contextSwitcher.DoStuff(demo));
+			IDemo demo = (IDemo)MockRepository.GenerateStrictMock(typeof(IDemo), null, null);
+			demo.Expect(x => x.ReturnIntNoArgs()).Throw(new InvalidOperationException("That was expected."));
+
+			var ex = Assert.Throws<InvalidOperationException>(() => this.contextSwitcher.DoStuff(demo));
+			Assert.Equal("That was expected.", ex.Message);
 		}
-
-
 
 		[Fact]
 		public void MockInterfaceUnexpectedCall()
 		{
-			MockRepository mocks = new MockRepository();
-			IDemo demo = (IDemo)mocks.StrictMock(typeof(IDemo));
-			Expect.Call(demo.ReturnIntNoArgs()).Return(34);
-			demo.VoidStringArg("bang");
-			mocks.ReplayAll();
-			Assert.Throws<ExpectationViolationException>(
-				"IDemo.VoidStringArg(\"34\"); Expected #0, Actual #1.\r\nIDemo.VoidStringArg(\"bang\"); Expected #1, Actual #0.",
-				() => contextSwitcher.DoStuff(demo));
+			IDemo demo = (IDemo)MockRepository.GenerateStrictMock(typeof(IDemo), null, null);
+			demo.Expect(x => x.ReturnIntNoArgs()).Return(34);
+			demo.Expect(x => x.VoidStringArg("bang"));
+
+			var ex = Assert.Throws<ExpectationViolationException>(() => this.contextSwitcher.DoStuff(demo));
+			Assert.Equal("IDemo.VoidStringArg(\"34\"); Expected #0, Actual #1.\r\nIDemo.VoidStringArg(\"bang\"); Expected #1, Actual #0.", ex.Message);
 		}
-
-
 
 		[Fact]
 		public void MockClass()
 		{
-			MockRepository mocks = new MockRepository();
-			RemotableDemoClass demo = (RemotableDemoClass)mocks.StrictMock(typeof(RemotableDemoClass));
-			Expect.Call(demo.Two()).Return(44);
-			mocks.ReplayAll();
+			RemotableDemoClass demo = (RemotableDemoClass)MockRepository.GenerateStrictMock(typeof(RemotableDemoClass), null, null);
+			demo.Expect(x => x.Two()).Return(44);
+
 			Assert.Equal(44, contextSwitcher.DoStuff(demo));
-			mocks.VerifyAll();
+			demo.VerifyAllExpectations();
 		}
 
-
-
+		[Fact]
 		public void MockClassExpectException()
 		{
-			MockRepository mocks = new MockRepository();
-			RemotableDemoClass demo = (RemotableDemoClass)mocks.StrictMock(typeof(RemotableDemoClass));
-			Expect.Call(demo.Two()).Throw(new InvalidOperationException("That was expected for class."));
-			mocks.ReplayAll();
-			Assert.Throws<InvalidOperationException>(
-				"That was expected for class.",
-				() => contextSwitcher.DoStuff(demo));
-		}
+			RemotableDemoClass demo = (RemotableDemoClass)MockRepository.GenerateStrictMock(typeof(RemotableDemoClass), null, null);
+			demo.Expect(x => x.Two()).Throw(new InvalidOperationException("That was expected for class."));
 
+			var ex = Assert.Throws<InvalidOperationException>(() => this.contextSwitcher.DoStuff(demo));
+			Assert.Equal("That was expected for class.", ex.Message);
+		}
 
 		[Fact]
 		public void MockClassUnexpectedCall()
 		{
-			MockRepository mocks = new MockRepository();
-			RemotableDemoClass demo = (RemotableDemoClass)mocks.StrictMock(typeof(RemotableDemoClass));
-			Expect.Call(demo.Prop).Return(11);
-			mocks.ReplayAll();
-			Assert.Throws<ExpectationViolationException>(
-				"RemotableDemoClass.Two(); Expected #0, Actual #1.",
-				() => contextSwitcher.DoStuff(demo));
+			RemotableDemoClass demo = (RemotableDemoClass)MockRepository.GenerateStrictMock(typeof(RemotableDemoClass), null, null);
+			demo.Expect(x => x.Prop).Return(11);
+
+			var ex = Assert.Throws<ExpectationViolationException>(() => this.contextSwitcher.DoStuff(demo));
+			Assert.Equal("RemotableDemoClass.Two(); Expected #0, Actual #1.", ex.Message);
 		}
 	}
-
 }

@@ -26,24 +26,19 @@
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endregion
 
-
-using System;
 using Xunit;
 using Rhino.Mocks.Impl;
 
 namespace Rhino.Mocks.Tests.Impl
 {
-		
 	public class MockedObjectsComparerTests
 	{
-		MockRepository mocks;
 		IDemo one, two;
 
 		public MockedObjectsComparerTests()
 		{
-			mocks = new MockRepository();
-			one = (IDemo)mocks.StrictMock(typeof(IDemo));
-			two = (IDemo)mocks.StrictMock(typeof(IDemo));
+			one = (IDemo)MockRepository.GenerateStrictMock(typeof(IDemo), null, null);
+			two = (IDemo)MockRepository.GenerateStrictMock(typeof(IDemo), null, null);
 		}
 
 		[Fact]

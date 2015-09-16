@@ -1,4 +1,3 @@
-#if DOTNET35
 using System;
 using Xunit;
 
@@ -40,4 +39,3 @@ namespace Rhino.Mocks.Tests.FieldsProblem
         }
     }
 }
-#endif

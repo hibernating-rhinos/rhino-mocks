@@ -30,7 +30,7 @@
 using System.Collections;
 using System.Reflection;
 using System.Text;
-using Castle.Core.Interceptor;
+using Castle.DynamicProxy;
 using Rhino.Mocks.Exceptions;
 using Rhino.Mocks.Impl;
 using Rhino.Mocks.Interfaces;
@@ -249,8 +249,11 @@ namespace Rhino.Mocks.MethodRecorders
 					if (triplet.Expectation == expectation)
 						recordedActions.RemoveAt(i);
 				}
-				//Action cannot be another recorder, since then the RemoveExpectation would've
-				//passed us to the top most recorder.
+				else //Action is another recorder
+				{
+					IMethodRecorder innerRecorder = (IMethodRecorder)recordedActions[i];
+					innerRecorder.RemoveExpectation(expectation);
+				}
 			}
 		}
 

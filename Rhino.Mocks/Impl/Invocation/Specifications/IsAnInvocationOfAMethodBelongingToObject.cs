@@ -1,7 +1,6 @@
 using System;
 using System.Reflection;
-using Castle.Core.Interceptor;
-using Rhino.Mocks.Impl.InvocationSpecifications;
+using Castle.DynamicProxy;
 
 namespace Rhino.Mocks.Impl.Invocation.Specifications
 {

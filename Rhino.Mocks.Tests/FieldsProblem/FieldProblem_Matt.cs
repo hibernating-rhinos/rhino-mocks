@@ -26,16 +26,12 @@
  //THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endregion
 
-
 using System;
-using System.Collections.Generic;
-using System.Text;
 using Xunit;
 using Rhino.Mocks.Interfaces;
 
 namespace Rhino.Mocks.Tests.FieldsProblem
 {
-    
     public class FieldProblem_Matt
     {
 
@@ -74,23 +70,16 @@ namespace Rhino.Mocks.Tests.FieldsProblem
         [Fact]
         public void ClearedModelSetsItemsOnView()
         {
-            MockRepository mocks = new MockRepository();
-            IModel model = mocks.StrictMock<IModel>();
-            IView view = mocks.StrictMock<IView>();
-            model.ModelChanged += null;
-            LastCall.IgnoreArguments();
-            IEventRaiser eventRaiser = LastCall.GetEventRaiser();
-
-            view.SetList(null);
-            LastCall.IgnoreArguments();
-            mocks.ReplayAll();
+            IModel model = MockRepository.GenerateStrictMock<IModel>();
+            IView view = MockRepository.GenerateStrictMock<IView>();
+            var eventRaiser = model.Expect(x => x.ModelChanged += null).IgnoreArguments().GetEventRaiser();
+            view.Expect(x => x.SetList(null)).IgnoreArguments();
 
             Presenter subject = new Presenter(view, model);
-
             eventRaiser.Raise(this, EventArgs.Empty);
 
-            mocks.VerifyAll();
+            model.VerifyAllExpectations();
+            view.VerifyAllExpectations();
         }
-
     }
 }

@@ -1,4 +1,3 @@
-#if DOTNET35
 using System;
 using System.Collections;
 using System.Linq;
@@ -116,4 +115,3 @@ namespace Rhino.Mocks.Tests
         }
     }
 }
-#endif

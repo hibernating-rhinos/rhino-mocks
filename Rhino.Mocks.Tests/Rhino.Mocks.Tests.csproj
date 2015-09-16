@@ -18,7 +18,7 @@
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>..\ayende-open-source.snk</AssemblyOriginatorKeyFile>
     <IsWebBootstrapper>false</IsWebBootstrapper>
-    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileUpgradeFlags>
     </FileUpgradeFlags>
     <OldToolsVersion>3.5</OldToolsVersion>
@@ -43,7 +43,7 @@
     <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
     <BaseAddress>285212672</BaseAddress>
     <CheckForOverflowUnderflow>false</CheckForOverflowUnderflow>
-    <DefineConstants>TRACE;DEBUG;DOTNET35</DefineConstants>
+    <DefineConstants>TRACE;DEBUG</DefineConstants>
     <DebugSymbols>true</DebugSymbols>
     <FileAlignment>4096</FileAlignment>
     <NoStdLib>false</NoStdLib>
@@ -62,7 +62,7 @@
     <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
     <BaseAddress>285212672</BaseAddress>
     <CheckForOverflowUnderflow>false</CheckForOverflowUnderflow>
-    <DefineConstants>TRACE;dotNet2</DefineConstants>
+    <DefineConstants>TRACE</DefineConstants>
     <DebugSymbols>false</DebugSymbols>
     <FileAlignment>4096</FileAlignment>
     <NoStdLib>false</NoStdLib>
@@ -83,13 +83,8 @@
     <PlatformTarget>AnyCPU</PlatformTarget>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Castle.Core, Version=1.0.3.0, Culture=neutral, PublicKeyToken=407dd0808d44fbdc, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="Castle.Core, Version=3.2.0.0, Culture=neutral, PublicKeyToken=407dd0808d44fbdc, processorArchitecture=MSIL">
       <HintPath>..\SharedLibs\Castle.Core.dll</HintPath>
-    </Reference>
-    <Reference Include="Castle.DynamicProxy2, Version=2.1.0.0, Culture=neutral, PublicKeyToken=407dd0808d44fbdc, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\SharedLibs\Castle.DynamicProxy2.dll</HintPath>
     </Reference>
     <Reference Include="Interop.ADODB, Version=2.8.0.0, Culture=neutral, PublicKeyToken=0b3305902db7183f, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -130,21 +125,23 @@
     <Reference Include="System.Web">
       <Name>System.Web</Name>
     </Reference>
+    <Reference Include="System.Web.ApplicationServices" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml">
       <Name>System.XML</Name>
     </Reference>
-    <Reference Include="xunit, Version=1.1.0.1323, Culture=neutral, PublicKeyToken=8d05b1bb7a6fdb6c, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="xunit, Version=1.9.1.1600, Culture=neutral, PublicKeyToken=8d05b1bb7a6fdb6c, processorArchitecture=MSIL">
       <HintPath>..\SharedLibs\xunit.dll</HintPath>
-    </Reference>
-    <Reference Include="xunit.extensions, Version=1.1.0.1323, Culture=neutral, PublicKeyToken=8d05b1bb7a6fdb6c, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
+    </Reference>
+    <Reference Include="xunit.extensions, Version=1.9.1.1600, Culture=neutral, PublicKeyToken=8d05b1bb7a6fdb6c, processorArchitecture=MSIL">
       <HintPath>..\SharedLibs\xunit.extensions.dll</HintPath>
+      <SpecificVersion>False</SpecificVersion>
     </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BackToRecord.cs" />
+    <Compile Include="BeforeExtensionMethodTest.cs" />
     <Compile Include="Callbacks\CallbackTests.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -172,11 +169,24 @@
     <Compile Include="Constraints\StringConstraintsTests.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="FieldsProblem\FieldProblem_Andreas2.cs" />
+    <Compile Include="FieldsProblem\FieldProblem_Andri.cs" />
+    <Compile Include="FieldsProblem\FieldProblem_Honggoff.cs" />
+    <Compile Include="FieldsProblem\FieldProblem_Norbi.cs" />
+    <Compile Include="FieldsProblem\FieldProblem_Steinkauz.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="FieldsProblem\FieldProblem_Ted.cs" />
+    <Compile Include="OrderingExpectationTest.cs" />
+    <Compile Include="PartialStubTestsAAA.cs" />
+    <Compile Include="PartialStubTests.cs" />
     <Compile Include="FieldsProblem\FieldProblem_Alex.cs" />
     <Compile Include="FieldsProblem\FieldProblem_Bill.cs" />
     <Compile Include="FieldsProblem\FieldProblem_JPBoodhoo.cs" />
     <Compile Include="FieldsProblem\FieldProblem_KeithD.cs" />
+    <Compile Include="FieldsProblem\FieldProblem_PropertyBehaviorOnInternalProperty.cs" />
     <Compile Include="MethodProblems\MethodProblem_JPBoodhoo.cs" />
+    <Compile Include="MultiStubWithAAA.cs" />
     <Compile Include="PartialMockTestsAAA.cs" />
     <Compile Include="MultiMocksWithAAA.cs" />
     <Compile Include="Coverage.cs" />
@@ -428,10 +438,9 @@
       <Project>{3078B943-10A5-41FA-A68A-7C4FC98506A0}</Project>
       <Name>Rhino.Mocks.Tests.Model</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Rhino.Mocks\Rhino.Mocks 2.0.csproj">
-      <Name>Rhino.Mocks</Name>
+    <ProjectReference Include="..\Rhino.Mocks\Rhino.Mocks.csproj">
       <Project>{1E8FECC7-9E9B-4275-A938-D956F5E5D4F8}</Project>
-      <Package>{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</Package>
+      <Name>Rhino.Mocks</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
@@ -469,5 +478,6 @@
       <Link>ayende-open-source.snk</Link>
     </None>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>

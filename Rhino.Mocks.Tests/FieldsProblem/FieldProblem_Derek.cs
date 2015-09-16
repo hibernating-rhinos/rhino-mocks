@@ -26,45 +26,25 @@
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endregion
 
-
 using System;
 using Xunit;
 
 namespace Rhino.Mocks.Tests.FieldsProblem
 {
-	 
-	public class FieldProblem_Derek : IDisposable
+	public class FieldProblem_Derek
 	{
-		private MockRepository mockRepository;
-
-
-		public FieldProblem_Derek()
-		{
-			mockRepository = new MockRepository();
-		}
-
-
-		public void Dispose()
-
-		{
-			mockRepository.VerifyAll();
-		}
-
-
 		[Fact]
 		public void TestInvalidValue()
 		{
-			IMockInterface mockedInterface = mockRepository.StrictMock<IMockInterface>();
-			Expect.Call(mockedInterface.InvalidValue).Return(100UL);
-			mockRepository.ReplayAll();
+			IMockInterface mockedInterface = MockRepository.GenerateStrictMock<IMockInterface>();
+			mockedInterface.Expect(x => x.InvalidValue).Return(100UL);
 			Assert.Equal(100UL, mockedInterface.InvalidValue);
+			mockedInterface.VerifyAllExpectations();
 		}
 	}
 
 	public interface IMockInterface
     {
-
         UInt64 InvalidValue { get; }
-
     }
 }

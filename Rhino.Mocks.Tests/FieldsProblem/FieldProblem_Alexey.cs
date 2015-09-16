@@ -1,9 +1,7 @@
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Rhino.Mocks.Tests.FieldsProblem
 {
+	using System;
 	using System.Data.SqlClient;
 	using Exceptions;
 	using Xunit;
@@ -21,65 +19,47 @@ namespace Rhino.Mocks.Tests.FieldsProblem
 		}
 	}
 
-	
 	public class FieldProblem_Alexey
 	{
 		[Fact]
 		public void MockInterfaceWithGenericMethodWithConstraints()
 		{
-			MockRepository mockery = new MockRepository();
-
-			ITestInterface mockObj = mockery.StrictMockWithRemoting<ITestInterface>();
-			mockObj.AddService<IDisposable, SqlConnection>();
-			LastCall.Return(mockObj);
-			mockery.ReplayAll();
+			ITestInterface mockObj = MockRepository.GenerateStrictMockWithRemoting<ITestInterface>();
+			mockObj.Expect(x => x.AddService<IDisposable, SqlConnection>()).Return(mockObj);
 
 			mockObj.AddService<IDisposable, SqlConnection>();
 
-			mockery.VerifyAll();
+			mockObj.VerifyAllExpectations();
 		}
 
 		[Fact]
 		public void MockInterfaceWithGenericMethodWithConstraints_WhenNotValid()
 		{
-			MockRepository mockery = new MockRepository();
+			ITestInterface mockObj = MockRepository.GenerateStrictMockWithRemoting<ITestInterface>();
+			mockObj.Expect(x => x.AddService<IDisposable, SqlConnection>()).Return(mockObj);
 
-			ITestInterface mockObj = mockery.StrictMockWithRemoting<ITestInterface>();
-			mockObj.AddService<IDisposable, SqlConnection>();
-			LastCall.Return(mockObj);
-			mockery.ReplayAll();
-
-			Assert.Throws<ExpectationViolationException>(
-				"ITestInterface.AddService<System.IDisposable, System.Data.SqlClient.SqlConnection>(); Expected #1, Actual #0.",
-				() => mockery.VerifyAll());
+			var ex = Assert.Throws<ExpectationViolationException>(() => mockObj.VerifyAllExpectations());
+			Assert.Equal("ITestInterface.AddService<System.IDisposable, System.Data.SqlClient.SqlConnection>(); Expected #1, Actual #0.", ex.Message);
 		}
 
 		[Fact]
 		public void MockInterfaceWithGenericMethodWithConstraints_WhenNotValid_UsingDynamicMock()
 		{
-			MockRepository mockery = new MockRepository();
+			ITestInterface mockObj = MockRepository.GenerateDynamicMockWithRemoting<ITestInterface>();
+			mockObj.Expect(x => x.AddService<IDisposable, SqlConnection>()).Return(mockObj);
 
-			ITestInterface mockObj = mockery.DynamicMockWithRemoting<ITestInterface>();
-			mockObj.AddService<IDisposable, SqlConnection>();
-			LastCall.Return(mockObj);
-			mockery.ReplayAll();
-
-			Assert.Throws<ExpectationViolationException>(
-				"ITestInterface.AddService<System.IDisposable, System.Data.SqlClient.SqlConnection>(); Expected #1, Actual #0.",
-				() => mockery.VerifyAll());
+			var ex = Assert.Throws<ExpectationViolationException>(() => mockObj.VerifyAllExpectations());
+			Assert.Equal("ITestInterface.AddService<System.IDisposable, System.Data.SqlClient.SqlConnection>(); Expected #1, Actual #0.", ex.Message);
 		}
 
 		[Fact]
 		public void MockInterfaceWithGenericMethodWithConstraints_UsingDynamicMock()
 		{
-			MockRepository mockery = new MockRepository();
-
-			ITestInterface mockObj = mockery.DynamicMockWithRemoting<ITestInterface>();
-			mockery.ReplayAll();
+			ITestInterface mockObj = MockRepository.GenerateDynamicMockWithRemoting<ITestInterface>();
 
 			mockObj.AddService<IDisposable, SqlConnection>();
 
-			mockery.VerifyAll();
+			mockObj.VerifyAllExpectations();
 		}
 	}
 }

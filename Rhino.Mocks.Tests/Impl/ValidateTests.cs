@@ -28,6 +28,8 @@
 
 
 using System;
+using System.Globalization;
+using System.Threading;
 using Xunit;
 using Rhino.Mocks.Impl;
 using System.Collections;
@@ -46,20 +48,36 @@ namespace Rhino.Mocks.Tests.Impl
 		[Fact]
 		public void IsNotNullWhenNullThrows()
 		{
-			Assert.Throws<ArgumentNullException>(
-				"Value cannot be null.\r\nParameter name: test",
-				() => Validate.IsNotNull(null, "test"));
+			var culture = Thread.CurrentThread.CurrentUICulture;
+			try
+			{
+				Thread.CurrentThread.CurrentUICulture = CultureInfo.InvariantCulture;
+				var ex = Assert.Throws<ArgumentNullException>(() => Validate.IsNotNull(null, "test"));
+				Assert.Equal("Value cannot be null.\r\nParameter name: test", ex.Message);
+			}
+			finally
+			{
+				Thread.CurrentThread.CurrentUICulture = culture;
+			}
 		}
 
-        [Fact]
-        public void IsNotNull_throws_exception_when_argument_is_null()
-        {
-            string sample = null;
+		[Fact]
+		public void IsNotNull_throws_exception_when_argument_is_null()
+		{
+			var culture = Thread.CurrentThread.CurrentUICulture;
+			try
+			{
+				Thread.CurrentThread.CurrentUICulture = CultureInfo.InvariantCulture;
+				string sample = null;
 
-            Assert.Throws<ArgumentNullException>(
-                "Value cannot be null.\r\nParameter name:sample",
-                () => Validate.IsNotNull(() => sample));
-        }
+				var ex = Assert.Throws<ArgumentNullException>(() => Validate.IsNotNull(() => sample));
+				Assert.Equal("Value cannot be null.\r\nParameter name: sample", ex.Message);
+			}
+			finally
+			{
+				Thread.CurrentThread.CurrentUICulture = culture;
+			}
+		}
 
 		[Fact]
 		public void ArgsEqualWhenNoArgs()

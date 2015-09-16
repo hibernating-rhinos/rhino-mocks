@@ -124,10 +124,9 @@ namespace Rhino.Mocks.Tests
             MockRepository mocks = new MockRepository();
 			TestClass t = (TestClass)mocks.StrictMock(typeof(TestClass));
             mocks.ReplayAll();
-            
-        	Assert.Throws<ExpectationViolationException>(
-        		"TestClass.Method(); Expected #0, Actual #1.",
-				() => t.Method());
+
+        	var ex = Assert.Throws<ExpectationViolationException>(() => t.Method());
+        	Assert.Equal("TestClass.Method(); Expected #0, Actual #1.", ex.Message);
         }
 
         [Fact]
@@ -170,9 +169,8 @@ namespace Rhino.Mocks.Tests
 			TestClass t = (TestClass)mocks.StrictMock(typeof(TestClass));
             Expect.Call(t.MethodGettingParameters(42, "foo")).Return("bar");
             mocks.ReplayAll();
-            Assert.Throws<ExpectationViolationException>(
-        		"TestClass.MethodGettingParameters(19, \"foo\"); Expected #0, Actual #1.\r\nTestClass.MethodGettingParameters(42, \"foo\"); Expected #1, Actual #0.",
-				() => t.MethodGettingParameters(19, "foo"));
+        	var ex = Assert.Throws<ExpectationViolationException>(() => t.MethodGettingParameters(19, "foo"));
+        	Assert.Equal("TestClass.MethodGettingParameters(19, \"foo\"); Expected #0, Actual #1.\r\nTestClass.MethodGettingParameters(42, \"foo\"); Expected #1, Actual #0.", ex.Message);
         }
 
         [Fact]
@@ -204,9 +202,8 @@ namespace Rhino.Mocks.Tests
             TestClass t = (TestClass)mocks.StrictMock(typeof(TestClass));
             t.StringProperty = "foo";
             mocks.ReplayAll();
-            Assert.Throws<ExpectationViolationException>(
-        		"TestClass.set_StringProperty(\"bar\"); Expected #0, Actual #1.\r\nTestClass.set_StringProperty(\"foo\"); Expected #1, Actual #0.",
-				() => t.StringProperty = "bar");
+        	var ex = Assert.Throws<ExpectationViolationException>(() => t.StringProperty = "bar");
+        	Assert.Equal("TestClass.set_StringProperty(\"bar\"); Expected #0, Actual #1.\r\nTestClass.set_StringProperty(\"foo\"); Expected #1, Actual #0.", ex.Message);
         }
 
         [Fact]
@@ -238,11 +235,9 @@ namespace Rhino.Mocks.Tests
 			TestClass t = (TestClass)mocks.StrictMock(typeof(TestClass));
 			Expect.Call(t.GenericMethod<string>("foo")).Return(42);
 			mocks.ReplayAll();
-			
-			Assert.Throws<ExpectationViolationException>(
-				@"TestClass.GenericMethod<System.Int32>(""foo""); Expected #1, Actual #1.
-TestClass.GenericMethod<System.String>(""foo""); Expected #1, Actual #0.",
-				() => Assert.Equal(42, t.GenericMethod<int>("foo")));
+
+			var ex = Assert.Throws<ExpectationViolationException>(() => Assert.Equal(42, t.GenericMethod<int>("foo")));
+			Assert.Equal("TestClass.GenericMethod<System.Int32>(\"foo\"); Expected #1, Actual #1.\r\nTestClass.GenericMethod<System.String>(\"foo\"); Expected #1, Actual #0.", ex.Message);
 		}
 
         [Fact]
@@ -296,8 +291,8 @@ TestClass.GenericMethod<System.String>(""foo""); Expected #1, Actual #0.",
 			AppDomain appDomain = mocks.StrictMock<AppDomain>();
 			Expect.Call(appDomain.BaseDirectory).Return("/home/user/ayende");
 			mocks.ReplayAll();
-			Assert.Throws<ExpectationViolationException>(@"AppDomain.get_BaseDirectory(); Expected #1, Actual #0.",
-			                                             () => mocks.VerifyAll());
+			var ex = Assert.Throws<ExpectationViolationException>(() => mocks.VerifyAll());
+			Assert.Equal(@"AppDomain.get_BaseDirectory(); Expected #1, Actual #0.", ex.Message);
     	}
 
         [Fact]

@@ -100,7 +100,7 @@ namespace Rhino.Mocks.Constraints
             else
             {
                 //if both objects are comparable Equals can be used to determine equality. (value types implement IComparable too when boxed)
-                if (expected is IComparable) 
+                if (expected is IComparable || expected is Type) 
                 {
                     if (!expected.Equals(actual))
                     {

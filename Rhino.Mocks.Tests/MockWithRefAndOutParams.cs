@@ -26,34 +26,27 @@
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endregion
 
-
 using System;
-using System.Text;
 using Xunit;
 
 namespace Rhino.Mocks.Tests
 {
-	
 	public class MockWithRefAndOutParams
 	{
-		MockRepository mocks;
 		IRefAndOut target;
 		private RemotingProxyWithOutRef remotingTarget;
 
 		public MockWithRefAndOutParams()
 		{
-			mocks = new MockRepository();
-			target = (IRefAndOut)mocks.StrictMock(typeof(IRefAndOut));
-			remotingTarget = mocks.StrictMock<RemotingProxyWithOutRef>();
+			target = (IRefAndOut)MockRepository.GenerateStrictMock(typeof(IRefAndOut), null, null);
+			remotingTarget = MockRepository.GenerateStrictMock<RemotingProxyWithOutRef>();
 		}
 
 		[Fact]
 		public void RefString()
 		{
 			string s = "";
-			target.RefStr(ref s);
-			LastCall.Do(new RefStrDel(SayHello));
-			mocks.ReplayAll();
+			target.Expect(x => x.RefStr(ref s)).Do(new RefStrDel(SayHello));
 			target.RefStr(ref s);
 			Assert.Equal("Hello", s);
 		}
@@ -62,9 +55,7 @@ namespace Rhino.Mocks.Tests
 		public void OutString()
 		{
 			string s = "";
-			target.OutStr(out s);
-			LastCall.Do(new OutStrDel(OutSayHello));
-			mocks.ReplayAll();
+			target.Expect(x => x.OutStr(out s)).Do(new OutStrDel(OutSayHello));
 			target.OutStr(out s);
 			Assert.Equal("Hello", s);
 		}
@@ -73,9 +64,7 @@ namespace Rhino.Mocks.Tests
 		public void OutInt()
 		{
 			int i = 0;
-			target.OutInt(out i);
-			LastCall.Do(new OutIntDel(OutFive));
-			mocks.ReplayAll();
+			target.Expect(x => x.OutInt(out i)).Do(new OutIntDel(OutFive));
 			target.OutInt(out i);
 			Assert.Equal(5, i);
 		}
@@ -84,9 +73,7 @@ namespace Rhino.Mocks.Tests
 		public void RefInt()
 		{
 			int i = 0;
-			target.RefInt(ref i);
-			LastCall.Do(new RefIntDel(RefFive));
-			mocks.ReplayAll();
+			target.Expect(x => x.RefInt(ref i)).Do(new RefIntDel(RefFive));
 			target.RefInt(ref i);
 			Assert.Equal(5, i);
 		}
@@ -96,9 +83,7 @@ namespace Rhino.Mocks.Tests
 		public void RemotingRefString()
 		{
 			string s = "";
-			remotingTarget.RefStr(ref s);
-			LastCall.Do(new RefStrDel(SayHello));
-			mocks.ReplayAll();
+			remotingTarget.Expect(x => x.RefStr(ref s)).Do(new RefStrDel(SayHello));
 			remotingTarget.RefStr(ref s);
 			Assert.Equal("Hello", s);
 		}
@@ -107,9 +92,7 @@ namespace Rhino.Mocks.Tests
 		public void RemotingOutString()
 		{
 			string s = "";
-			remotingTarget.OutStr(out s);
-			LastCall.Do(new OutStrDel(OutSayHello));
-			mocks.ReplayAll();
+			remotingTarget.Expect(x => x.OutStr(out s)).Do(new OutStrDel(OutSayHello));
 			remotingTarget.OutStr(out s);
 			Assert.Equal("Hello", s);
 		}
@@ -118,9 +101,7 @@ namespace Rhino.Mocks.Tests
 		public void RemotingOutInt()
 		{
 			int i = 0;
-			remotingTarget.OutInt(out i);
-			LastCall.Do(new OutIntDel(OutFive));
-			mocks.ReplayAll();
+			remotingTarget.Expect(x => x.OutInt(out i)).Do(new OutIntDel(OutFive));
 			remotingTarget.OutInt(out i);
 			Assert.Equal(5, i);
 		}
@@ -129,9 +110,7 @@ namespace Rhino.Mocks.Tests
 		public void RemotingRefInt()
 		{
 			int i = 0;
-			remotingTarget.RefInt(ref i);
-			LastCall.Do(new RefIntDel(RefFive));
-			mocks.ReplayAll();
+			remotingTarget.Expect(x => x.RefInt(ref i)).Do(new RefIntDel(RefFive));
 			remotingTarget.RefInt(ref i);
 			Assert.Equal(5, i);
 		}
@@ -160,7 +139,6 @@ namespace Rhino.Mocks.Tests
 		public delegate void RefIntDel(ref int i);
 		public delegate void OutStrDel(out string s);
 		public delegate void OutIntDel(out int i);
-
 	}
 
 	public interface IRefAndOut

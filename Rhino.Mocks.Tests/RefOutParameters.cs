@@ -26,14 +26,11 @@
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endregion
 
-
 using System;
-using System.Text;
 using Xunit;
 
 namespace Rhino.Mocks.Tests
 {
-    
     public class RefOutParameters
     {
         public class MyClass
@@ -47,17 +44,14 @@ namespace Rhino.Mocks.Tests
         [Fact]
         public void UseTheOutMethodToSpecifyOutputAndRefParameters()
         {
-            MockRepository mocks = new MockRepository();
-            MyClass myClass = (MyClass) mocks.StrictMock(typeof (MyClass));
+            MyClass myClass = (MyClass) MockRepository.GenerateStrictMock(typeof (MyClass), null);
             int i;
             string s = null, s2;
-            myClass.MyMethod(out i, ref s, 1, out s2);
-            LastCall.IgnoreArguments().OutRef(100, "s", "b");
-            mocks.ReplayAll();
+            myClass.Expect(x => x.MyMethod(out i, ref s, 1, out s2)).IgnoreArguments().OutRef(100, "s", "b");
             
             myClass.MyMethod(out i, ref s, 1, out s2);
             
-            mocks.VerifyAll();
+            myClass.VerifyAllExpectations();
             
             Assert.Equal(100, i);
             Assert.Equal("s", s);
@@ -67,30 +61,24 @@ namespace Rhino.Mocks.Tests
 		[Fact]
 		public void UseTheOutMethodToSpecifyOutputAndRefParameters_CanOnlyBeCalledOnce()
         {
-            MockRepository mocks = new MockRepository();
-            MyClass myClass = (MyClass) mocks.StrictMock(typeof (MyClass));
+            MyClass myClass = (MyClass) MockRepository.GenerateStrictMock(typeof (MyClass), null);
             int i;
             string s = null, s2;
-            myClass.MyMethod(out i, ref s, 1, out s2);
-			Assert.Throws<InvalidOperationException>(
-				"Output and ref parameters has already been set for this expectation",
-				() => LastCall.OutRef(100, "s", "b").OutRef(100, "s", "b"));
+			var ex = Assert.Throws<InvalidOperationException>(() => myClass.Expect(x => x.MyMethod(out i, ref s, 1, out s2)).OutRef(100, "s", "b").OutRef(100, "s", "b"));
+			Assert.Equal("Output and ref parameters has already been set for this expectation", ex.Message);
         }
 
     	[Fact]
     	public void GivingLessParametersThanWhatIsInTheMethodWillNotThrow()
     	{
-    		   MockRepository mocks = new MockRepository();
-            MyClass myClass = (MyClass) mocks.StrictMock(typeof (MyClass));
+            MyClass myClass = (MyClass) MockRepository.GenerateStrictMock(typeof (MyClass), null);
             int i;
             string s = null, s2;
-            myClass.MyMethod(out i, ref s, 1, out s2);
-            LastCall.IgnoreArguments().OutRef(100);
-            mocks.ReplayAll();
+            myClass.Expect(x => x.MyMethod(out i, ref s, 1, out s2)).IgnoreArguments().OutRef(100);
             
             myClass.MyMethod(out i, ref s, 1, out s2);
             
-            mocks.VerifyAll();
+            myClass.VerifyAllExpectations();
             
             Assert.Equal(100, i);
             Assert.Null(s);

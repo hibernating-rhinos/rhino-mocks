@@ -26,84 +26,72 @@
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endregion
 
-
 using System;
-using System.Text;
-using System.Windows.Forms;
 using Xunit;
 using Rhino.Mocks.Exceptions;
 
 namespace Rhino.Mocks.Tests
 {
-    
     public class PartialMockTests
     {
-        MockRepository mocks;
         AbstractClass abs;
 
 		public PartialMockTests()
         {
-            mocks = new MockRepository();
-            abs = (AbstractClass)mocks.PartialMock(typeof(AbstractClass));
+            abs = (AbstractClass)MockRepository.GeneratePartialMock(typeof(AbstractClass), null);
         }
 
         [Fact]
 		public void AutomaticallCallBaseMethodIfNoExpectationWasSet() 
 	    {
-            mocks.ReplayAll();
             Assert.Equal(1, abs.Increment());
 			Assert.Equal(6, abs.Add(5));
 			Assert.Equal(6, abs.Count);
-			mocks.VerifyAll();
-
+			abs.VerifyAllExpectations();
 	    }
 
         [Fact]
         public void CanMockVirtualMethods()
         {
-            Expect.Call(abs.Increment()).Return(5);
-			Expect.Call(abs.Add(2)).Return(3);
-			mocks.ReplayAll();
+            abs.Expect(x => x.Increment()).Return(5);
+            abs.Expect(x => x.Add(2)).Return(3);
             Assert.Equal(5, abs.Increment());
 			Assert.Equal(3, abs.Add(2));
 			Assert.Equal(0, abs.Count);
-            mocks.VerifyAll();
+            abs.VerifyAllExpectations();
         }
 
         [Fact]
         public void CanMockAbstractMethods()
         {
-            Expect.Call(abs.Decrement()).Return(5);
-            mocks.ReplayAll();
+            abs.Expect(x => x.Decrement()).Return(5);
             Assert.Equal(5, abs.Decrement());
             Assert.Equal(0, abs.Count);
-            mocks.VerifyAll();
+            abs.VerifyAllExpectations();
         }
 
         [Fact]
         public void CantCreatePartialMockFromInterfaces()
         {
-        	Assert.Throws<InvalidOperationException>("Can't create a partial mock from an interface",
-        	                                         () => new MockRepository().PartialMock(typeof (IDemo)));
+        	var ex = Assert.Throws<InvalidOperationException>(() => MockRepository.GeneratePartialMock(typeof(IDemo), null));
+        	Assert.Equal("Can't create a partial mock from an interface", ex.Message);
         }
 
-        [Fact]
+    	[Fact]
         public void CallAnAbstractMethodWithoutSettingExpectation()
         {
-            mocks.ReplayAll();
-			Assert.Throws<ExpectationViolationException>("AbstractClass.Decrement(); Expected #0, Actual #1.",
-												 () => abs.Decrement());
-			;
+    		var ex = Assert.Throws<ExpectationViolationException>(() => this.abs.Decrement());
+    		Assert.Equal("AbstractClass.Decrement(); Expected #0, Actual #1.", ex.Message);
+    		;
         }
 
     	[Fact]
     	public void CanMockWithCtorParams()
     	{
-    		WithParameters withParameters = mocks.PartialMock<WithParameters>(1);
-    		Expect.Call(withParameters.Int).Return(4);
-    		mocks.ReplayAll();
+    		WithParameters withParameters = MockRepository.GeneratePartialMock<WithParameters>(1);
+    		withParameters.Expect(x => x.Int).Return(4);
     		Assert.Equal(4, withParameters.Int);
-    		mocks.VerifyAll();
+    		abs.VerifyAllExpectations();
     	}
     }
     

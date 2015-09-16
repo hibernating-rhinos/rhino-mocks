@@ -30,7 +30,7 @@
 using System;
 using System.Collections;
 using System.Reflection;
-using Castle.Core.Interceptor;
+using Castle.DynamicProxy;
 using Xunit;
 using Rhino.Mocks.Exceptions;
 using Rhino.Mocks.Impl;
@@ -98,9 +98,14 @@ namespace Rhino.Mocks.Tests
 
 	public class MyMockRepository : MockRepository
 	{
+		public MyMockRepository()
+			: base(false)
+		{
+		}
+
 		public object QueryableMock(Type type)
 		{
-            return CreateMockObject(type, new CreateMockState(CreateQueryMockState), new Type[0]);
+			return CreateMockObject(type, new CreateMockState(CreateQueryMockState), new Type[0]);
 		}
 
 		private IMockState CreateQueryMockState(IMockedObject mockedObject)
@@ -160,10 +165,10 @@ namespace Rhino.Mocks.Tests
 			{
 			}
 
-		    public void NotifyCallOnPropertyBehavior()
-		    {
-		        
-		    }
+				public void NotifyCallOnPropertyBehavior()
+				{
+						
+				}
 		}
 
 		public object Query(object mock)

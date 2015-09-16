@@ -4,33 +4,24 @@ namespace Rhino.Mocks.Tests.FieldsProblem
 {
 	using Exceptions;
 
-	
 	public class FieldProblem_Sam
 	{
 		[Fact]
 		public void Test()
 		{
-			MockRepository mocks = new MockRepository();
-			SimpleOperations myMock = mocks.StrictMock<SimpleOperations>();
-			Expect.Call(myMock.AddTwoValues(1, 2)).Return(3);
-			mocks.ReplayAll();
+			SimpleOperations myMock = MockRepository.GenerateStrictMock<SimpleOperations>();
+			myMock.Expect(x => x.AddTwoValues(1, 2)).Return(3);
 			Assert.Equal(3, myMock.AddTwoValues(1, 2));
-			mocks.VerifyAll();
+			myMock.VerifyAllExpectations();
 		}
 
 		[Fact]
 		public void WillRememberExceptionInsideOrderRecorderEvenIfInsideCatchBlock()
 		{
-			MockRepository mockRepository = new MockRepository();
-			IInterfaceWithThreeMethods interfaceWithThreeMethods = mockRepository.StrictMock<IInterfaceWithThreeMethods>();
+			IInterfaceWithThreeMethods interfaceWithThreeMethods = MockRepository.GenerateStrictMock<IInterfaceWithThreeMethods>();
 
-			using (mockRepository.Ordered())
-			{
-				interfaceWithThreeMethods.A();
-				interfaceWithThreeMethods.C();
-			}
-
-			mockRepository.ReplayAll();
+			interfaceWithThreeMethods.Expect(x => x.A());
+			interfaceWithThreeMethods.Expect(x => x.C());
 
 			interfaceWithThreeMethods.A();
 			try
@@ -40,9 +31,9 @@ namespace Rhino.Mocks.Tests.FieldsProblem
 			catch { /* valid for code under test to catch all */ }
 			interfaceWithThreeMethods.C();
 
-			Assert.Throws<ExpectationViolationException>(
-				"Unordered method call! The expected call is: 'Ordered: { IInterfaceWithThreeMethods.C(); }' but was: 'IInterfaceWithThreeMethods.B();'",
-				() => mockRepository.VerifyAll());
+			interfaceWithThreeMethods.AssertWasCalled(x => x.C()).After(interfaceWithThreeMethods.AssertWasCalled(x => x.A()));
+			var ex = Assert.Throws<ExpectationViolationException>(() => interfaceWithThreeMethods.VerifyAllExpectations());
+			Assert.Equal("IInterfaceWithThreeMethods.B(); Expected #0, Actual #1.", ex.Message);
 		}
 	}
 

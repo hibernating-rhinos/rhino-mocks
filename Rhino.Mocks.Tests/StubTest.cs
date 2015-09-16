@@ -32,7 +32,6 @@ using Rhino.Mocks.Interfaces;
 
 namespace Rhino.Mocks.Tests
 {
-	
 	public class StubTest
 	{
 		[Fact]
@@ -46,8 +45,7 @@ namespace Rhino.Mocks.Tests
 		[Fact]
 		public void StubHasPropertyBehaviorForAllProperties()
 		{
-			MockRepository mocks = new MockRepository();
-			IAnimal animal = mocks.Stub<IAnimal>();
+			IAnimal animal = MockRepository.GenerateStub<IAnimal>();
 			animal.Legs = 4;
 			Assert.Equal(4, animal.Legs);
 
@@ -62,10 +60,8 @@ namespace Rhino.Mocks.Tests
 		[Fact]
 		public void CanRegisterToEventsAndRaiseThem()
 		{
-			MockRepository mocks = new MockRepository();
-			IAnimal animal = mocks.Stub<IAnimal>();
-			animal.Hungry += null; //Note, no expectation!
-			IEventRaiser eventRaiser = LastCall.GetEventRaiser();
+			IAnimal animal = MockRepository.GenerateStub<IAnimal>();
+			IEventRaiser eventRaiser = animal.Stub(x => x.Hungry += null).GetEventRaiser();
 
 			bool raised = false;
 			animal.Hungry += delegate
@@ -80,16 +76,12 @@ namespace Rhino.Mocks.Tests
 		[Fact]
 		public void CallingMethodOnStubsDoesNotCreateExpectations()
 		{
-			MockRepository mocks = new MockRepository();
-			IAnimal animal = mocks.Stub<IAnimal>();
-			using (mocks.Record())
-			{
-				animal.Legs = 4;
-				animal.Name = "Rose";
-				animal.Species = "Caucasusian Shepherd";
-				animal.GetMood();
-			}
-			mocks.VerifyAll();
+			IAnimal animal = MockRepository.GenerateStub<IAnimal>();
+			animal.Legs = 4;
+			animal.Name = "Rose";
+			animal.Species = "Caucasusian Shepherd";
+			animal.Stub(x => x.GetMood());
+			animal.VerifyAllExpectations();
 		}
 
 		[Fact]
@@ -108,18 +100,21 @@ namespace Rhino.Mocks.Tests
 		[Fact]
 		public void CanCreateExpectationOnMethod()
 		{
-			MockRepository mocks = new MockRepository();
-			IAnimal animal = mocks.Stub<IAnimal>();
-			using (mocks.Record())
-			{
-				animal.Legs = 4;
-				animal.Name = "Rose";
-				animal.Species = "Caucasusian Shepherd";
-				animal.GetMood();
-				LastCall.Return("Happy");
-			}
+			IAnimal animal = MockRepository.GenerateStub<IAnimal>();
+			animal.Legs = 4;
+			animal.Name = "Rose";
+			animal.Species = "Caucasusian Shepherd";
+			animal.Stub(x => x.GetMood()).Return("Happy");
 			Assert.Equal("Happy", animal.GetMood());
-			mocks.VerifyAll();
+			animal.VerifyAllExpectations();
+		}
+
+		[Fact]
+		public void StubReplacesVirtualMethod()
+		{
+			var stub = MockRepository.GenerateStub<AbstractClass>();
+
+			Assert.Equal(0, stub.Increment());
 		}
 	}
 
@@ -128,6 +123,7 @@ namespace Rhino.Mocks.Tests
 		int Legs { get; set; }
 		int Eyes { get; set; }
 		string Name { get; set; }
+		string FullName { get; }
 		string Species { get; set; }
 
 		event EventHandler Hungry;

@@ -1,7 +1,5 @@
 using System;
-#if DOTNET35
 using System.Linq.Expressions;
-#endif
 using Rhino.Mocks.Constraints;
 
 namespace Rhino.Mocks
@@ -21,9 +19,6 @@ namespace Rhino.Mocks
 	/// <typeparam name="T"></typeparam>
 	public static class Arg<T>
     {
-
-#if DOTNET35
-
         /// <summary>
 		/// Register the predicate as a constraint for the current call.
 		/// </summary>
@@ -40,24 +35,6 @@ namespace Rhino.Mocks
 			ArgManager.AddInArgument(new LambdaConstraint(predicate));
 			return default(T);
 		}
-#else
-		/// <summary>
-		/// Register the predicate as a constraint for the current call.
-		/// </summary>
-		/// <param name="predicate">The predicate.</param>
-		/// <returns>default(T)</returns>
-		/// <example>
-		/// Allow you to use code to create constraints
-		/// <code>
-		/// demo.AssertWasCalled(x => x.Bar(Arg{string}.Matches(a => a.StartsWith("b") &amp;&amp; a.Contains("ba"))));
-		/// </code>
-		/// </example>
-		public static T Matches<TPredicate>(Predicate<TPredicate> predicate)
-		{
-			ArgManager.AddInArgument(Rhino.Mocks.Constraints.Is.Matching<TPredicate>(predicate));
-			return default(T);
-		}
-#endif
 
 		/// <summary>
 		/// Define a simple constraint for this argument. (Use Matches in simple cases.)

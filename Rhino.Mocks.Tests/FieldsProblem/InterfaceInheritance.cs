@@ -26,7 +26,6 @@
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endregion
 
-
 using System;
 using Xunit;
 
@@ -39,13 +38,11 @@ namespace Rhino.Mocks.Tests.FieldsProblem
         [Fact]
         public void CreateObjectUsingInterfaceInheritance()
         {
-            MockRepository mocks = new MockRepository();
-            ILocalizer localizer = (ILocalizer)mocks.StrictMock(typeof(ILocalizer));
+            ILocalizer localizer = (ILocalizer)MockRepository.GenerateStrictMock(typeof(ILocalizer), null, null);
             Assert.NotNull(localizer);
             typeof(ILocalizer).IsAssignableFrom(localizer.GetType());
             typeof(ICloneable).IsAssignableFrom(localizer.GetType());
-            mocks.ReplayAll();
-            mocks.VerifyAll();
+            localizer.VerifyAllExpectations();
         }
 
         public interface ILocalizer : ICloneable

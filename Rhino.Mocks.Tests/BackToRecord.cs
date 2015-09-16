@@ -26,138 +26,122 @@
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endregion
 
-
 using System;
-using System.Text;
-using Xunit;
 using Rhino.Mocks.Exceptions;
 using Rhino.Mocks.Interfaces;
 using Rhino.Mocks.Tests.FieldsProblem;
+using Xunit;
 
 namespace Rhino.Mocks.Tests
 {
-    
-    public class BackToRecord
-    {
-        [Fact]
-        public void CanMoveToRecordAndThenReplay()
-        {
-            MockRepository mocks = new MockRepository();
-            IDemo demo = (IDemo)mocks.StrictMock(typeof(IDemo));
-            Expect.Call(demo.Prop).Return("ayende");
-            mocks.Replay(demo);
-            Assert.Equal("ayende", demo.Prop);
-            mocks.BackToRecord(demo);
-            Expect.Call(demo.Prop).Return("rahien");
-            mocks.Replay(demo);
-            Assert.Equal("rahien", demo.Prop);
-            mocks.VerifyAll();
-        }
+	public class BackToRecord
+	{
+		[Fact]
+		public void CanMoveToRecordAndThenReplay()
+		{
+			IDemo demo = (IDemo)MockRepository.GenerateStrictMock(typeof(IDemo), null, null);
+			demo.Expect(x => x.Prop).Return("ayende");
+			demo.Replay();
+			Assert.Equal("ayende", demo.Prop);
+			demo.BackToRecord();
+			demo.Expect(x => x.Prop).Return("rahien");
+			demo.Replay();
+			Assert.Equal("rahien", demo.Prop);
+			demo.VerifyAllExpectations();
+		}
 
-        [Fact]
-        public void CanMoveToRecordFromVerified()
-        {
-            MockRepository mocks = new MockRepository();
-            IDemo demo = (IDemo)mocks.StrictMock(typeof(IDemo));
-            Expect.Call(demo.Prop).Return("ayende");
-            
-            mocks.Replay(demo);
-            Assert.Equal("ayende", demo.Prop);
-            mocks.VerifyAll();
+		[Fact]
+		public void CanMoveToRecordFromVerified()
+		{
+			IDemo demo = (IDemo)MockRepository.GenerateStrictMock(typeof(IDemo), null, null);
+			demo.Expect(x => x.Prop).Return("ayende");
 
-            mocks.BackToRecord(demo);
+			demo.Replay();
+			Assert.Equal("ayende", demo.Prop);
+			demo.VerifyAllExpectations();
 
-            Expect.Call(demo.Prop).Return("rahien");
-            mocks.Replay(demo);
-            Assert.Equal("rahien", demo.Prop);
-            mocks.VerifyAll();
-        }
-    
-        [Fact]
-        public void CanSpecifyClearOnlyEvents()
-        {
-            MockRepository mocks = new MockRepository();
-            IWithEvent withEvent = mocks.StrictMock<IWithEvent>();
-            bool called = false;
-            withEvent.Load += delegate { called = true; };
-            IEventRaiser raiser = LastCall.GetEventRaiser();
-            mocks.BackToRecord(withEvent, BackToRecordOptions.EventSubscribers);
+			demo.BackToRecord();
 
-            raiser.Raise(this, EventArgs.Empty);
+			demo.Expect(x => x.Prop).Return("rahien");
+			demo.Replay();
+			Assert.Equal("rahien", demo.Prop);
+			demo.VerifyAllExpectations();
+		}
 
-            Assert.False(called);
-        }
+		[Fact]
+		public void CanSpecifyClearOnlyEvents()
+		{
+			IWithEvent withEvent = MockRepository.GenerateStrictMock<IWithEvent>();
+			bool called = false;
+			IEventRaiser raiser = withEvent.Expect(x => x.Load += delegate { called = true; }).GetEventRaiser();
+			withEvent.BackToRecord(BackToRecordOptions.EventSubscribers);
 
-        [Fact]
-        public void CanClearOnlyOriginalMethodCalls()
-        {
-            MockRepository mocks = new MockRepository();
-            AbstractClass abstractClass = mocks.StrictMock<AbstractClass>();
-            Expect.Call(abstractClass.Add(0)).CallOriginalMethod(OriginalCallOptions.NoExpectation);
-            mocks.BackToRecord(abstractClass, BackToRecordOptions.OriginalMethodsToCall);
-            mocks.ReplayAll();
+			raiser.Raise(this, EventArgs.Empty);
 
-        	Assert.Throws<ExpectationViolationException>(
-        		"AbstractClass.Add(5); Expected #0, Actual #1.",
-        		() => abstractClass.Add(5));
-        }
+			Assert.False(called);
+		}
 
-        [Fact]
-        public void CanClearOnlyPropertyBehavior()
-        {
-            MockRepository mocks = new MockRepository();
-            IDemo mock = mocks.StrictMock<IDemo>();
-            Expect.Call(mock.Prop).PropertyBehavior();
+		[Fact]
+		public void CanClearOnlyOriginalMethodCalls()
+		{
+			AbstractClass abstractClass = MockRepository.GenerateStrictMock<AbstractClass>();
+			abstractClass.Expect(x => x.Add(0)).CallOriginalMethod(OriginalCallOptions.NoExpectation);
+			abstractClass.BackToRecord(BackToRecordOptions.OriginalMethodsToCall);
+			abstractClass.Replay();
 
-            mocks.BackToRecord(mock,BackToRecordOptions.PropertyBehavior);
+			var ex = Assert.Throws<ExpectationViolationException>(() => abstractClass.Add(5));
+			Assert.Equal("AbstractClass.Add(5); Expected #0, Actual #1.", ex.Message);
+		}
 
-            mocks.ReplayAll();
+		[Fact]
+		public void CanClearOnlyPropertyBehavior()
+		{
+			IDemo mock = MockRepository.GenerateStrictMock<IDemo>();
+			mock.Expect(x => x.Prop).PropertyBehavior();
 
-        	Assert.Throws<ExpectationViolationException>("IDemo.get_Prop(); Expected #0, Actual #1.", delegate
-        	{
-        		string prop = mock.Prop;
-        	});
-        }
+			mock.BackToRecord(BackToRecordOptions.PropertyBehavior);
 
-        [Fact]
-        public void CanMoveToRecordFromReplyWithoutClearingExpectations()
-        {
-            MockRepository mocks = new MockRepository();
-            IDemo mock = mocks.StrictMock<IDemo>();
+			mock.Replay();
 
-            mock.VoidNoArgs();
-            mocks.ReplayAll();
+			var ex = Assert.Throws<ExpectationViolationException>(delegate { string prop = mock.Prop; });
+			Assert.Equal("IDemo.get_Prop(); Expected #0, Actual #1.", ex.Message);
+		}
 
-            mocks.BackToRecord(mock, BackToRecordOptions.None);
-            
-            mock.VoidNoArgs();
-            mocks.ReplayAll();
+		[Fact]
+		public void CanMoveToRecordFromReplyWithoutClearingExpectations()
+		{
+			IDemo mock = MockRepository.GenerateStrictMock<IDemo>();
+			mock.Expect(x => x.VoidNoArgs());
+			mock.Replay();
 
-            mock.VoidNoArgs();
+			mock.BackToRecord(BackToRecordOptions.None);
 
-        	Assert.Throws<ExpectationViolationException>(
-        		"IDemo.VoidNoArgs(); Expected #1, Actual #0.",
-        		() => mocks.VerifyAll());
-        }
+			mock.Expect(x => x.VoidNoArgs());
+			mock.Replay();
 
-        [Fact]
-        public void CanMoveToRecordFromVerifiedWithoutClearingExpectations()
-        {
-            MockRepository mocks = new MockRepository();
-            IDemo mock = mocks.StrictMock<IDemo>();
+			mock.VoidNoArgs();
 
-            mock.VoidNoArgs();
-            mocks.ReplayAll();
+			var ex = Assert.Throws<ExpectationViolationException>(() => mock.VerifyAllExpectations());
+			Assert.Equal("IDemo.VoidNoArgs(); Expected #1, Actual #0.", ex.Message);
+		}
 
-            mock.VoidNoArgs();
-            mocks.VerifyAll();
+		[Fact]
+		public void CanMoveToRecordFromVerifiedWithoutClearingExpectations()
+		{
+			IDemo mock = MockRepository.GenerateStrictMock<IDemo>();
 
-            mocks.BackToRecord(mock, BackToRecordOptions.None);
-            mock.VoidNoArgs();
-            mocks.ReplayAll();
+			mock.Expect(x => x.VoidNoArgs());
+			mock.Replay();
 
-            mock.VoidNoArgs();
-            mocks.VerifyAll();
-        }
-    }
+			mock.VoidNoArgs();
+			mock.VerifyAllExpectations();
+
+			mock.BackToRecord(BackToRecordOptions.None);
+			mock.Expect(x => x.VoidNoArgs());
+			mock.Replay();
+
+			mock.VoidNoArgs();
+			mock.VerifyAllExpectations();
+		}
+	}
 }

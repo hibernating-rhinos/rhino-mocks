@@ -51,7 +51,7 @@ namespace Rhino.Mocks.Impl
 		private IDictionary eventsSubscribers;
 		private readonly Type[] implemented;
 
-	    private readonly IDictionary<MethodInfo, ICollection<object[]>> methodToActualCalls = new Dictionary<MethodInfo, ICollection<object[]>>();
+	    private readonly IDictionary<int, CallRecordCollection> methodToActualCalls = new Dictionary<int, CallRecordCollection>();
 	    private object[] constructorArguments = new object[0];
 	    private IList<IMockedObject> dependentMocks = new List<IMockedObject>();
 
@@ -150,12 +150,29 @@ namespace Rhino.Mocks.Impl
 		{
 			if (left.Equals(right))
 				return true;
-			// GetHashCode calls to RuntimeMethodHandle.StripMethodInstantiation()
-			// which is needed to fix issues with method equality from generic types.
-			if (left.GetHashCode() != right.GetHashCode())
-				return false;
-			if (left.DeclaringType != right.DeclaringType)
-				return false;
+
+			if (left.Name.StartsWith("get_"))
+			{
+				if (!left.Name.Equals(right.Name))
+				{
+					return false;
+				}
+			}
+			else
+			{
+				// GetHashCode calls to RuntimeMethodHandle.StripMethodInstantiation()
+				// which is needed to fix issues with method equality from generic types.
+				if (left.GetHashCode() != right.GetHashCode())
+				{
+					return false;
+				}
+
+				if (left.DeclaringType != right.DeclaringType)
+				{
+					return false;
+				}
+			}
+
 			ParameterInfo[] leftParams = left.GetParameters();
 			ParameterInfo[] rightParams = right.GetParameters();
 			if (leftParams.Length != rightParams.Length)
@@ -284,11 +301,11 @@ namespace Rhino.Mocks.Impl
 		/// <remarks>
 		/// Only method calls in replay mode are counted
 		/// </remarks>
-	    public ICollection<object[]> GetCallArgumentsFor(MethodInfo method)
+	    public CallRecordCollection GetCallArgumentsFor(MethodInfo method)
 	    {
-            if (methodToActualCalls.ContainsKey(method) == false)
-                return new List<object[]>();
-	        return methodToActualCalls[method];
+            if (methodToActualCalls.ContainsKey(method.MetadataToken) == false)
+                return new CallRecordCollection();
+	        return methodToActualCalls[method.MetadataToken];
 	    }
 
 
@@ -301,9 +318,12 @@ namespace Rhino.Mocks.Impl
 	    {
 	        if(repository.IsInReplayMode(this)==false)
 	            return;
-            if (methodToActualCalls.ContainsKey(method) == false)
-                methodToActualCalls[method] = new List<object[]>();
-	        methodToActualCalls[method].Add(args);
+            if (methodToActualCalls.ContainsKey(method.MetadataToken) == false)
+                methodToActualCalls[method.MetadataToken] = new CallRecordCollection();
+	        methodToActualCalls[method.MetadataToken].Add(new CallRecord{
+                Arguments = args,
+                Method = method
+            });
         }
 
 	    /// <summary>
@@ -327,7 +347,8 @@ namespace Rhino.Mocks.Impl
 
 		private static string GenerateKey(MethodInfo method, object[] args)
 		{
-            var baseName = method.DeclaringType.FullName + method.Name.Substring(4); 
+            var propertyType = method.Name.StartsWith("get_") ? method.ReturnType : method.GetParameters()[args.Length - 1].ParameterType;
+            var baseName = propertyType.FullName + method.Name.Substring(4);
             if ((method.Name.StartsWith("get_") && args.Length == 0) ||
 			    (method.Name.StartsWith("set_") && args.Length == 1))
 				return baseName;
@@ -338,7 +359,7 @@ namespace Rhino.Mocks.Impl
 				len--;
 			for (int i = 0; i < len; i++)
 			{
-				sb.Append(args[i].GetHashCode());
+				sb.Append(args[i] == null ? 0 : args[i].GetHashCode());
 			}
 			return sb.ToString();
 		}

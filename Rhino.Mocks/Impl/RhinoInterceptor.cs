@@ -31,15 +31,11 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
-using Castle.Core.Interceptor;
+using Castle.DynamicProxy;
 using Rhino.Mocks.Impl.Invocation;
 using Rhino.Mocks.Impl.Invocation.Actions;
 using Rhino.Mocks.Impl.Invocation.Specifications;
 using Rhino.Mocks.Interfaces;
-
-namespace Rhino.Mocks.Impl.InvocationSpecifications
-{
-}
 
 namespace Rhino.Mocks.Impl
 {

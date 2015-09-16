@@ -31,6 +31,7 @@
 using System;
 using Xunit;
 using Rhino.Mocks.Exceptions;
+using Rhino.Mocks.Interfaces;
 
 namespace Rhino.Mocks.Tests
 {
@@ -77,20 +78,18 @@ namespace Rhino.Mocks.Tests
     [Fact]
     public void CantCreatePartialMockFromInterfaces()
     {
-    	Assert.Throws<InvalidOperationException>(
-    		"Can't create a partial mock from an interface",
-    		() => MockRepository.GeneratePartialMock<IDemo>());
+    	var ex = Assert.Throws<InvalidOperationException>(() => MockRepository.GeneratePartialMock<IDemo>());
+    	Assert.Equal("Can't create a partial mock from an interface", ex.Message);
     }
 
-    [Fact]
+  	[Fact]
     public void CallAnAbstractMethodWithoutSettingExpectation()
-    {
-    	Assert.Throws<ExpectationViolationException>(
-    		"AbstractClass.Decrement(); Expected #0, Actual #1.",
-    		() => abs.Decrement());
-    }
+  	{
+  		var ex = Assert.Throws<ExpectationViolationException>(() => this.abs.Decrement());
+  		Assert.Equal("AbstractClass.Decrement(); Expected #0, Actual #1.", ex.Message);
+  	}
 
-    [Fact]
+  	[Fact]
     public void CanMockWithCtorParams()
     {
       var withParameters = MockRepository.GeneratePartialMock<WithParameters>(1);
@@ -98,5 +97,23 @@ namespace Rhino.Mocks.Tests
       Assert.Equal(4, withParameters.Int);
       withParameters.VerifyAllExpectations();
     }
+
+    [Fact]
+    public void CanMockWithAbstractCtorCalls()
+    {
+      var sut = MockRepository.GeneratePartialMock<AbstractMethodCall>();
+      Assert.NotNull(sut);
+      Assert.True(sut is IPartialMockMarker);
+    }
+  }
+
+  public abstract class AbstractMethodCall
+  {
+    public AbstractMethodCall()
+    {
+      this.MyProperty = this.MyProperty + 1;
+    }
+
+    public abstract int MyProperty { get; set; }
   }
 }

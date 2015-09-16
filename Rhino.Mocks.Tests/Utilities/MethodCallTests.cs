@@ -28,9 +28,11 @@
 
 
 using System;
+using System.Globalization;
 using System.Reflection;
-using Xunit;
+using System.Threading;
 using Rhino.Mocks.Utilities;
+using Xunit;
 
 namespace Rhino.Mocks.Tests.Utilities
 {
@@ -54,17 +56,34 @@ namespace Rhino.Mocks.Tests.Utilities
 		[Fact]
 		public void MethodCallCtorWontAcceptNullMethod()
 		{
-			Assert.Throws<ArgumentNullException>(
-				"Value cannot be null.\r\nParameter name: method",
-				() => MethodCallUtil.StringPresentation(null, null, null));
+			var culture = Thread.CurrentThread.CurrentUICulture;
+			try
+			{
+				Thread.CurrentThread.CurrentUICulture = CultureInfo.InvariantCulture;
+				var ex = Assert.Throws<ArgumentNullException>(() => MethodCallUtil.StringPresentation(null, null, null));
+				Assert.Equal("Value cannot be null.\r\nParameter name: method", ex.Message);
+			}
+			finally
+			{
+				Thread.CurrentThread.CurrentUICulture = culture;
+			}
 		}
 
 		[Fact]
 		public void MethodCallCtorWontAcceptNullArgs()
 		{
-            MethodInfo method = typeof(string).GetMethod("StartsWith", new Type[] { typeof(string) });
-			Assert.Throws<ArgumentNullException>("Value cannot be null.\r\nParameter name: args",
-			                                     () => MethodCallUtil.StringPresentation(null, method, null));
+			var culture = Thread.CurrentThread.CurrentUICulture;
+			try
+			{
+				Thread.CurrentThread.CurrentUICulture = CultureInfo.InvariantCulture;
+				MethodInfo method = typeof(string).GetMethod("StartsWith", new Type[] { typeof(string) });
+				var ex = Assert.Throws<ArgumentNullException>(() => MethodCallUtil.StringPresentation(null, method, null));
+				Assert.Equal("Value cannot be null.\r\nParameter name: args", ex.Message);
+			}
+			finally
+			{
+				Thread.CurrentThread.CurrentUICulture = culture;
+			}
 		}
 
 		[Fact]

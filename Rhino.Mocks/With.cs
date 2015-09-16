@@ -38,6 +38,7 @@ namespace Rhino.Mocks
     /// allow access to a context where the mock repository is automatially verified at
     /// the end of the code block.
     /// </summary>
+    [Obsolete("Please switch to AAA syntax (reference can be found at http://svengrand.blogspot.de/2011/02/rhino-mocks-arange-act-assert-aaa.html).")]
     public static class With
     {
         /// <summary>

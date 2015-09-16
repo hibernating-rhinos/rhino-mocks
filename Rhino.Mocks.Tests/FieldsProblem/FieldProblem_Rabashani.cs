@@ -3,41 +3,34 @@ using Rhino.Mocks.Tests.Model;
 
 namespace Rhino.Mocks.Tests.FieldsProblem
 {
-	
 	public class FieldProblem_Rabashani
 	{
 		[Fact]
 		public void CanMockInternalInterface()
 		{
-			MockRepository mocks = new MockRepository();
-			IInternal mock = mocks.StrictMock<IInternal>();
+			IInternal mock = MockRepository.GenerateStrictMock<IInternal>();
+			mock.Expect(x => x.Foo());
 			mock.Foo();
-			mocks.ReplayAll();
-			mock.Foo();
-			mocks.VerifyAll();
+			mock.VerifyAllExpectations();
 		}
 
 		[Fact]
 		public void CanMockInternalClass()
 		{
-			MockRepository mocks = new MockRepository();
-			Internal mock = mocks.StrictMock<Internal>();
-			Expect.Call(mock.Bar()).Return("blah");
-			mocks.ReplayAll();
+			Internal mock = MockRepository.GenerateStrictMock<Internal>();
+			mock.Expect(x => x.Bar()).Return("blah");
 			Assert.Equal("blah", mock.Bar());
-			mocks.VerifyAll();
+			mock.VerifyAllExpectations();
 		}
 
 		[Fact]
 		public void CanPartialMockInternalClass()
 		{
-			MockRepository mocks = new MockRepository();
-			Internal mock = mocks.PartialMock<Internal>();
-			Expect.Call(mock.Foo()).Return("blah");
-			mocks.ReplayAll();
+			Internal mock = MockRepository.GeneratePartialMock<Internal>();
+			mock.Expect(x => x.Foo()).Return("blah");
 			Assert.Equal("blah", mock.Foo());
 			Assert.Equal("abc", mock.Bar());
-			mocks.VerifyAll();
+			mock.VerifyAllExpectations();
 		}
 	}
 }

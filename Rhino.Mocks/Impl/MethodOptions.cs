@@ -218,6 +218,7 @@ namespace Rhino.Mocks.Impl
 		public IMethodOptions<T> Do(Delegate action)
 		{
 			expectation.ActionToExecute = action;
+			expectation.AllowTentativeReturn = false;
 			return this;
 		}
 
@@ -241,6 +242,7 @@ namespace Rhino.Mocks.Impl
 		public IMethodOptions<T> Return(T objToReturn)
 		{
 			expectation.ReturnValue = objToReturn;
+			expectation.AllowTentativeReturn = false;
 			return this;
 		}
 
@@ -262,6 +264,7 @@ namespace Rhino.Mocks.Impl
 		public IMethodOptions<T> Throw(Exception exception)
 		{
 			expectation.ExceptionToThrow = exception;
+			expectation.AllowTentativeReturn = false; 
 			return this;
 		}
 
@@ -275,17 +278,6 @@ namespace Rhino.Mocks.Impl
 			ReplaceExpectation(anyArgsExpectation);
 			return this;
 		}
-
-		/// <summary>
-		/// Call the original method on the class, bypassing the mocking layers.
-		/// </summary>
-		/// <returns></returns>
-		[Obsolete("Use CallOriginalMethod(OriginalCallOptions options) overload to explicitly specify the call options")]
-		public void CallOriginalMethod()
-		{
-			CallOriginalMethod(OriginalCallOptions.NoExpectation);
-		}
-
 
 		/// <summary>
 		/// Call the original method on the class, optionally bypassing the mocking layers
@@ -437,8 +429,13 @@ namespace Rhino.Mocks.Impl
 					continue;
 				types.Add(args[i].ParameterType);
 			}
+
 			PropertyInfo prop = expectation.Method.DeclaringType.GetProperty(propName,
-			                                                                 (Type[]) types.ToArray(typeof (Type)));
+				BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance,
+				null, null,
+				(Type[])types.ToArray(typeof(Type)),
+				null);
+
 			return prop;
 		}
 
@@ -507,6 +504,7 @@ namespace Rhino.Mocks.Impl
 			expectation.ExceptionToThrow = new InvalidOperationException("This is a method that should not be called");
 			expectation.RepeatableOption = RepeatableOption.Never;
 			repository.Replayer.AddToRepeatableMethods(proxy, expectation.Method, expectation);
+			expectation.AllowTentativeReturn = false;
 			return this;
 		}
 

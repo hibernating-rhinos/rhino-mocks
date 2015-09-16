@@ -26,76 +26,63 @@
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endregion
 
-
 using System;
-using System.Diagnostics;
 using System.IO;
 using Xunit;
 using Rhino.Mocks.Interfaces;
 
 namespace Rhino.Mocks.Tests
 {
-	
 	public class MockingClassesTests
 	{
-		private MockRepository mocks;
 		private DemoClass demoClass;
 
 		public MockingClassesTests()
 		{
-			mocks = new MockRepository();
-			demoClass = (DemoClass) mocks.StrictMock(typeof (DemoClass));
+			demoClass = (DemoClass) MockRepository.GenerateStrictMock(typeof (DemoClass), null, null);
 		}
-
 
 		[Fact]
 		public void MockAClass()
 		{
 			IMockedObject mockedObject = demoClass as IMockedObject;
-			Assert.Equal(mocks, mockedObject.Repository);
+			Assert.NotNull(mockedObject.Repository);
 		}
 
 		[Fact]
 		public void MockVirtualCall()
 		{
-			demoClass.Two();
-			LastCall.On(demoClass).Return(3);
-			mocks.Replay(demoClass);
+			demoClass.Expect(x => x.Two()).Return(3);
 			Assert.Equal(3, demoClass.Two());
-			mocks.Verify(demoClass);
+			demoClass.VerifyAllExpectations();
 		}
 
 		[Fact]
 		public void CantMockNonVirtualCall()
 		{
-			demoClass.One();
-			Assert.Throws<InvalidOperationException>(
-				"There is no matching last call on this object. Are you sure that the last call was a virtual or interface method call?",
-				() => LastCall.On(demoClass).Return(3));
-
+			var ex = Assert.Throws<InvalidOperationException>(() => demoClass.Expect(x => x.One()).Return(3));
+			Assert.Equal("Invalid call, the last call has been used or no call has been made (make sure that you are calling a virtual (C#) / Overridable (VB) method).", ex.Message);
 		}
 
 		[Fact]
 		public void MockClassWithParametrizedCtor()
 		{
-			ParametrizedCtor pc = mocks.StrictMock(typeof (ParametrizedCtor), 3, "Hello") as ParametrizedCtor;
+			ParametrizedCtor pc = MockRepository.GenerateStrictMock(typeof (ParametrizedCtor), null, 3, "Hello") as ParametrizedCtor;
 			Assert.Equal(3, pc.Int);
 			Assert.Equal("Hello", pc.String);
-			pc.Add(0, 1);
-			LastCall.On(pc).Return(10);
-			mocks.Replay(pc);
+			pc.Expect(x => x.Add(0, 1)).Return(10);
 			Assert.Equal(10, pc.Add(0, 1));
-			mocks.Verify(pc);
+			pc.VerifyAllExpectations();
 		}
 
 		[Fact]
 		public void MockClassWithOverloadedCtor()
 		{
-			OverLoadedCtor oc = mocks.StrictMock(typeof (OverLoadedCtor), 1) as OverLoadedCtor;
+			OverLoadedCtor oc = MockRepository.GenerateStrictMock(typeof (OverLoadedCtor), null, 1) as OverLoadedCtor;
 			OverLoadCtorExercise(oc, 1, null);
-			oc = mocks.StrictMock(typeof (OverLoadedCtor), "Hello") as OverLoadedCtor;
+			oc = MockRepository.GenerateStrictMock(typeof (OverLoadedCtor), null, "Hello") as OverLoadedCtor;
 			OverLoadCtorExercise(oc, 0, "Hello");
-			oc = mocks.StrictMock(typeof (OverLoadedCtor), 33, "Hello") as OverLoadedCtor;
+			oc = MockRepository.GenerateStrictMock(typeof (OverLoadedCtor), null, 33, "Hello") as OverLoadedCtor;
 			OverLoadCtorExercise(oc, 33, "Hello");
 		}
 
@@ -104,37 +91,29 @@ namespace Rhino.Mocks.Tests
 		{
 		    try
 		    {
-                mocks.StrictMock(typeof(OverLoadedCtor), "Ayende", 55);
+                MockRepository.GenerateStrictMock(typeof(OverLoadedCtor), null, "Ayende", 55);
 
                 Assert.False(true, "The above call should have failed");
 		    }
 		    catch (ArgumentException argumentException)
 		    {
-                Assert.Contains(
-					"Can not instantiate proxy of class: Rhino.Mocks.Tests.MockingClassesTests+OverLoadedCtor",
-					argumentException.Message);
+                Assert.Contains("Can not instantiate proxy of class: Rhino.Mocks.Tests.MockingClassesTests+OverLoadedCtor", argumentException.Message);
 		    }			
 		}
-
 
 		[Fact]
 		public void MockSealedClass()
 		{
-			MockRepository mocks = new MockRepository();
-			Assert.Throws<NotSupportedException>("Can't create mocks of sealed classes",
-			                                     () => mocks.StrictMock(typeof (File)));
+			var ex = Assert.Throws<NotSupportedException>(() => MockRepository.GenerateStrictMock(typeof (File), null, null));
+			Assert.Equal("Can't create mocks of sealed classes", ex.Message);
 		}
 
         [Fact]
         public void CallNonVirtualMethodThatImplementsAnInterface()
         {
-            ((IDisposable)demoClass).Dispose();
-        	Assert.Throws<InvalidOperationException>(
-        		"Invalid call, the last call has been used or no call has been made (make sure that you are calling a virtual (C#) / Overridable (VB) method).",
-        		() => LastCall.Repeat.Never());
-           
+            var ex = Assert.Throws<InvalidOperationException>(() => ((IDisposable)demoClass).Expect(x => x.Dispose()).Repeat.Never());
+        	Assert.Equal("Invalid call, the last call has been used or no call has been made (make sure that you are calling a virtual (C#) / Overridable (VB) method).", ex.Message);
         }
-    
 
 		#region Can call object's method without implementing them
 
@@ -300,11 +279,9 @@ namespace Rhino.Mocks.Tests
 		{
 			Assert.Equal(i, oc.I);
 			Assert.Equal(s, oc.S);
-			oc.Concat("Ayende", "Rahien");
-			LastCall.On(oc).Return("Hello, World");
-			mocks.Replay(oc);
+			oc.Expect(x => x.Concat("Ayende", "Rahien")).Return("Hello, World");
 			Assert.Equal("Hello, World", oc.Concat("Ayende", "Rahien"));
-			mocks.Verify(oc);
+			oc.VerifyAllExpectations();
 		}
 
 		#endregion

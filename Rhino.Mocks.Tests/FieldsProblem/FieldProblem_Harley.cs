@@ -1,13 +1,10 @@
-#if DOTNET35
 using System;
 using Xunit;
 
 namespace Rhino.Mocks.Tests.FieldsProblem
 {
-    
     public class FieldProblem_Harley
     {
-
         public delegate void ChangeTestEvent(bool value);
         public interface ClassToMock
         {
@@ -17,18 +14,13 @@ namespace Rhino.Mocks.Tests.FieldsProblem
         [Fact]
         public void TestSampleMatrixChanged()
         {
-            var repository = new MockRepository();
-            var mockTestClass = repository.DynamicMock<ClassToMock>();
-            mockTestClass.ChangeTestProperty += null;
-            var fireChangeTestProperty = LastCall.IgnoreArguments().GetEventRaiser();
+            var mockTestClass = MockRepository.GenerateMock<ClassToMock>();
+            var fireChangeTestProperty = mockTestClass.Expect(x => x.ChangeTestProperty += null).IgnoreArguments().GetEventRaiser();
             new ClassRaisingException(mockTestClass);
 
-            repository.ReplayAll();
-
-			Assert.Throws<ArgumentOutOfRangeException>(() => fireChangeTestProperty.Raise(true));
+            Assert.Throws<ArgumentOutOfRangeException>(() => fireChangeTestProperty.Raise(true));
         }
     }
-
 
     public class ClassRaisingException
     {
@@ -43,6 +35,4 @@ namespace Rhino.Mocks.Tests.FieldsProblem
                 throw new ArgumentOutOfRangeException();
         }
     }
-
 }
-#endif

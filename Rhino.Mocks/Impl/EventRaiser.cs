@@ -111,7 +111,7 @@ namespace Rhino.Mocks.Impl
 			List<string> errors = new List<string>();
 			for (int i = 0; i < parameterInfos.Length; i++)
 			{
-				if ((args[i] == null && parameterInfos[i].ParameterType.IsValueType) ||
+				if ((args[i] == null && !NullIsValidValueFor(parameterInfos[i].ParameterType)) ||
 					(args[i] != null && parameterInfos[i].ParameterType.IsInstanceOfType(args[i])==false))
 				{
 					string type = "null";
@@ -125,6 +125,16 @@ namespace Rhino.Mocks.Impl
 			{
 				throw new InvalidOperationException(string.Join(Environment.NewLine, errors.ToArray()));
 			}
+		}
+
+		private static bool NullIsValidValueFor(Type type)
+		{
+			if (!type.IsValueType)
+			{
+				return true;
+			}
+
+			return Nullable.GetUnderlyingType(type) != null;
 		}
 
 		/// <summary>

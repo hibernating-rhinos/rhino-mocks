@@ -34,14 +34,12 @@ using Rhino.Mocks.Exceptions;
 
 namespace Rhino.Mocks.Tests.FieldsProblem
 {
-	
 	public class FieldProblem_Aharon
 	{
 		[Fact]
 		public void CanCreateInterfaceWithGuid()
 		{
-			MockRepository mocks = new MockRepository();
-			IUniqueID bridgeRemote = mocks.StrictMock<IUniqueID>();
+			IUniqueID bridgeRemote = MockRepository.GenerateStrictMock<IUniqueID>();
 			Assert.NotNull(bridgeRemote);
 		}
 
@@ -49,21 +47,16 @@ namespace Rhino.Mocks.Tests.FieldsProblem
 		[Fact]
 		public void MockingDataset()
 		{
-			MockRepository mocks = new MockRepository();
-			MyDataSet controller = mocks.StrictMock<MyDataSet>();
+			MyDataSet controller = MockRepository.GenerateStrictMock<MyDataSet>();
 			Assert.NotNull(controller);
 		}
 
 		[Fact]
 		public void PassingMockToMock_WhenErrorOccurs()
 		{
-			MockRepository mocks = new MockRepository();
-			Accepter accepter = mocks.StrictMock<Accepter>();
-			mocks.ReplayAll();
-			Assert.Throws<ExpectationViolationException>(
-				"Accepter.Accept(Rhino.Mocks.Tests.FieldsProblem.Accepter); Expected #0, Actual #1.",
-				() => accepter.Accept(accepter));
-
+			Accepter accepter = MockRepository.GenerateStrictMock<Accepter>();
+			var ex = Assert.Throws<ExpectationViolationException>(() => accepter.Accept(accepter));
+			Assert.Equal("Accepter.Accept(Rhino.Mocks.Tests.FieldsProblem.Accepter); Expected #0, Actual #1.", ex.Message);
 		}
 	}
 

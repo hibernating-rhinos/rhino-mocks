@@ -26,7 +26,6 @@
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endregion
 
-
 using Xunit;
 
 namespace Rhino.Mocks.Tests.FieldsProblem
@@ -35,14 +34,12 @@ namespace Rhino.Mocks.Tests.FieldsProblem
 	{
 	}
 
-	
 	public class InternalClassMockingFixture
 	{
 		[Fact]
 		public void MockInternalClass()
 		{
-			MockRepository mocker = new MockRepository();
-			InternalClass mockInternalClass = mocker.StrictMock<InternalClass>();
+			InternalClass mockInternalClass = MockRepository.GenerateStrictMock<InternalClass>();
 
 			Assert.NotNull(mockInternalClass);
 		}

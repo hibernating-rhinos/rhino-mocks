@@ -26,129 +26,82 @@
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endregion
 
-#if DOTNET35
-
 using Xunit;
 using Rhino.Mocks.Exceptions;
 using Xunit.Extensions;
 
 namespace Rhino.Mocks.Tests.FieldsProblem
 {
-	
 	public class FieldProblem_Jodran
 	{
 		[Theory]
-        [InlineData(true)]
+		[InlineData(true)]
 		[InlineData(false)]
 		public void CanUseExpectSyntax_OnStubWithOrderedExpectations(bool shouldSwitchToReplyImmediately)
 		{
-			MockRepository mocks = new MockRepository();
+			var foo54 = MockRepository.GenerateStub<IFoo54>();
+			if (shouldSwitchToReplyImmediately)
+				foo54.Replay();
 
-			var foo54 = mocks.Stub<IFoo54>();
-            if (shouldSwitchToReplyImmediately)
-                mocks.ReplayAll();
+				foo54.Expect(x => x.DoSomething()).Return(0);
+				foo54.Expect(x => x.DoSomethingElse());
 
-			using (mocks.Ordered())
-			{
-				foo54
-					.Expect(x => x.DoSomething())
-					.Return(0);
+			if (!shouldSwitchToReplyImmediately)
+				foo54.Replay();
 
-				foo54
-					.Expect(x => x.DoSomethingElse());
-			}
-
-            if (!shouldSwitchToReplyImmediately)
-                mocks.Replay(foo54);
-			
 			foo54.DoSomething();
 			foo54.DoSomethingElse();
 		}
 
-        [Theory, InlineData(true), InlineData(false)]
-        public void CanUseExpectSyntax_OnMockWithOrderedExpectations(bool shouldSwitchToReplyImmediately)
+		[Theory, InlineData(true), InlineData(false)]
+		public void CanUseExpectSyntax_OnMockWithOrderedExpectations(bool shouldSwitchToReplyImmediately)
 		{
-			MockRepository mocks = new MockRepository();
+			var foo54 = MockRepository.GenerateStrictMock<IFoo54>();
+			if (shouldSwitchToReplyImmediately)
+				foo54.Replay();
 
-			var foo54 = mocks.StrictMock<IFoo54>();
-            if (shouldSwitchToReplyImmediately)
-                mocks.ReplayAll();
+				foo54.Expect(x => x.DoSomething()).Return(0);
+				foo54.Expect(x => x.DoSomethingElse());
 
-			using (mocks.Ordered())
-			{
-				foo54
-					.Expect(x => x.DoSomething())
-					.Return(0);
+			if (!shouldSwitchToReplyImmediately)
+				foo54.Replay();
 
-				foo54
-					.Expect(x => x.DoSomethingElse());
-			}
-
-            if (!shouldSwitchToReplyImmediately)
-                mocks.Replay(foo54);
-			
 			foo54.DoSomething();
 			foo54.DoSomethingElse();
 
 			foo54.VerifyAllExpectations();
 		}
 
-        [Theory]
+		[Theory]
 		[InlineData(true)]
 		[InlineData(false)]
-        public void CanUseExpectSyntax_OnMockWithOrderedExpectations2(bool shouldSwitchToReplyImmediately)
+		public void CanUseExpectSyntax_OnMockWithOrderedExpectations2(bool shouldSwitchToReplyImmediately)
 		{
-			MockRepository mocks = new MockRepository();
+			var foo54 = MockRepository.GenerateStrictMock<IFoo54>();
+			if (shouldSwitchToReplyImmediately)
+				foo54.Replay();
 
-			var foo54 = mocks.StrictMock<IFoo54>();
-            if (shouldSwitchToReplyImmediately)
-                mocks.ReplayAll();
+			foo54.Expect(x => x.DoSomething()).Return(0);
+			foo54.Expect(x => x.DoSomethingElse());
 
-			using (mocks.Ordered())
-			{
-				foo54
-					.Expect(x => x.DoSomething())
-					.Return(0);
+			if (!shouldSwitchToReplyImmediately)
+				foo54.Replay();
 
-				foo54
-					.Expect(x => x.DoSomethingElse());
-			}
-
-            if (!shouldSwitchToReplyImmediately)
-                mocks.Replay(foo54);
-
-			Assert.Throws<ExpectationViolationException>(() => foo54.DoSomethingElse());
+			foo54.DoSomethingElse();
+			Assert.Throws<ExpectationViolationException>(() => foo54.AssertWasCalled(x => x.DoSomethingElse()).Before(foo54.AssertWasCalled(x => x.DoSomething())));
 		}
 
-        [Fact]
-        public void ExtensionMethodsTransistionStateCorrectly()
-        {
-            MockRepository mocks = new MockRepository();
+		[Fact]
+		public void ExtensionMethodsTransistionStateCorrectly()
+		{
+			var foo54 = MockRepository.GenerateStrictMock<IFoo54>();
+			foo54.Expect(x => x.DoSomethingElse());
+			foo54.DoSomethingElse(); // Satisfy first expectation
 
-            var foo54 = mocks.StrictMock<IFoo54>();
-            Assert.False(mocks.IsInReplayMode(foo54));
+			foo54.Expect(x => x.DoSomethingElse());
+			foo54.DoSomethingElse(); // Satisfy second expectation
 
-            foo54.Expect(x => x.DoSomethingElse());
-            Assert.False(mocks.IsInReplayMode(foo54));
-
-            foo54.Replay();
-            Assert.True(mocks.IsInReplayMode(foo54));
-
-            foo54.DoSomethingElse(); // Satisfy first expectation
-
-            foo54.BackToRecord();
-            Assert.False(mocks.IsInReplayMode(foo54));
-
-            foo54.Expect(x => x.DoSomethingElse());
-            Assert.False(mocks.IsInReplayMode(foo54));
-
-            foo54.Replay();
-            Assert.True(mocks.IsInReplayMode(foo54));
-
-            foo54.DoSomethingElse(); // Satisfy second expectation
-
-            foo54.VerifyAllExpectations();
-        }
+			foo54.VerifyAllExpectations();
+		}
 	}
 }
-#endif

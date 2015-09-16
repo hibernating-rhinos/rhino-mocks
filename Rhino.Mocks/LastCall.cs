@@ -45,6 +45,7 @@ namespace Rhino.Mocks
 	/// a specified object.
 	/// If the method has a return value, it's recommended to use Expect
 	/// </summary>
+	[Obsolete("Please switch to AAA syntax (reference can be found at http://svengrand.blogspot.de/2011/02/rhino-mocks-arange-act-assert-aaa.html).")]
 	public static class LastCall
 	{
 		/*
@@ -83,9 +84,7 @@ namespace Rhino.Mocks
 		 */
 		internal static IMethodOptions<T> GetOptions<T>()
 		{
-			if (MockRepository.LastMockedObject == null)
-				throw new InvalidOperationException("Invalid call, the last call has been used or no call has been made (make sure that you are calling a virtual (C#) / Overridable (VB) method).");
-			return MockRepository.lastRepository.LastMethodCall<T>(MockRepository.LastMockedObject);
+			return RhinoMocksExtensions.GetOptions<T>();
 		}
 
 		/*
@@ -303,16 +302,6 @@ namespace Rhino.Mocks
 		{
 			return Callback((Delegate)callback);
 		}
-
-		/// <summary>
-		/// Call the original method on the class, bypassing the mocking layers, for the last call.
-		/// </summary>
-		[Obsolete("Use CallOriginalMethod(OriginalCallOptions options) overload to explicitly specify the call options")]
-		public static void CallOriginalMethod()
-		{
-			GetOptions<object>().CallOriginalMethod();
-		}
-
 
 		/// <summary>
 		/// Call the original method on the class, optionally bypassing the mocking layers, for the last call.

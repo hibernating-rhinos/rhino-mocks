@@ -30,22 +30,19 @@ using Xunit;
 
 namespace Rhino.Mocks.Tests.FieldsProblem
 {
-    
     public class FieldProblem_BackToMockWithRepeatableMethods
     {
         [Fact]
         public void UsingBackToRecordWithSetUpResult()
         {
-            MockRepository mocks = new MockRepository();
-            IDemo demo = (IDemo) mocks.StrictMock(typeof(IDemo));
-            SetupResult.For(demo.Prop).Return("Here is 1 sample greeting");
-            mocks.Replay(demo);
+            IDemo demo = (IDemo)MockRepository.GenerateStrictMock(typeof(IDemo), null, null);
+            demo.Expect(x => x.Prop).Return("Here is 1 sample greeting");
             Assert.Equal("Here is 1 sample greeting",demo.Prop);
-            mocks.BackToRecord(demo);
-            SetupResult.For(demo.Prop).Return("Here is another sample greeting");
-            mocks.Replay(demo);
+            demo.BackToRecord();
+            demo.Expect(x => x.Prop).Return("Here is another sample greeting");
+            demo.Replay();
             Assert.Equal("Here is another sample greeting", demo.Prop);
-            mocks.VerifyAll();
+            demo.VerifyAllExpectations();
         }
     }
 }
